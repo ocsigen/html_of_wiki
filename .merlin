@@ -1,3 +1,6 @@
-B _build
-PKG lwt
+B _build/src
+S src
+PKG lwt.unix
+PKG lwt.ppx
+PKG re.pcre
 PKG tyxml

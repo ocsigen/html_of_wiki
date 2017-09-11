@@ -1,9 +1,3 @@
-_build
-setup.data
-setup.log
-setup.exe
-api.docdir
-
-local/var/lib/
-local/var/log/
-local/var/www/static/ocsimore.js
+_build/
+*.byte
+*.native
