@@ -1,23 +1,7 @@
-open Eliom_content
-
-
-(* BB XXX why not type service_href = { a_link : ...; uri : Html5.F.uri } *)
-module type Service_href = sig
-
-  val a_link :
-    ?a:Html5_types.a_attrib Html5.F.attrib list ->
-    'a Html5.F.elt list ->
-    [> 'a Html5_types.a ] Html5.F.elt
-
-  val uri : Html5.F.uri
-
-end
-
-type service_href = (module Service_href)
+open Tyxml
 
 type href =
   | String_href of string
-  | Service_href of service_href
 
 type desugar_param = {
   dc_page_wiki : Wiki_types.wiki;
@@ -70,7 +54,7 @@ module type Parser = sig
     sectioning:bool ->
     Wiki_widgets_interface.box_info ->
     string ->
-    res Html5.F.elt list Lwt.t list
+    res Html.elt list Lwt.t list
 
 end
 
@@ -101,25 +85,25 @@ type (+'flow,
       +'flow_without_interactive,
       +'phrasing_without_interactive) plugin_content =
   [ `Flow5_link
-      of (href * Wikicreole.attribs * 'flow_without_interactive Html5.F.elt list Lwt.t)
+      of (href * Wikicreole.attribs * 'flow_without_interactive Html.elt list Lwt.t)
   | `Phrasing_link
-      of (href * Wikicreole.attribs * 'phrasing_without_interactive Html5.F.elt list Lwt.t)
-  | `Flow5 of 'flow Html5.F.elt list Lwt.t
+      of (href * Wikicreole.attribs * 'phrasing_without_interactive Html.elt list Lwt.t)
+  | `Flow5 of 'flow Html.elt list Lwt.t
   | `Phrasing_without_interactive
-      of 'phrasing_without_interactive Html5.F.elt list Lwt.t ]
+      of 'phrasing_without_interactive Html.elt list Lwt.t ]
 
 type (+'flow_without_interactive,
       +'phrasing_without_interactive) ni_plugin_content =
-  [ `Flow5 of 'flow_without_interactive Html5.F.elt list Lwt.t
+  [ `Flow5 of 'flow_without_interactive Html.elt list Lwt.t
   | `Phrasing_without_interactive
-      of 'phrasing_without_interactive Html5.F.elt list Lwt.t ]
+      of 'phrasing_without_interactive Html.elt list Lwt.t ]
 
 type (+'flow_without_interactive,
       +'phrasing_without_interactive) link_plugin_content =
   [ `Flow5_link
-      of (href * Wikicreole.attribs * 'flow_without_interactive Html5.F.elt list Lwt.t)
+      of (href * Wikicreole.attribs * 'flow_without_interactive Html.elt list Lwt.t)
   | `Phrasing_link
-      of (href * Wikicreole.attribs * 'phrasing_without_interactive Html5.F.elt list Lwt.t) ]
+      of (href * Wikicreole.attribs * 'phrasing_without_interactive Html.elt list Lwt.t) ]
 
 
 (** Module type for representing extensible wikicreole parser on which
@@ -139,7 +123,7 @@ module rec ExtParser : sig
       sectioning:bool ->
       Wiki_widgets_interface.box_info ->
       string ->
-      res_without_interactive Html5.F.elt list Lwt.t list
+      res_without_interactive Html.elt list Lwt.t list
 
     type simple_plugin =
         Wiki_widgets_interface.box_info -> Wikicreole.attribs ->
@@ -153,17 +137,17 @@ module rec ExtParser : sig
 
     type 'a wiki_plugin =
         Wiki_widgets_interface.box_info -> Wikicreole.attribs ->
-        'a Html5.F.elt list Lwt.t option ->
+        'a Html.elt list Lwt.t option ->
         (res, res_without_interactive, link_content) plugin_content
 
     type 'a wiki_ni_plugin =
         Wiki_widgets_interface.box_info -> Wikicreole.attribs ->
-        'a Html5.F.elt list Lwt.t option ->
+        'a Html.elt list Lwt.t option ->
         (res_without_interactive, link_content) ni_plugin_content
 
     type 'a link_plugin =
         Wiki_widgets_interface.box_info -> Wikicreole.attribs ->
-        'a Html5.F.elt list Lwt.t option ->
+        'a Html.elt list Lwt.t option ->
         (res_without_interactive, link_content) link_plugin_content
 
     (* Module to encode existential type parameter of the recursive wikiparser.
@@ -241,4 +225,3 @@ module rec ExtParser : sig
         and type link_content = 'c)
 
 end
-
