@@ -2142,6 +2142,18 @@ let register_link_phrasing_extension ~name ?(reduced = true) ?preparser
   register phrasing_wikicreole_parser
 
 
+let () =
+  let f_content bi _ _ = `Flow5 bi.bi_content in
+  let nope _ _ _ = `Flow5 (FlowBuilder.error "content is interactive") in
+  let wp = wikicreole_parser in
+  register_wiki_extension
+    ~name:"content"
+    ~wp ~wp_rec:wp
+    ~context:(fun bi _ -> bi)
+    ~ni_plugin:nope
+    f_content
+
+
 (*
     (preprocess_extension (cast_wp wikicreole_parser))
     (xml_of_wiki (cast_wp wikicreole_parser))
