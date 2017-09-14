@@ -1,4 +1,4 @@
 all:
-	ocamlbuild -use-ocamlfind src/wiki_syntax.byte
+	ocamlbuild -use-ocamlfind src/html_of_wiki.byte
 clean:
 	ocamlbuild -clean
