@@ -416,3 +416,10 @@ val make_href :
 (** The class to use to denote the fact that the content comes
     from the specified wikibox *)
 val class_wikibox: wikibox -> string
+
+(*
+val register_interactive:
+  string ->
+  (Html_types.flow5, Html_types.flow5, Html_types.phrasing_without_interactive)
+  wiki_plugin -> unit
+  *)

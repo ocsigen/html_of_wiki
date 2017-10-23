@@ -1710,7 +1710,7 @@ let reduced_wikicreole_parser_button_content =
                        [Html_types.button_content | `PCDATA])
 
 (*************************)
-(** Registring extension *)
+(** Registering extension *)
 
 type (+'flow_without_interactive,
       +'phrasing_without_interactive) non_interactive_simple_plugin =
@@ -2142,22 +2142,129 @@ let register_link_phrasing_extension ~name ?(reduced = true) ?preparser
   register phrasing_wikicreole_parser
 
 
+(* Extensions: div; aside; article; nav; section; header; footer *)
+
+let f_block make _ args content =
+  `Flow5
+    ( let a = Some (parse_common_attribs args) in
+      match content with
+      | None -> Lwt.return [make ?a []]
+      | Some content ->
+        let%lwt content = content in
+        Lwt.return [make ?a content])
+
 let () =
-  let f_content bi _ _ = `Flow5 bi.bi_content in
-  let nope _ _ _ = `Flow5 (FlowBuilder.error "content is interactive") in
+  let add_divs wp wp_rec =
+    List.iter
+      (fun (name, make, make') ->
+         (* FIXME it won't type without duplicating the 'make'
+            argument... *)
+         register_wiki_extension ~wp ~name ~wp_rec
+           ~ni_plugin:(f_block make')
+           (f_block make))
+      ["div", Html.div, Html.div;
+       "aside", Html.aside, Html.aside;
+       "article", Html.article, Html.article;
+       "nav", Html.nav, Html.nav;
+       "section", Html.section, Html.section;
+      ] in
+  add_divs wikicreole_parser wikicreole_parser;
+  add_divs wikicreole_parser_without_header_footer wikicreole_parser;
+  add_divs reduced_wikicreole_parser0 reduced_wikicreole_parser0;
+  add_divs reduced_wikicreole_parser1 reduced_wikicreole_parser1;
+  add_divs reduced_wikicreole_parser2 reduced_wikicreole_parser2
+
+let () =
+  List.iter
+    (fun (name, make, make') ->
+       (* FIXME it won't type without duplicating the 'make'
+          argument... *)
+       register_wiki_extension ~name
+         ~wp:wikicreole_parser
+         ~context:(fun bi _ -> { bi with bi_sectioning = false })
+         ~wp_rec: wikicreole_parser_without_header_footer
+         ~ni_plugin:(f_block make')
+         (f_block make))
+    ["header", Html.header, Html.header;
+     "footer", Html.footer, Html.footer]
+
+(* pre *)
+
+let f_pre _ args content =
+  `Flow5
+    (let%lwt content = match content with
+       | None -> Lwt.return []
+       | Some c -> (c :> Html_types.pre_content Html.elt list Lwt.t)
+     in
+     let a = Some (parse_common_attribs args) in
+     Lwt.return [Html.pre ?a content])
+
+let () =
+  let register wp =
+    register_wiki_extension ~wp ~wp_rec:phrasing_wikicreole_parser
+      ~name:"pre" ~ni_plugin:f_pre f_pre in
+  register wikicreole_parser;
+  register wikicreole_parser_without_header_footer;
+  register reduced_wikicreole_parser0;
+  register reduced_wikicreole_parser1;
+  register reduced_wikicreole_parser2
+
+
+(* span *)
+
+let f_span _ args content =
+  `Phrasing_without_interactive
+    (let%lwt content = match content with
+       | None -> Lwt.return []
+       | Some c -> (c :> Html_types.phrasing Html.elt list Lwt.t)
+     in
+     let a = Some (parse_common_attribs args) in
+     Lwt.return [(Html.span ?a content : 'a Html.elt)])
+
+let () =
+  register_wiki_phrasing_extension ~name:"span" { ppp = f_span }
+
+(* wikiname *)
+
+let f_wikiname bi _args _c =
+  `Phrasing_without_interactive
+    (let wid = bi.Wiki_widgets_interface.bi_wiki in
+     let%lwt wiki_info = Wiki_sql.get_wiki_info_by_id ~id:wid in
+     Lwt.return [Html.pcdata wiki_info.wiki_descr])
+
+let () =
+  register_simple_phrasing_extension ~name:"wikiname" f_wikiname
+
+(* Raw *)
+
+let f_raw _bi args content =
+  `Phrasing_without_interactive
+    (let s = string_of_extension "raw" args content in
+     Lwt.return [Html.b [Html.pcdata s]])
+
+let () =
+  register_simple_phrasing_extension ~name:"raw" f_raw
+
+(* Empty *)
+
+let f_empty _bi _args _c = `Flow5 (Lwt.return [])
+
+let () =
+  register_simple_phrasing_extension ~name:"" f_empty
+
+
+  (*
+let register_interactive name f =
+  let nope _ _ _ = `Flow5 (FlowBuilder.error @@ name ^ "is interactive") in
   let wp = wikicreole_parser in
   register_wiki_extension
-    ~name:"content"
+    ~name
     ~wp ~wp_rec:wp
     ~context:(fun bi _ -> bi)
     ~ni_plugin:nope
-    f_content
+    f
 
-
-(*
-    (preprocess_extension (cast_wp wikicreole_parser))
-    (xml_of_wiki (cast_wp wikicreole_parser))
-
-    (preprocess_extension (cast_wp phrasing_wikicreole_parser))
-    (xml_of_wiki (cast_wp phrasing_wikicreole_parser))
-*)
+let () =
+  let f_content bi _ _ = `Flow5 bi.bi_content in
+  register_interactive "content" f_content
+  *)
