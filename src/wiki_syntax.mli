@@ -356,7 +356,45 @@ val wikicreole_parser :
    Html_types.flow5_without_interactive,
    Html_types.phrasing_without_interactive
   ) ext_wikicreole_parser
-(* Currently modified in Wiki_widgets and User_widgets *)
+
+(** The same parser as [wikicreole_parser] but with a more precise type. *)
+val wikicreole_parser_without_header_footer :
+  (Html_types.flow5_without_header_footer,
+   Html_types.flow5_without_interactive_header_footer,
+   Html_types.phrasing_without_interactive
+  ) ext_wikicreole_parser
+
+(** The same, without subwikiboxes and containers (content).
+    Used for example for forum messages.
+*)
+val reduced_wikicreole_parser0 :
+  (Html_types.flow5,
+   Html_types.flow5_without_interactive,
+   Html_types.phrasing_without_interactive
+  ) ext_wikicreole_parser
+
+(** The same, without images, objects, subwikiboxes and containers (content).
+    Used for example for forum messages with restricted features.
+*)
+val reduced_wikicreole_parser1 :
+  (Html_types.flow5,
+   Html_types.flow5_without_interactive,
+   Html_types.phrasing_without_interactive
+  ) ext_wikicreole_parser
+
+(** The same, without images, objects, titles, tables, lists,
+    subwikiboxes and containers (content). *)
+val reduced_wikicreole_parser2 :
+  (Html_types.flow5,
+   Html_types.flow5_without_interactive,
+   Html_types.phrasing_without_interactive
+  ) ext_wikicreole_parser
+
+(** For button content. *)
+val reduced_wikicreole_parser_button_content :
+  (Html_types.button_content,
+   Html_types.button_content,
+   Html_types.button_content) ext_wikicreole_parser
 
 (** Parser for phrasing wikicreole. *)
 val phrasing_wikicreole_parser :

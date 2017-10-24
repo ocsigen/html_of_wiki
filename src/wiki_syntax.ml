@@ -2224,47 +2224,9 @@ let f_span _ args content =
 let () =
   register_wiki_phrasing_extension ~name:"span" { ppp = f_span }
 
-(* wikiname *)
-
-let f_wikiname bi _args _c =
-  `Phrasing_without_interactive
-    (let wid = bi.Wiki_widgets_interface.bi_wiki in
-     let%lwt wiki_info = Wiki_sql.get_wiki_info_by_id ~id:wid in
-     Lwt.return [Html.pcdata wiki_info.wiki_descr])
-
-let () =
-  register_simple_phrasing_extension ~name:"wikiname" f_wikiname
-
-(* Raw *)
-
-let f_raw _bi args content =
-  `Phrasing_without_interactive
-    (let s = string_of_extension "raw" args content in
-     Lwt.return [Html.b [Html.pcdata s]])
-
-let () =
-  register_simple_phrasing_extension ~name:"raw" f_raw
-
-(* Empty *)
+(* Empty (comment) *)
 
 let f_empty _bi _args _c = `Flow5 (Lwt.return [])
 
 let () =
   register_simple_phrasing_extension ~name:"" f_empty
-
-
-  (*
-let register_interactive name f =
-  let nope _ _ _ = `Flow5 (FlowBuilder.error @@ name ^ "is interactive") in
-  let wp = wikicreole_parser in
-  register_wiki_extension
-    ~name
-    ~wp ~wp_rec:wp
-    ~context:(fun bi _ -> bi)
-    ~ni_plugin:nope
-    f
-
-let () =
-  let f_content bi _ _ = `Flow5 bi.bi_content in
-  register_interactive "content" f_content
-  *)
