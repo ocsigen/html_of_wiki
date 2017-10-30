@@ -6,13 +6,22 @@ let get_opt args name =
   try Some (List.assoc name args)
   with Not_found -> None
 
-let get_def ~default args name =
-  try List.assoc name args
-  with Not_found -> default
+let get ?default args name =
+  try
+    List.assoc name args
+  with Not_found ->
+    match default with
+    | None -> raise (Error.Error ("no \"" ^ name ^ "\" option."))
+    | Some d -> d
 
-let get_project_version args =
-  List.assoc "project" args,
-  try Some (List.assoc "version" args) with Not_found -> None
+(* monads... monads everywhere! *)
+
+let map f = function
+  | None -> None
+  | Some x -> f x
+
+let lift f =
+  fun x -> Some (f x)
 
 module String = struct
   include String
@@ -24,5 +33,4 @@ module String = struct
     String.trim (String.sub s (seppos+1) (len-1))
 end
 
-(* FIXME maybe this is useless *)
-let section = Lwt_log.Section.make "ocsimore"
+let section = Lwt_log.Section.make "wiki_syntax"

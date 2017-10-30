@@ -1,6 +1,4 @@
-open Tyxml
 open Ocsimore_lib
-
 exception Error of string
 
 let is_capitalized s =
@@ -174,47 +172,3 @@ let string_of_id ?(spacer = ".") : id -> string = function
   | (_, `IndexModules)
   | (_, `IndexModuleTypes)
   | (_,`Section _) -> ""
-
-let api prefix _ args contents =
-  (* Get arguments *)
-  let project, version = get_project_version args in
-  let sub = List.assoc "subproject" args in
-  let id = parse_contents args contents in
-  let body = get_def ~default:(string_of_id ~spacer:".​" id) args "text" in
-  (* Build URL *)
-  let doc_class = "ocsforge_doclink_" ^ project in
-  let href =
-    sub ^ "/" ^ path_of_id ?prefix id ^
-    match fragment_of_id id with
-    | Some f -> "#" ^ f
-    | None -> ""
-  in
-  let a =
-    Html.a
-      ~a:[Html.a_class [doc_class]; Html.a_href href]
-      [Html.pcdata body] in
-  Lwt.return [a]
-
-
-let register name f =
-  let wp_rec = Wiki_syntax.phrasing_wikicreole_parser in
-  Wiki_syntax.register_raw_wiki_extension ~name
-    ~wp:Wiki_syntax.wikicreole_parser
-    ~wp_rec (fun _ -> Error.wrap_phrasing name f);
-  Wiki_syntax.register_raw_wiki_extension ~name
-    ~wp:Wiki_syntax.wikicreole_parser_without_header_footer
-    ~wp_rec (fun _ -> Error.wrap_phrasing name f);
-  Wiki_syntax.register_raw_wiki_extension ~name
-    ~wp:Wiki_syntax.phrasing_wikicreole_parser
-    ~wp_rec (fun _ -> Error.wrap_phrasing name f);
-  Wiki_syntax.register_raw_wiki_extension ~name
-    ~wp:Wiki_syntax.menu_parser
-    ~wp_rec (fun _ -> Error.wrap_phrasing name f)
-
-let init () =
-  let a_api_type = api (Some "type_") in
-  let a_api_code = api (Some "code_") in
-  let a_api = api None in
-  register "a_api_type" a_api_type;
-  register "a_api_code" a_api_code;
-  register "a_api" a_api

@@ -1,5 +1,5 @@
 open Tyxml.Html
-let () = Api.init ()
+let () = Links.init (); Only.init ()
 
 let read_file ?(buffer_size=4096) filename =
   let ch = open_in filename in
