@@ -1,3 +1,4 @@
+true: bin_annot, annot
 true: package(lwt.unix)
 true: package(lwt.ppx)
 true: package(re.pcre)
