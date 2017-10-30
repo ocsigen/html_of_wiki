@@ -1,33 +1,58 @@
-module Make (Ord: Set.OrderedType) = struct
+module type S = sig
+  type t
 
-module Entry = struct
-  type t = {
-    pred: Ord.t option;
-    node: Ord.t;
-    depth: int;
-  }
+  module Entry : sig
+    type nonrec t = {
+      pred: t option;
+      node: t;
+      depth: int;
+    }
+  end
 
-  let compare {node; _} {node = node'; _} =
-    Ord.compare node node'
+  module Set : Set.S with type elt = Entry.t
+
+  val bfs :
+    ?max_depth:int ->
+    t ->
+    f:(add:(t -> unit) ->
+       ?pred:t ->
+       t ->
+       unit) ->
+    Set.t
 end
 
-module Set = Set.Make(Entry)
 
-let bfs ?max_depth initial ~f =
-  let q = Queue.create () in
-  let visited = ref Set.empty in
-  Queue.add {Entry.pred = None; node = initial; depth = 0} q;
-  while not (Queue.is_empty q) do
-    let {Entry.pred; node = cur; depth} as entry = Queue.pop q in
-    visited := Set.add entry !visited;
-    let add node =
-      let nw = {Entry.pred = Some cur; node; depth = depth + 1} in
-      match max_depth with
-      | Some max when depth >= max -> () (* too deep *)
-      | _ when Set.mem nw !visited -> () (* just once *)
-      | _ -> Queue.add nw q
-    in
-    f ~add ?pred cur
-  done;
-  !visited
+module Make (Ord: Set.OrderedType) = struct
+  type t = Ord.t
+
+  module Entry = struct
+    type t = {
+      pred: Ord.t option;
+      node: Ord.t;
+      depth: int;
+    }
+
+    let compare {node; _} {node = node'; _} =
+      Ord.compare node node'
+  end
+
+  module Set = Set.Make(Entry)
+
+  let bfs ?max_depth initial ~f =
+    let q = Queue.create () in
+    let visited = ref Set.empty in
+    Queue.add {Entry.pred = None; node = initial; depth = 0} q;
+    while not (Queue.is_empty q) do
+      let {Entry.pred; node = cur; depth} as entry = Queue.pop q in
+      visited := Set.add entry !visited;
+      let add node =
+        let nw = {Entry.pred = Some cur; node; depth = depth + 1} in
+        match max_depth with
+        | Some max when depth >= max -> () (* too deep *)
+        | _ when Set.mem nw !visited -> () (* just once *)
+        | _ -> Queue.add nw q
+      in
+      f ~add ?pred cur
+    done;
+    !visited
 end
