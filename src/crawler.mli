@@ -16,7 +16,7 @@ module type S = sig
       [add node] allows declaring successor nodes. *)
   val bfs :
     ?max_depth:int ->
-    t ->
+    t list ->
     f:(add:(t -> unit) ->
        ?pred:t ->
        t ->

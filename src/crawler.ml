@@ -13,7 +13,7 @@ module type S = sig
 
   val bfs :
     ?max_depth:int ->
-    t ->
+    t list ->
     f:(add:(t -> unit) ->
        ?pred:t ->
        t ->
@@ -41,7 +41,8 @@ module Make (Ord: Set.OrderedType) = struct
   let bfs ?max_depth initial ~f =
     let q = Queue.create () in
     let visited = ref Set.empty in
-    Queue.add {Entry.pred = None; node = initial; depth = 0} q;
+    initial |> List.iter (fun x ->
+      Queue.add {Entry.pred = None; node = x; depth = 0} q);
     while not (Queue.is_empty q) do
       let {Entry.pred; node = cur; depth} as entry = Queue.pop q in
       visited := Set.add entry !visited;
