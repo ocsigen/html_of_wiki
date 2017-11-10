@@ -32,4 +32,7 @@ let compare a b =
 
 (* FIXME use Tyre to convert both ways! *)
 let parse_filename fn =
-  Site (Filename.chop_extension fn)
+  if Filename.check_suffix fn ".wiki" then
+    Site (Filename.chop_extension fn)
+  else
+    failwith ("not a .wiki input: " ^ fn)

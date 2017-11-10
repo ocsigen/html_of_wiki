@@ -62,7 +62,7 @@ let explore max_depth force dry files =
 
 open Cmdliner
 
-let files = Arg.(non_empty & pos_all file [] & info [] ~docv:"FILE")
+let files = Arg.(non_empty & pos_all non_dir_file [] & info [] ~docv:"FILE")
 
 let depth =
   let doc = "Follow links down to a given depth, 0 disables recursion." in
