@@ -14,15 +14,6 @@ let get ?default args name =
     | None -> raise (Error.Error ("no \"" ^ name ^ "\" option."))
     | Some d -> d
 
-(* monads... monads everywhere! *)
-
-let map f = function
-  | None -> None
-  | Some x -> f x
-
-let lift f =
-  fun x -> Some (f x)
-
 module String = struct
   include String
 

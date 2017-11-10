@@ -17,7 +17,7 @@ let explore max_depth force dry files =
     let inp = read_file (Document.to_source page) in
     let content = Lwt_main.run (parse ~page add_link inp) in
     let title = extract_h1 content in
-    let ch = open_out (Document.to_html page) in
+    let ch = open_out (Document.to_string page) in
     render ch ~header ~footer ~title content;
     close_out ch
   in
@@ -41,7 +41,7 @@ let explore max_depth force dry files =
           incr dead;
           raise Exit
       in
-      if force || to_rebuild source_t (Document.to_html cur) then (
+      if force || to_rebuild source_t (Document.to_string cur) then (
         try
           compile add cur;
           incr processed

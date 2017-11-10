@@ -1,7 +1,8 @@
 open Tyxml
 
 type href =
-  | String_href of string
+  | Absolute of string
+  | Document of {document: Document.t; fragment: string option}
 
 type desugar_param = {
   dc_page_wiki : Wiki_types.wiki;

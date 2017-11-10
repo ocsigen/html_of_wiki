@@ -2,8 +2,7 @@ open Wiki_types
 open Tyxml
 
 type box_info = {
-  bi_wiki: wiki;
-  bi_page: wiki * string;
+  bi_page: Document.t;
   bi_sectioning: bool;
-  bi_content: Html_types.flow5 Html.elt list Lwt.t
+  bi_add_link: Document.t -> unit;
 }

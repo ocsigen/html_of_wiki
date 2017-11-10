@@ -44,9 +44,7 @@ val cast_wp : ('a, 'b, 'c) ext_wikicreole_parser -> 'a wikicreole_parser
 val cast_niwp : ('a, 'b, 'c) ext_wikicreole_parser -> 'b wikicreole_parser
 
 
-type href = Wiki_syntax_types.href =
-  | String_href of string
-
+type href = Wiki_syntax_types.href
 val uri_of_href : href -> Html.uri
 
 (** Add a syntax extension to an existing parser. *)
@@ -430,34 +428,7 @@ val string_of_extension :
 val parse_common_attribs :
   ?classes:Html_types.nmtokens -> Wikicreole.attribs -> [> Html_types.common ] Html.attrib list
 
-(** Type of wiki links:
-    - [Wiki_page (None, path, _)] means the page of the currently display wiki at the given path.
-    - [Wiki_page (Some wiki, path, _)] means a page in the providede wiki at the given path.
-    - [Href path] means a link relative to the the domain if starting with a '/' or relative to the current URL
-      otherwise.
-    - [Site path] means a link relative the Ocsigen application site.
-    - [Absolute] means an absolute URL ([<otherscheme>:href]).
-*)
-type link_kind =
-  | Wiki_page of Wiki_types.wiki * string
-  | Href of string
-  | Site of string
-  | Absolute of string
-
-val link_kind : string -> link_kind
-
-val make_href :
-  Wiki_widgets_interface.box_info ->
-  link_kind -> string option -> href
-
 
 (** The class to use to denote the fact that the content comes
     from the specified wikibox *)
 val class_wikibox: wikibox -> string
-
-(*
-val register_interactive:
-  string ->
-  (Html_types.flow5, Html_types.flow5, Html_types.phrasing_without_interactive)
-  wiki_plugin -> unit
-  *)

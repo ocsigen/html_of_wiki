@@ -27,7 +27,8 @@
         let l = split_char '.' s' in
         let l = List.map int_of_string l in
         V (s,l,extra)
-      with _ -> assert false
+      with e ->
+        assert false
 
   let major = function
     | Dev -> "dev"

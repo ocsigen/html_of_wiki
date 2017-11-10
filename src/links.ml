@@ -17,38 +17,41 @@ let register name f =
     ~wp:Wiki_syntax.menu_parser
     ~wp_rec (fun _ -> Error.wrap_phrasing name f)
 
-let to_uri bi args =
-  let path =
-    match project, version with
-    | Some p, Some v -> "/" ^ p ^ "/" ^ v ^ "/"
-    | Some p, None -> "/" ^ p ^ "/dev/"
-    | None, Some v -> "../" ^ v ^ "/"
-    | None, None -> ""
-  in
-  let file =
-    match file with
-    | Some f -> f
-    | None -> ""
-  in
-  let fragment =
-    match fragment with
-    | Some f -> "#" ^ f
-    | None -> ""
-  in
-  path ^ file ^ fragment
+let get_project_and_version bi args =
+  match bi.Wiki_widgets_interface.bi_page with
+  | Document.Site _ ->
+    `Maybe_in_args
+  | Document.Project {project; version; _} ->
+    let project' =
+      match get_opt args "project" with
+      | None -> project
+      | Some project' -> project'
+    in
+    let default =
+      if project = project' then
+        version |> Version.to_string
+      else
+        Projects.latest_of project' |> Version.to_string (* unrelated! *)
+    in
+    `Project (project', get ~default args "version" |> Version.parse)
 
-let a_class bi project =
-  let project =
-    match project with
-    | None -> "xxx" (* FIXME read bi *)
-    | Some p -> p
-  in
+let force_project_and_version bi args =
+  match get_project_and_version bi args with
+  | `Project (p, v) -> p, v
+  | `Maybe_in_args ->
+    let project = get args "project" in
+    let default = Projects.latest_of project |> Version.to_string in
+    project, get ~default args "version" |> Version.parse
+
+let make_project bi args page =
+  let project, version = force_project_and_version bi args in
+  Document.Project {project; version; page}, project
+
+let a_class project =
   Html.a_class ["ocsforge_doclink_" ^ project]
 
 let manual_link bi args contents =
-  let project = get ~default:bi. args "project" in
-  let version = get_opt args "version" in
-  let chapter = get ~default:"" args "chapter" in
+  let chapter = get ~default:"index" args "chapter" in (* FIXME? *)
   let fragment = get_opt args "fragment" in
   let%lwt contents =
     match contents with
@@ -59,52 +62,65 @@ let manual_link bi args contents =
         contents
     | None -> Lwt.fail (Error.Error "Empty contents")
   in
-  let file = Some (chapter ^ ".html") in
-  let href = Html.a_href @@ to_uri project version file fragment in
-  Lwt.return [Html.a ~a:[a_class bi project; href] contents]
+  let doc, project = make_project bi args (Document.Manual chapter) in
+  let href = Html.a_href (Document.to_uri ?fragment doc) in
+  Lwt.return [Html.a ~a:[a_class project; href] contents]
+
+let local_link bi args =
+  let src = get args "src" in
+  match bi.Wiki_widgets_interface.bi_page with
+  | Document.Project _ ->
+    make_project bi args (Document.Manual ("files/" ^ src)) |> fun (d, p) ->
+    d, Some p
+  | _ ->
+    if List.mem_assoc "project" args then
+      make_project bi args (Document.Manual ("files/" ^ src)) |> fun (d, p) ->
+      d, Some p
+    else
+      Document.Site src, None
 
 let files_link bi args contents =
-  let src = get args "src" in
-  let project = get_opt args "project" in
-  let version = get_opt args "version" in
   let contents =
     match contents with
-    | None -> [Html.pcdata (Filename.basename src)]
+    | None -> [Html.pcdata (Filename.basename (get args "src"))]
     | Some contents -> contents
   in
-  let href = Html.a_href @@ to_uri project version (Some src) None in
-  Lwt.return [Html.a ~a:[a_class bi project; href] contents]
+  let doc, project = local_link bi args in
+  let href = Html.a_href @@ Document.to_string ~ext:"" doc in
+  let a =
+    href ::
+    match project with
+    | None -> []
+    | Some p -> [a_class p]
+  in
+  Lwt.return [Html.a ~a contents]
 
 let files_img bi args contents =
-  let src = get args "src" in
-  let project = get_opt args "project" in
-  let version = get_opt args "version" in
+  let doc, _ = local_link bi args in
   let alt =
     match contents with
-    | None -> Filename.basename src
+    | None -> Filename.basename (get args "src")
     | Some contents -> contents
   in
-  let src = to_uri project version (Some src) None in
+  let src = Document.to_string doc in
   Lwt.return [ Html.img ~src ~alt () ]
 
 let api prefix bi args contents =
-  (* Get arguments *)
-  let project =
-    let p = get_opt args "project" in
-    let s = get_opt args "subproject" in
-    match p, s with
-    | None, None -> Lwt.fail (Error.Error "missing project and/or subproject")
-    | _, _ ->
-    xxx
+  let id = parse_contents contents in
+  let doc, project =
+    let subproject =
+      match bi.Wiki_widgets_interface.bi_page with
+      | Document.Project {page = Document.Api {subproject; _}; _} -> subproject
+      | _ -> get ~default:"client" args "subproject"
+    in
+    let file = path_of_id ?prefix id in
+    make_project bi args (Document.Api {subproject; file})
   in
-  let version = get_opt args "version" in
-  let id = parse_contents args contents in
   let default = string_of_id ~spacer:".<U+200B>" id in
   let body = [Html.pcdata @@ get ~default args "text"] in
   let fragment = fragment_of_id id in
-  let file = Some (sub ^ "/" ^ path_of_id ?prefix id) in
-  let href = Html.a_href @@ to_uri project version file fragment in
-  Lwt.return [Html.a ~a:[a_class bi project; href] body]
+  let href = Html.a_href @@ Document.to_uri ?fragment doc in
+  Lwt.return [Html.a ~a:[a_class project; href] body]
 
 
 let init () =
@@ -112,5 +128,5 @@ let init () =
   register "a_api_code" (api (Some "code_"));
   register "a_api" (api None);
   register "a_manual" manual_link;
-  (*register "a_file" files_link;*)
+  (* register "a_file" files_link; FIXME WHY *)
   register "a_img" files_img

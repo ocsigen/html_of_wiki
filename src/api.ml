@@ -32,7 +32,7 @@ let parse_method id =
   | [id; mid] when not (is_capitalized id) && not (is_capitalized mid) -> (id, mid)
   | _ -> raise (Error (Printf.sprintf "invalid method name %S" id))
 
-let parse_contents args contents =
+let parse_contents contents =
   match contents with
   | None | Some "" -> raise (Error "contents must be an Ocaml id")
   | Some def ->

@@ -4,3 +4,5 @@ PKG lwt.unix
 PKG lwt.ppx
 PKG re.pcre
 PKG tyxml
+PKG cmdliner
+PKG yojson
