@@ -30,7 +30,7 @@ let to_source d = to_string d ^ ".wiki"
 let to_output d = !output ^ to_string d ^ ".html"
 
 let to_uri ?(ext=".html") ?fragment x =
-  to_string x ^ ext ^
+  "/" ^ to_string x ^ ext ^
   (match fragment with
   | None -> ""
   | Some f -> "#" ^ f)
