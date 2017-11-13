@@ -204,7 +204,8 @@ let normalize_link =
             | result -> (* [[wiki(ix):path]] => [[wiki("title"):path]] *)
                 let id = get_substring result 1 in
                 begin try%lwt
-                  let wiki_name = "\"" ^ List.assoc (int_of_string id) Projects.ids ^ "\"" in
+                  let project = Projects.of_id (int_of_string id) in
+                  let wiki_name = "\"" ^ project ^ "\"" in
                   let replacement =
                     replace_regexp_group ~str:addr ~result ~group:wiki_id_group ~replacement:wiki_name
                   in

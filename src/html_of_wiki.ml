@@ -23,6 +23,7 @@ let rec create_tree dirs =
 (* FIXME avoid leaking handles *)
 let explore max_depth output force dry files =
   Document.output := output;
+  Projects.init ".";
   let open Compiler in
   let header = read_file "header" in (* FIXME *)
   let footer = read_file "footer" in (* FIXME *)
@@ -32,7 +33,7 @@ let explore max_depth output force dry files =
     let title = extract_h1 content in
     let out_fn = Document.to_output page in
     create_tree (Filename.dirname out_fn);
-    let ch = open_out out_fn in
+    let ch = open_out (if dry then "/dev/null" else out_fn) in
     render ch ~header ~footer ~title content;
     close_out ch
   in
@@ -93,12 +94,12 @@ let output =
   let doc = "Write output to directory." in
   Arg.(value & opt dir !Document.output & info ["o"; "output"] ~doc)
 
-let force =
+let dry =
   let doc = "Don't output HTML files." in
   Arg.(value & flag & info ["n"; "dry-run"] ~doc)
 
-let dry =
-  let doc = "Dry runForce a complete rebuild." in
+let force =
+  let doc = "Force a complete rebuild." in
   Arg.(value & flag & info ["f"; "force"; "fresh"] ~doc)
 
 let cmd =
