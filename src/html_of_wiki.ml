@@ -105,8 +105,8 @@ let cmd =
   let doc = "compile Ocsigen's Wikicreole dialect to HTML" in
   let man = [
     `S Manpage.s_description;
-    `P "$(tnameà) compiles documentation files to HTML. Header and footers are
-        read directly from text files, the $TITLE variable is injected in the
+    `P "$(tname) compiles documentation files to HTML. Header and footers are
+        read directly from text files, the \\$TITLE variable is injected in the
         header, extracted from the first <h1> tag of the output.";
     `S Manpage.s_examples;
     `P "cd ~/dev/ocsigen.org-data && html_of_wiki index.wiki";
