@@ -15,7 +15,7 @@ let projects =
   List.map (fun p ->
     readdir p |>
     List.map Version.parse |>
-    List.sort (fun x y -> - Version.compare x y) |> function
+    List.sort (fun x y -> Version.compare y x) |> function
     | [] ->
       Printf.eprintf "no versions found for %s...\n%!" p;
       []

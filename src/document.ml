@@ -13,24 +13,30 @@ and t' =
     file: string;
   }
 
-let to_source = function
-  | Site s -> s ^ ".wiki" (* FIXME *)
-  | Project {page = Page p; version = v; project} ->
-    project ^ "/" ^ (v |> Version.to_string) ^ "/" ^ p ^ ".wiki"
+let to_string = function
+  | Site s -> s (* FIXME this won't always work *)
+  | Project {page; version = v; project} ->
+    let p =
+      match page with
+      | Page p -> p
+      | Manual m -> "manual/" ^ m
+      | Api {subproject; file} -> "api/" ^ subproject ^ "/" ^ file
+    in
+    project ^ "/" ^ (v |> Version.to_string) ^ "/" ^ p
 
-let to_string ?(ext=".html") = function
-  | Site s -> s ^ ext (* FIXME *)
+let to_source d = to_string d ^ ".wiki"
+let to_output d = "gen/" ^ to_string d ^ ".html"
 
-let to_uri ?fragment x =
-  "/" ^ to_string x ^
+let to_uri ?(ext=".html") ?fragment x =
+  to_string x ^ ext ^
   (match fragment with
   | None -> ""
   | Some f -> "#" ^ f)
 
 let compare a b =
-  String.compare (to_string a) (to_string b)
+  String.compare (to_source a) (to_source b)
 
-(* FIXME use Tyre to convert both ways! *)
+(* FIXME use Tyre to convert both ways? *)
 let parse_filename fn =
   if Filename.check_suffix fn ".wiki" then
     Site (Filename.chop_extension fn)

@@ -64,6 +64,7 @@ let manual_link bi args contents =
   in
   let doc, project = make_project bi args (Document.Manual chapter) in
   let href = Html.a_href (Document.to_uri ?fragment doc) in
+  bi.Wiki_widgets_interface.bi_add_link doc;
   Lwt.return [Html.a ~a:[a_class project; href] contents]
 
 let local_link bi args =
@@ -86,13 +87,14 @@ let files_link bi args contents =
     | Some contents -> contents
   in
   let doc, project = local_link bi args in
-  let href = Html.a_href @@ Document.to_string ~ext:"" doc in
+  let href = Html.a_href @@ Document.to_uri ~ext:"" doc in
   let a =
     href ::
     match project with
     | None -> []
     | Some p -> [a_class p]
   in
+  bi.Wiki_widgets_interface.bi_add_link doc;
   Lwt.return [Html.a ~a contents]
 
 let files_img bi args contents =
@@ -103,6 +105,7 @@ let files_img bi args contents =
     | Some contents -> contents
   in
   let src = Document.to_string doc in
+  bi.Wiki_widgets_interface.bi_add_link doc;
   Lwt.return [ Html.img ~src ~alt () ]
 
 let api prefix bi args contents =
@@ -120,6 +123,7 @@ let api prefix bi args contents =
   let body = [Html.pcdata @@ get ~default args "text"] in
   let fragment = fragment_of_id id in
   let href = Html.a_href @@ Document.to_uri ?fragment doc in
+  bi.Wiki_widgets_interface.bi_add_link doc;
   Lwt.return [Html.a ~a:[a_class project; href] body]
 
 

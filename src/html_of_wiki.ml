@@ -8,6 +8,18 @@ let to_rebuild source_t html =
   with _ -> (* probably not found *)
     true (* not built yet *)
 
+let rec create_tree dirs =
+  (* create parents first *)
+  if Filename.basename dirs = dirs then
+    ()
+  else
+    create_tree (Filename.dirname dirs);
+  (* then, create the child dir (base case, too) *)
+  try
+    Unix.mkdir dirs 0755
+  with Unix.(Unix_error (EEXIST, _, _)) ->
+    ()
+
 (* FIXME avoid leaking handles *)
 let explore max_depth force dry files =
   let open Compiler in
@@ -17,7 +29,9 @@ let explore max_depth force dry files =
     let inp = read_file (Document.to_source page) in
     let content = Lwt_main.run (parse ~page add_link inp) in
     let title = extract_h1 content in
-    let ch = open_out (Document.to_string page) in
+    let out_fn = Document.to_output page in
+    create_tree (Filename.dirname out_fn);
+    let ch = open_out out_fn in
     render ch ~header ~footer ~title content;
     close_out ch
   in
@@ -41,8 +55,14 @@ let explore max_depth force dry files =
           incr dead;
           raise Exit
       in
-      if force || to_rebuild source_t (Document.to_string cur) then (
+      if force || to_rebuild source_t (Document.to_output cur) then (
         try
+          (*
+          let add x =
+            print_endline @@ "add: " ^ (Document.to_source x);
+            add x
+          in
+          *)
           compile add cur;
           incr processed
         with Unix.Unix_error (e, _, _) ->
