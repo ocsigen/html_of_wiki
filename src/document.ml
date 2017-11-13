@@ -1,3 +1,5 @@
+let output = ref "../gen/"
+
 type t =
   | Site of string
   | Project of {
@@ -25,7 +27,7 @@ let to_string = function
     project ^ "/" ^ (v |> Version.to_string) ^ "/" ^ p
 
 let to_source d = to_string d ^ ".wiki"
-let to_output d = "gen/" ^ to_string d ^ ".html"
+let to_output d = !output ^ to_string d ^ ".html"
 
 let to_uri ?(ext=".html") ?fragment x =
   to_string x ^ ext ^

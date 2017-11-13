@@ -21,7 +21,8 @@ let rec create_tree dirs =
     ()
 
 (* FIXME avoid leaking handles *)
-let explore max_depth force dry files =
+let explore max_depth output force dry files =
+  Document.output := output;
   let open Compiler in
   let header = read_file "header" in (* FIXME *)
   let footer = read_file "footer" in (* FIXME *)
@@ -88,6 +89,10 @@ let depth =
   let doc = "Follow links down to a given depth, 0 disables recursion." in
   Arg.(value & opt (some int) None & info ["m"; "max-depth"] ~doc)
 
+let output =
+  let doc = "Write output to directory." in
+  Arg.(value & opt dir !Document.output & info ["o"; "output"] ~doc)
+
 let force =
   let doc = "Don't output HTML files." in
   Arg.(value & flag & info ["n"; "dry-run"] ~doc)
@@ -111,7 +116,7 @@ let cmd =
         to compile.";
     `P "Report bugs to <guillaume.huysmans@student.umons.ac.be>.";
   ] in
-  Term.(const explore $ depth $ force $ dry $ files),
+  Term.(const explore $ depth $ output $ force $ dry $ files),
   Term.info "html_of_wiki" ~version:"v1.0.0" ~doc ~exits:Term.default_exits ~man
 
 let () = Term.(exit @@ eval cmd)
