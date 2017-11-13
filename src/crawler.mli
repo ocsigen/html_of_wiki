@@ -12,12 +12,13 @@ module type S = sig
   module Set : Set.S with type elt = Entry.t
 
   (** [bfs "/" ~add initial ~f] traverses a graph built on-the-fly by [f],
-      breadth first. [f ~add ?pred node] is called once for each node.
+      breadth first. It calls [f] at least once per node.
       [add node] allows declaring successor nodes. *)
   val bfs :
     ?max_depth:int ->
     t list ->
-    f:(add:(t -> unit) ->
+    f:(already: bool ->
+       add:(t -> unit) ->
        ?pred:t ->
        t ->
        unit) ->

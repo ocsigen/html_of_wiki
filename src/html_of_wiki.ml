@@ -39,9 +39,10 @@ let explore max_depth output force dry files =
   in
   let dead = ref 0 in
   let processed = ref 0 in
+  let errors = ref 0 in
   let docs = List.map Document.parse_filename files in
   let module C = Crawler.Make(Document) in
-  let set = C.bfs ?max_depth docs ~f:(fun ~add ?pred cur ->
+  let set = C.bfs ?max_depth docs ~f:(fun ~already ~add ?pred cur ->
     try
       let source = Document.to_source cur in
       let source_t =
@@ -59,25 +60,23 @@ let explore max_depth output force dry files =
       in
       if force || to_rebuild source_t (Document.to_output cur) then (
         try
-          (*
-          let add x =
-            print_endline @@ "add: " ^ (Document.to_source x);
-            add x
-          in
-          *)
-          compile add cur;
-          incr processed
+          if not already then (
+            compile add cur;
+            incr processed
+          )
         with Unix.Unix_error (e, _, _) ->
           prerr_endline @@ source ^ ": " ^ Unix.error_message e;
+          incr errors;
           raise Exit
       )
     with Exit ->
       ()
   ) in
   let n = C.Set.cardinal set in
-  Printf.fprintf stderr "%d targets: %d cached, %d dead, %d processed.\n"
-    n
-    (n - !dead - !processed)
+  Printf.fprintf stderr "%d targets (%d cached).\n" n (n - !processed);
+  Printf.fprintf stderr
+    "%d fatal errors, %d dead links, %d files processed.\n"
+    !errors
     !dead
     !processed
 

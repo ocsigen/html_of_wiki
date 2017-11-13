@@ -14,7 +14,8 @@ module type S = sig
   val bfs :
     ?max_depth:int ->
     t list ->
-    f:(add:(t -> unit) ->
+    f:(already:bool ->
+       add:(t -> unit) ->
        ?pred:t ->
        t ->
        unit) ->
@@ -45,6 +46,7 @@ module Make (Ord: Set.OrderedType) = struct
       Queue.add {Entry.pred = None; node = x; depth = 0} q);
     while not (Queue.is_empty q) do
       let {Entry.pred; node = cur; depth} as entry = Queue.pop q in
+      let already = Set.mem entry !visited in
       visited := Set.add entry !visited;
       let add node =
         let nw = {Entry.pred = Some cur; node; depth = depth + 1} in
@@ -53,7 +55,7 @@ module Make (Ord: Set.OrderedType) = struct
         | _ when Set.mem nw !visited -> () (* just once *)
         | _ -> Queue.add nw q
       in
-      f ~add ?pred cur
+      f ~already ~add ?pred cur
     done;
     !visited
 end
