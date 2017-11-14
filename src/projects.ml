@@ -1,9 +1,11 @@
+let (++) = Filename.concat
+
 let is_directory path name =
-  let full = Filename.concat path name in
-  name.[0] <> '.' && name.[0] <> '_' && name.[0] <> '#' && Sys.is_directory full
+  name.[0] <> '.' && name.[0] <> '_' && name.[0] <> '#' &&
+  Sys.is_directory @@ path ++ name
 
 let readdir wiki_dir path =
-  let full = Filename.concat wiki_dir path in
+  let full = wiki_dir ++ path in
   Sys.readdir full |>
   Array.to_list |>
   List.filter (fun name -> is_directory full name)
@@ -15,6 +17,31 @@ let init wiki_dir =
   projects :=
     readdir wiki_dir "" |>
     List.map (fun p ->
+      let default_subproject =
+        try
+          let f =
+            Yojson.Safe.from_file @@ wiki_dir ++ p ++ "config.js"
+          in
+          (try
+            let id =
+              Yojson.Safe.Util.member "wiki_id" f |>
+              Yojson.Safe.Util.to_int
+            in
+            ids := (id, p) :: !ids
+          with _ ->
+            ());
+          try
+            Yojson.Safe.Util.member "default_subproject" f |>
+            Yojson.Safe.Util.to_string
+          with _ ->
+            (* no default subproject *)
+            ""
+        with _ ->
+          (* couldn't read config.js *)
+          Printf.eprintf "couldn't read %s's config.js...\n%!" p;
+          (* no default subproject *)
+          ""
+      in
       readdir wiki_dir p |>
       List.map Version.parse |>
       List.sort (fun x y -> Version.compare y x) |> function
@@ -23,35 +50,15 @@ let init wiki_dir =
         []
       | Version.Dev :: latest :: _
       | latest :: _ ->
-        [p, latest]
-    ) |>
-    List.flatten;
-  ids :=
-    !projects |> List.map (fun (p, _) ->
-      let full =
-        let project_full = Filename.concat wiki_dir p in
-        Filename.concat project_full "config.js"
-      in
-      try
-        let f = Yojson.Safe.from_file full in
-        let id =
-          Yojson.Safe.Util.member "wiki_id" f |>
-          Yojson.Safe.Util.to_int
-        in
-        (* FIXME *)
-        let default_subproject =
-          Yojson.Safe.Util.member "default_subproject" f |>
-          Yojson.Safe.Util.to_string_option
-        in
-        [id, p]
-      with _ ->
-        Printf.eprintf "couldn't get %s's wiki_id...\n%!" p;
-        []
+        [p, (default_subproject, latest)]
     ) |>
     List.flatten
 
 let latest_of project =
-  List.assoc project !projects
+  List.assoc project !projects |> snd
 
 let of_id id =
   List.assoc id !ids
+
+let default_subproject_of project =
+  List.assoc project !projects |> fst
