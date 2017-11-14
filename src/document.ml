@@ -22,7 +22,8 @@ let to_string = function
       match page with
       | Page p -> p
       | Manual m -> "manual/" ^ m
-      | Api {subproject; file} -> "api/" ^ subproject ^ "/" ^ file
+      | Api {subproject; file} ->
+        "api/" ^ (if subproject = "" then "" else subproject ^ "/") ^ file
     in
     project ^ "/" ^ (v |> Version.to_string) ^ "/" ^ p
 
