@@ -218,8 +218,8 @@ let normalize_link =
       | _ -> (* [addr] is no [link_regexp] *)
           (*
           let replacement_addr =
-            *)
             let page_wiki_name = desugar_param.dc_page_wiki in
+            *)
             if String.length addr = 0 then (* [[]] => [[wiki(name):a/b/c]] *)
               failwith "self-link?"
               (* FIXME #anchor seems to be the only case. *)
@@ -2193,3 +2193,22 @@ let f_empty _bi _args _c = `Flow5 (Lwt.return [])
 
 let () =
   register_simple_phrasing_extension ~name:"" f_empty
+
+(* Templating *)
+
+let () =
+  let f_content bi _ _ = `Flow5 bi.bi_content in
+  let nope _ _ _ = `Flow5 (FlowBuilder.error "content is interactive") in
+  let wp = wikicreole_parser in
+  register_wiki_extension
+    ~name:"content"
+    ~wp ~wp_rec:wp
+    ~context:(fun bi _ -> bi)
+    ~ni_plugin:nope
+    f_content
+
+let () =
+  let f_title bi _ _ =
+    `Phrasing_without_interactive (Lwt.return [Html.pcdata bi.bi_title])
+  in
+  register_simple_phrasing_extension ~name:"title" f_title

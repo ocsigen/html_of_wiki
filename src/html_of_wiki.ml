@@ -25,16 +25,18 @@ let explore max_depth output force dry files =
   Document.output := output;
   Projects.init ".";
   let open Compiler in
-  let header = read_file "header" in (* FIXME *)
-  let footer = read_file "footer" in (* FIXME *)
   let compile add_link page =
     let inp = read_file (Document.to_source page) in
-    let content = Lwt_main.run (parse ~page add_link inp) in
-    let title = extract_h1 content in
+    let empty = Lwt.return [] in
+    let content = Lwt_main.run (parse ~page add_link empty inp) in
+    let title =
+      extract_first_h1 content |>
+      Eliom_lib.Option.default_to "Ocsigen"
+    in
     let out_fn = Document.to_output page in
     create_tree (Filename.dirname out_fn);
     let ch = open_out (if dry then "/dev/null" else out_fn) in
-    render ch ~header ~footer ~title content;
+    render ch ~title content;
     close_out ch
   in
   let dead = ref 0 in
@@ -105,15 +107,15 @@ let cmd =
   let doc = "compile Ocsigen's Wikicreole dialect to HTML" in
   let man = [
     `S Manpage.s_description;
-    `P "$(tname) compiles documentation files to HTML. Header and footers are
-        read directly from text files, the \\$TITLE variable is injected in the
-        header, extracted from the first <h1> tag of the output.";
+    `P "$(tname) compiles documentation files to HTML. The <<title>> command
+        in the template injects the first <h1>'s content, and <<content>>
+        inserts the page's content.";
     `S Manpage.s_examples;
     `P "cd ~/dev/ocsigen.org-data && html_of_wiki index.wiki";
     `S Manpage.s_bugs;
     `P "Currently, it only works from ocsigen.org-data's root. As a workaround,
-        just update a fake index file with links to the specific parts you want
-        to compile.";
+        just update a fake index file with links to the specific pages you want
+        to generate.";
     `P "Report bugs to <guillaume.huysmans@student.umons.ac.be>.";
   ] in
   Term.(const explore $ depth $ output $ force $ dry $ files),

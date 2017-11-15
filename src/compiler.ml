@@ -14,22 +14,28 @@ let read_file ?(buffer_size=4096) filename =
   close_in ch;
   Buffer.to_bytes buf |> Bytes.to_string
 
-let parse ~page add_link source = Wiki_syntax.(
+let parse ~page ?title add_link content source = Wiki_syntax.(
   let parser = cast_wp wikicreole_parser in
+  let bi_title = Eliom_lib.Option.default_to "" title in
   let bi = Wiki_widgets_interface.{
     bi_page = page;
     bi_sectioning = true;
     bi_add_link = add_link;
+    bi_content = content;
+    bi_title;
   } in
   xml_of_wiki parser bi source
 )
 
-let render ch ~header ~footer ~title content =
+let render ch ~title content =
   let fmt = Format.formatter_of_out_channel ch in
-  let title_re = Re.str "$TITLE" |> Re.compile in
-  Format.print_string (Re.replace_string title_re ~by:title header);
-  List.iter (Tyxml.Html.pp_elt () fmt) content;
-  Format.print_string footer;
+  let open Tyxml in
+  Html.pp () fmt @@
+    Html.html
+      (Html.head (Html.title (Html.pcdata title)) [
+        Html.meta ~a:[Html.a_charset "utf8"] ()
+      ])
+      (Html.body content);
   Format.pp_force_newline fmt ();
   Format.pp_print_flush fmt ()
 
