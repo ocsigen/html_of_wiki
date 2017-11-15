@@ -33,5 +33,33 @@ let render ch ~header ~footer ~title content =
   Format.pp_force_newline fmt ();
   Format.pp_print_flush fmt ()
 
-let extract_h1 content =
-  "HEY" (* FIXME maybe use a reference in Wiki_syntax... *)
+let rec flatten elt =
+  let open Tyxml_xml in
+  match content elt with
+  | PCDATA _ -> [elt]
+  | Entity _ -> [elt]
+  | Node (name, a, children) ->
+    List.map flatten children |>
+    List.flatten
+  | _ -> [] (* ignore the others *)
+
+let extract_h1 blocks =
+  let rec f = function
+    | [] -> None
+    | x :: t ->
+      match Tyxml_xml.content x with
+      | Tyxml_xml.Node ("h1", _, title) ->
+        List.map flatten title |>
+        List.flatten |>
+        List.map (Format.asprintf "%a" (Tyxml_xml.pp ())) |>
+        String.concat "" |> fun t ->
+        Some t (* the first one, depth first *)
+      | Tyxml_xml.Node (_, _, children) ->
+        (match f children with
+        | (Some title) as r -> r (* return the first one *)
+        | None -> f t (* not found among children, try with the siblings *))
+      | _ -> None (* not found at all *)
+  in
+  blocks |>
+  List.map Tyxml_html.toelt |>
+  f
