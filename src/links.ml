@@ -112,9 +112,20 @@ let api prefix bi args contents =
   let id = parse_contents contents in
   let doc, project =
     let subproject =
-      match bi.Wiki_widgets_interface.bi_page with
-      | Document.Project {page = Document.Api {subproject; _}; _} -> subproject
-      | _ -> get ~default:"client" args "subproject"
+      let default =
+        match bi.Wiki_widgets_interface.bi_page with
+        | Document.Project {page = Document.Api {subproject; _}; project; _} ->
+          if Projects.default_subproject_of project = "" then
+            (* there are no subprojects in the target project *)
+            ""
+          else
+            (* keep the same one. *)
+            subproject
+        | Document.Project {project; _} ->
+          Projects.default_subproject_of project
+        | _ -> ""
+      in
+      get ~default args "subproject"
     in
     let file = path_of_id ?prefix id in
     make_project bi args (Document.Api {subproject; file})
