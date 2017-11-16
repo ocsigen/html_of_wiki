@@ -15,19 +15,19 @@ and t' =
     file: string;
   }
 
-let to_string = function
+let to_string ?(src=false) = function
   | Site s -> s (* FIXME this won't always work *)
   | Project {page; version = v; project} ->
     let p =
       match page with
       | Page p -> p
-      | Manual m -> "manual/" ^ m
+      | Manual m -> "manual/" ^ (if src then "src/" else "") ^ m
       | Api {subproject; file} ->
         "api/" ^ (if subproject = "" then "" else subproject ^ "/") ^ file
     in
     project ^ "/" ^ (v |> Version.to_string) ^ "/" ^ p
 
-let to_source d = to_string d ^ ".wiki"
+let to_source d = to_string ~src:true d ^ ".wiki"
 let to_output d = !output ^ to_string d ^ ".html"
 
 let to_uri ?(ext=".html") ?fragment x =
