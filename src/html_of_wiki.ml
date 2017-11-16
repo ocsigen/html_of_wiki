@@ -30,7 +30,7 @@ let explore max_depth output force dry files =
     let empty = Lwt.return [] in
     let content = Lwt_main.run (parse ~page add_link empty inp) in
     let title =
-      extract_first_h1 content |>
+      extract_h1 content |>
       Eliom_lib.Option.default_to "Ocsigen"
     in
     let out_fn = Document.to_output page in
