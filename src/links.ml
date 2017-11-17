@@ -130,7 +130,7 @@ let api prefix bi args contents =
     let file = path_of_id ?prefix id in
     make_project bi args (Document.Api {subproject; file})
   in
-  let default = string_of_id ~spacer:".<U+200B>" id in
+  let default = string_of_id ~spacer:".​" id in
   let body = [Html.pcdata @@ get ~default args "text"] in
   let fragment = fragment_of_id id in
   let href = Html.a_href @@ Document.to_uri ?fragment doc in
