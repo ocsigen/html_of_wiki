@@ -27,7 +27,10 @@ let to_string ?(src=false) = function
     in
     project ^ "/" ^ (v |> Version.to_string) ^ "/" ^ p
 
-let to_source d = to_string ~src:true d ^ ".wiki"
+let to_source = function
+  | Project {page = Page _; _} -> None
+  | d -> Some (to_string ~src:true d ^ ".wiki")
+
 let to_output d = !output ^ to_string d ^ ".html"
 
 let to_uri ?(ext=".html") ?fragment x =
@@ -37,7 +40,7 @@ let to_uri ?(ext=".html") ?fragment x =
   | Some f -> "#" ^ f)
 
 let compare a b =
-  String.compare (to_source a) (to_source b)
+  String.compare (to_output a) (to_output b)
 
 (* FIXME use Tyre to convert both ways? *)
 let parse_filename fn =

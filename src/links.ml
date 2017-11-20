@@ -51,7 +51,7 @@ let a_class project =
   Html.a_class ["ocsforge_doclink_" ^ project]
 
 let manual_link bi args contents =
-  let chapter = get ~default:"index" args "chapter" in (* FIXME? *)
+  let chapter = get ~default:"intro" args "chapter" in (* FIXME? *)
   let fragment = get_opt args "fragment" in
   let%lwt contents =
     match contents with

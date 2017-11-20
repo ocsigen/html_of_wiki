@@ -147,14 +147,13 @@ let uri_of_href = function
   | Document {document; fragment} -> Document.to_uri ?fragment document
 
 let link_regexp =
-  Re_pcre.regexp "(http\\+|https\\+)?([a-z|A-Z|-1-9]+)(\\((.*)\\))?:(.*)"
+  Re_pcre.regexp "([a-z|A-Z|-1-9]+)(\\((.*)\\))?:(.*)"
 let wiki_title_regexp = Re_pcre.regexp "\"([a-z|A-Z|_][a-z|A-Z|_|0-9]*)\""
 let wiki_id_regexp = Re_pcre.regexp "([0-9]+)"
-let protocol_group = 1
-let prototype_group = 2
-let wiki_id_parentheses_group = 3
-let wiki_id_group = 4
-let page_group = 5
+let prototype_group = 1
+let wiki_id_parentheses_group = 2 (* with ()... *)
+let wiki_id_group = 3
+let page_group = 4
 
 let replace_regexp_group ~str ~result ~group ~replacement =
   let open Re_pcre in
@@ -199,8 +198,8 @@ let normalize_link =
     let open Re_pcre in
     match exec ~rex:link_regexp addr with
       | g when get_substring g prototype_group = "wiki" ->
-          let wikinum = get_substring g wiki_id_group in
-          begin match exec ~rex:wiki_id_regexp wikinum with
+          let wiki = get_substring g wiki_id_group in
+          begin match exec ~rex:wiki_id_regexp wiki with
             | result -> (* [[wiki(ix):path]] => [[wiki("title"):path]] *)
                 let id = get_substring result 1 in
                 begin try%lwt
@@ -266,12 +265,13 @@ let normalize_link =
           *)
 
 let link_kind bi addr =
-  match Re_pcre.exec ~rex:link_regexp addr with
+  let open Re_pcre in
+  match exec ~rex:link_regexp addr with
     | exception Not_found ->
         failwith (Printf.sprintf "Not a valid link: %S" addr);
     | result ->
-        let page = Re_pcre.get_substring result page_group in
-        match Re_pcre.get_substring result prototype_group with
+        let page = get_substring result page_group in
+        match get_substring result prototype_group with
         | "href" ->
             Absolute page
         | "site" ->
@@ -287,10 +287,30 @@ let link_kind bi addr =
               in
               Document {document = Document.Site page; fragment = None}
         | "wiki" ->
-            let project = Re_pcre.get_substring result wiki_id_group in
-            (* FIXME remove quotes, I guess *)
+            let project, version =
+              match get_substring result wiki_id_group with
+              | exception Not_found ->
+                begin match bi.Wiki_widgets_interface.bi_page with
+                | Document.Site _ ->
+                  failwith "no implicit wiki from a Site page"
+                | Document.Project {project; version; _} -> project, version
+                end
+              | wiki ->
+                match exec ~rex:wiki_id_regexp wiki with
+                | exception Not_found ->
+                  begin match exec ~rex:wiki_title_regexp wiki with
+                  | exception Not_found ->
+                    failwith (Printf.sprintf "Not a valid wiki: %S" wiki)
+                  | result -> (* [[wiki("name"):path]] *)
+                    let wiki = get_substring result 1 in
+                    wiki, Projects.latest_of wiki
+                  end
+                | result -> (* [[wiki(ix):path]] *)
+                  let id = int_of_string (get_substring result 1) in
+                  let project = Projects.of_id id in
+                  project, Projects.latest_of project
+            in
             let page = Document.Page page in
-            let version = Projects.latest_of project in
             let document = Document.Project {page; version; project} in
             Document {document; fragment = None}
         |  _ ->
@@ -1148,7 +1168,7 @@ module FlowBuilder = struct
     (fun bi c fragment ->
       try
         make_href bi (link_kind bi c) fragment
-      with Failure _ ->
+      with Failure _ | Not_found (* FIXME *) ->
         Absolute "???")
 
   let string_of_href = uri_of_href

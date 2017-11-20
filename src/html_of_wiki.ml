@@ -26,9 +26,17 @@ let explore max_depth output force dry files =
   Projects.init ".";
   let open Compiler in
   let compile add_link page =
-    let inp = read_file (Document.to_source page) in
+    let inp = read_file (Document.to_source page |> Eliom_lib.Option.force) in
     let empty = Lwt.return [] in
-    let content = Lwt_main.run (parse ~page add_link empty inp) in
+    let my_add d =
+      match Document.to_source d with
+      | None ->
+        (* no corresponding source, don't add it *)
+        (* TODO collect names! *)
+        ()
+      | Some _ -> add_link d
+    in
+    let content = Lwt_main.run (parse ~page my_add empty inp) in
     let title =
       extract_h1 content |>
       Eliom_lib.Option.default_to "Ocsigen"
@@ -46,7 +54,7 @@ let explore max_depth output force dry files =
   let module C = Crawler.Make(Document) in
   let set = C.bfs ?max_depth docs ~f:(fun ~already ~add ?pred cur ->
     try
-      let source = Document.to_source cur in
+      let source = Document.to_source cur |> Eliom_lib.Option.force in
       let source_t =
         try
           mtime_of source
@@ -54,7 +62,8 @@ let explore max_depth output force dry files =
           let from =
             match pred with
             | None -> ""
-            | Some d -> Document.to_source d ^ " -> "
+            | Some d ->
+              (Document.to_source d |> Eliom_lib.Option.force) ^ " -> "
           in
           prerr_endline @@ from ^ source ^ ": " ^ Unix.error_message e;
           incr dead;
