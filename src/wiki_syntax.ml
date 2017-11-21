@@ -310,10 +310,15 @@ let link_kind bi addr =
                   let project = Projects.of_id id in
                   project, Projects.latest_of project
             in
-            let page = Document.Page page in
+            let page = Document.Manual page in
             let document = Document.Project {page; version; project} in
             Document {document; fragment = None}
+        | "http" | "https" ->
+            Absolute addr
         |  _ ->
+            (* FIXME menu *)
+            print_endline @@ "unhandled link kind: " ^ addr ^ " in " ^
+              (Document.to_output (bi.Wiki_widgets_interface.bi_page));
             Absolute addr
 
 (** **)
