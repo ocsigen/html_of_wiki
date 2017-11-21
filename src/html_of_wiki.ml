@@ -26,8 +26,6 @@ let explore max_depth output force dry files =
   Projects.init ".";
   let open Compiler in
   let compile add_link page =
-    let inp = read_file (Document.to_source page |> Eliom_lib.Option.force) in
-    let empty = Lwt.return [] in
     let my_add d =
       match Document.to_source d with
       | None ->
@@ -36,10 +34,32 @@ let explore max_depth output force dry files =
         ()
       | Some _ -> add_link d
     in
-    let content = Lwt_main.run (parse ~page my_add empty inp) in
-    let title =
-      extract_h1 content |>
-      Eliom_lib.Option.default_to "Ocsigen"
+    let content, title =
+      let content =
+        let inp =
+          Document.to_source page |>
+          Eliom_lib.Option.force |>
+          read_file
+        in
+        let empty = Lwt.return [] in
+        Lwt_main.run (parse ~page my_add empty inp)
+      in
+      let title =
+        extract_h1 content |>
+        Eliom_lib.Option.default_to "Ocsigen"
+      in
+      let template =
+        match page with
+        | Document.Project {project; version; _} ->
+          Document.Project {page = Document.Template; project; version}
+        | Document.Site _ -> Document.Site "template"
+      in
+      let raw =
+        Document.to_source template |>
+        Eliom_lib.Option.force |>
+        read_file
+      in
+      Lwt_main.run (parse ~page ~title my_add (Lwt.return content) raw), title
     in
     let out_fn = Document.to_output page in
     create_tree (Filename.dirname out_fn);

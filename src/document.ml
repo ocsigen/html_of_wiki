@@ -8,6 +8,7 @@ type t =
     project: string;
   }
 and t' =
+  | Template
   | Page of string
   | Manual of string
   | Api of {
@@ -17,6 +18,7 @@ and t' =
 
 let to_string ?(src=false) = function
   | Site s -> s (* FIXME this won't always work *)
+  | Project {page = Template; project; _} -> project ^ "/template"
   | Project {page; version = v; project} ->
     let p =
       match page with
@@ -24,6 +26,7 @@ let to_string ?(src=false) = function
       | Manual m -> "manual/" ^ (if src then "src/" else "") ^ m
       | Api {subproject; file} ->
         "api/" ^ (if subproject = "" then "" else subproject ^ "/") ^ file
+      | Template -> assert false (* handled above... *)
     in
     project ^ "/" ^ (v |> Version.to_string) ^ "/" ^ p
 

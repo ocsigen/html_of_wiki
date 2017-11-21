@@ -291,9 +291,8 @@ let link_kind bi addr =
               match get_substring result wiki_id_group with
               | exception Not_found ->
                 begin match bi.Wiki_widgets_interface.bi_page with
-                | Document.Site _ ->
-                  failwith "no implicit wiki from a Site page"
                 | Document.Project {project; version; _} -> project, version
+                | Document.Site _ -> failwith "no implicit project"
                 end
               | wiki ->
                 match exec ~rex:wiki_id_regexp wiki with
