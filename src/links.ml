@@ -104,8 +104,7 @@ let files_img bi args contents =
     | None -> Filename.basename (get args "src")
     | Some contents -> contents
   in
-  let src = Document.to_string doc in
-  bi.Wiki_widgets_interface.bi_add_link doc;
+  let src = Document.to_uri ~ext:"" doc in
   Lwt.return [ Html.img ~src ~alt () ]
 
 let api prefix bi args contents =
