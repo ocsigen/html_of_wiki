@@ -108,7 +108,7 @@ let files_img bi args contents =
   Lwt.return [ Html.img ~src ~alt () ]
 
 let api prefix bi args contents =
-  let id = parse_contents contents in
+  let id = parse_contents (Eliom_lib.Option.map String.trim contents) in
   let doc, project =
     let subproject =
       let default =
