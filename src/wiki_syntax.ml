@@ -264,6 +264,14 @@ let normalize_link =
       | _ -> Result.no_replacement
           *)
 
+let starts_with prefix s =
+  let p = String.length prefix in
+  String.length s >= p && String.sub s 0 p = prefix
+
+let ends_with suffix s =
+  let l = String.length suffix in
+  String.length s >= l && String.sub s (String.length s - l) l = suffix
+
 let link_kind bi addr =
   let open Re_pcre in
   match exec ~rex:link_regexp addr with
@@ -309,9 +317,17 @@ let link_kind bi addr =
                   let project = Projects.of_id id in
                   project, Projects.latest_of project
             in
-            let page = Document.Manual page in
-            let document = Document.Project {page; version; project} in
-            Document {document; fragment = None}
+            if page = "install" then
+              Absolute ("https://github.com/ocsigen/" ^ project)
+            else
+              let page =
+                if starts_with "manual/" page then
+                  Document.Manual (String.sub page 7 (String.length page - 7))
+                else
+                  Document.Manual page
+              in
+              let document = Document.Project {page; version; project} in
+              Document {document; fragment = None}
         | "http" | "https" ->
             Absolute addr
         |  _ ->
