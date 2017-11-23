@@ -110,24 +110,20 @@ let files_img bi args contents =
 let api prefix bi args contents =
   let id = parse_contents (Eliom_lib.Option.map String.trim contents) in
   let doc, project =
+    let project, version = force_project_and_version bi args in
     let subproject =
-      let default =
+      match get_opt args "subproject" with
+      | Some subproject -> subproject
+      | None ->
         match bi.Wiki_widgets_interface.bi_page with
-        | Document.Project {page = Document.Api {subproject; _}; project; _} ->
-          if Projects.default_subproject_of project = "" then
-            (* there are no subprojects in the target project *)
-            ""
-          else
-            (* keep the same one. *)
+        | Document.Project {page = Document.Api {subproject; _}; _}
+          when subproject <> "" ->
             subproject
-        | Document.Project {project; _} ->
-          Projects.default_subproject_of project
-        | _ -> ""
-      in
-      get ~default args "subproject"
+        | _ -> Projects.default_subproject_of project
     in
     let file = path_of_id ?prefix id in
-    make_project bi args (Document.Api {subproject; file})
+    let page = Document.Api {subproject; file} in
+    Document.Project {project; version; page}, project
   in
   let default = string_of_id ~spacer:".​" id in
   let body = [Html.pcdata @@ get ~default args "text"] in
