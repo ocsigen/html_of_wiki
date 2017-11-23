@@ -1,13 +1,3 @@
-let mtime_of fn =
-  let open Unix in
-  (stat fn).st_mtime
-
-let to_rebuild source_t html =
-  try
-    mtime_of html < source_t
-  with _ -> (* probably not found *)
-    true (* not built yet *)
-
 let rec create_tree dirs =
   (* create parents first *)
   if Filename.basename dirs = dirs then
@@ -21,7 +11,7 @@ let rec create_tree dirs =
     ()
 
 (* FIXME avoid leaking handles *)
-let explore max_depth output force dry files =
+let explore max_depth output dry files =
   Document.output := output;
   Projects.init ".";
   let open Compiler in
@@ -69,47 +59,29 @@ let explore max_depth output force dry files =
   in
   let dead = ref 0 in
   let processed = ref 0 in
-  let errors = ref 0 in
   let docs = List.map Document.parse_filename files in
   let module C = Crawler.Make(Document) in
   let set = C.bfs ?max_depth docs ~f:(fun ~already ~add ?pred cur ->
+    let source = Document.to_source cur |> Eliom_lib.Option.force in
     try
-      let source = Document.to_source cur |> Eliom_lib.Option.force in
-      let source_t =
-        try
-          mtime_of source
-        with Unix.Unix_error (e, _, _) ->
-          let from =
-            match pred with
-            | None -> ""
-            | Some d ->
-              (Document.to_source d |> Eliom_lib.Option.force) ^ " -> "
-          in
-          prerr_endline @@ from ^ source ^ ": " ^ Unix.error_message e;
-          incr dead;
-          raise Exit
-      in
-      if force || to_rebuild source_t (Document.to_output cur) then (
-        try
-          if not already then (
-            compile add cur;
-            incr processed
-          )
-        with Unix.Unix_error (e, _, _) ->
-          prerr_endline @@ source ^ ": " ^ Unix.error_message e;
-          incr errors;
-          raise Exit
+      if not already then (
+        compile add cur;
+        incr processed
       )
-    with Exit ->
-      ()
+    with Sys_error e ->
+      let from =
+        match pred with
+        | None -> ""
+        | Some d ->
+          (Document.to_source d |> Eliom_lib.Option.force) ^ " -> "
+      in
+      prerr_endline @@ from ^ e;
+      incr dead;
   ) in
   let n = C.Set.cardinal set in
-  Printf.fprintf stderr "%d targets (%d cached).\n" n (n - !processed);
-  Printf.fprintf stderr
-    "%d fatal errors, %d dead links, %d files processed.\n"
-    !errors
-    !dead
-    !processed
+  Printf.printf
+    "%d targets\n%d dead links\n%d files processed\n"
+    n !dead !processed
 
 
 open Cmdliner
@@ -128,10 +100,6 @@ let dry =
   let doc = "Don't output HTML files." in
   Arg.(value & flag & info ["n"; "dry-run"] ~doc)
 
-let force =
-  let doc = "Force a complete rebuild." in
-  Arg.(value & flag & info ["f"; "force"; "fresh"] ~doc)
-
 let cmd =
   let doc = "compile Ocsigen's Wikicreole dialect to HTML" in
   let man = [
@@ -147,7 +115,7 @@ let cmd =
         to generate.";
     `P "Report bugs to <guillaume.huysmans@student.umons.ac.be>.";
   ] in
-  Term.(const explore $ depth $ output $ force $ dry $ files),
+  Term.(const explore $ depth $ output $ dry $ files),
   Term.info "html_of_wiki" ~version:"v1.0.0" ~doc ~exits:Term.default_exits ~man
 
 let () = Term.(exit @@ eval cmd)
