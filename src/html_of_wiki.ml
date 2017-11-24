@@ -10,6 +10,13 @@ let rec create_tree dirs =
   with Unix.(Unix_error (EEXIST, _, _)) ->
     ()
 
+let copy f =
+  (* FIXME sometimes copy the whole subdirectory? *)
+  let source = Document.to_source f |> Eliom_lib.Option.force in
+  let dest = Document.to_output f in
+  create_tree dest;
+  FileUtil.cp [source] dest
+
 (* FIXME avoid leaking handles *)
 let explore max_depth output dry files =
   Document.output := output;
@@ -57,15 +64,18 @@ let explore max_depth output dry files =
     render ch ~title content;
     close_out ch
   in
+  let process add_link = function
+    | Document.Project {page = Document.File _; _} as f -> copy f
+    | d -> compile add_link d
+  in
   let dead = ref 0 in
   let processed = ref 0 in
   let docs = List.map Document.parse_filename files in
   let module C = Crawler.Make(Document) in
   let set = C.bfs ?max_depth docs ~f:(fun ~already ~add ?pred cur ->
-    let source = Document.to_source cur |> Eliom_lib.Option.force in
     try
       if not already then (
-        compile add cur;
+        process add cur;
         incr processed
       )
     with Sys_error e ->

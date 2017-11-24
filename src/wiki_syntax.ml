@@ -323,6 +323,8 @@ let link_kind bi addr =
               let page =
                 if starts_with "manual/" page then
                   Document.Manual (String.sub page 7 (String.length page - 7))
+                else if starts_with "files/" page then
+                  Document.File (String.sub page 6 (String.length page - 6))
                 else
                   Document.Manual page
               in

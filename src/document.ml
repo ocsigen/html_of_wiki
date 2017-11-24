@@ -8,6 +8,7 @@ type t =
     project: string;
   }
 and t' =
+  | File of string
   | Template
   | Page of string
   | Manual of string
@@ -27,11 +28,13 @@ let to_string ?(src=false) = function
       | Api {subproject; file} ->
         "api/" ^ (if subproject = "" then "" else subproject ^ "/") ^ file
       | Template -> assert false (* handled above... *)
+      | File f -> "manual/files/" ^ f
     in
     project ^ "/" ^ (v |> Version.to_string) ^ "/" ^ p
 
 let to_source = function
   | Project {page = Page _; _} -> None
+  | Project {page = File _; _} as d -> Some (to_string ~src:true d)
   | d -> Some (to_string ~src:true d ^ ".wiki")
 
 let to_output d = !output ^ to_string d ^ ".html"

@@ -71,11 +71,11 @@ let local_link bi args =
   let src = get args "src" in
   match bi.Wiki_widgets_interface.bi_page with
   | Document.Project _ ->
-    make_project bi args (Document.Manual ("files/" ^ src)) |> fun (d, p) ->
+    make_project bi args (Document.File src) |> fun (d, p) ->
     d, Some p
   | _ ->
     if List.mem_assoc "project" args then
-      make_project bi args (Document.Manual ("files/" ^ src)) |> fun (d, p) ->
+      make_project bi args (Document.File src) |> fun (d, p) ->
       d, Some p
     else
       Document.Site src, None
