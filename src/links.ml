@@ -31,7 +31,8 @@ let get_project_and_version bi args =
       if project = project' then
         version |> Version.to_string
       else
-        Projects.latest_of project' |> Version.to_string (* unrelated! *)
+        (Projects.get project').Projects.latest |>
+        Version.to_string (* unrelated! *)
     in
     `Project (project', get ~default args "version" |> Version.parse)
 
@@ -40,7 +41,10 @@ let force_project_and_version bi args =
   | `Project (p, v) -> p, v
   | `Maybe_in_args ->
     let project = get args "project" in
-    let default = Projects.latest_of project |> Version.to_string in
+    let default =
+      (Projects.get project).Projects.latest |>
+      Version.to_string
+    in
     project, get ~default args "version" |> Version.parse
 
 let make_project bi args page =
@@ -51,7 +55,7 @@ let a_class project =
   Html.a_class ["ocsforge_doclink_" ^ project]
 
 let manual_link bi args contents =
-  let chapter = get ~default:"intro" args "chapter" in (* FIXME? *)
+  let chapter = get args "chapter" in
   let fragment = get_opt args "fragment" in
   let%lwt contents =
     match contents with
@@ -118,9 +122,9 @@ let api prefix bi args contents =
         match bi.Wiki_widgets_interface.bi_page with
         | Document.Project {page = Document.Api {subproject; _}; _}
           when subproject <> ""
-          && Projects.default_subproject_of project <> "" ->
+          && (Projects.get project).Projects.default_subproject <> "" ->
             subproject
-        | _ -> Projects.default_subproject_of project
+        | _ -> (Projects.get project).Projects.default_subproject
     in
     let file = path_of_id ?prefix id in
     let page = Document.Api {subproject; file} in

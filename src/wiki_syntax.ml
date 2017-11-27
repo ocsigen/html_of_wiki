@@ -310,21 +310,31 @@ let link_kind bi addr =
                     failwith (Printf.sprintf "Not a valid wiki: %S" wiki)
                   | result -> (* [[wiki("name"):path]] *)
                     let wiki = get_substring result 1 in
-                    wiki, Projects.latest_of wiki
+                    wiki, (Projects.get wiki).Projects.latest
                   end
                 | result -> (* [[wiki(ix):path]] *)
                   let id = int_of_string (get_substring result 1) in
                   let project = Projects.of_id id in
-                  project, Projects.latest_of project
+                  project, (Projects.get project).Projects.latest
             in
             if page = "install" then
               Absolute ("https://github.com/ocsigen/" ^ project)
             else
               let page =
-                if starts_with "manual/" page then
+                if page = "" then
+                  let def =
+                    (Projects.get project).Projects.manual_main |>
+                    Eliom_lib.Option.default_to "intro"
+                  in
+                  Document.Manual def
+                else if starts_with "manual/" page then
                   Document.Manual (String.sub page 7 (String.length page - 7))
                 else if starts_with "files/" page then
-                  Document.File (String.sub page 6 (String.length page - 6))
+                  let f = String.sub page 6 (String.length page - 6) in
+                  if f.[String.length f - 1] = '/' then
+                    Document.File (f ^ "index.html")
+                  else
+                    Document.File f
                 else
                   Document.Manual page
               in

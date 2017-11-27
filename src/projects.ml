@@ -1,3 +1,12 @@
+type t = {
+  name: string;
+  versions: Version.t list;
+  latest: Version.t;
+  manual_main: string option;
+  default_subproject: string; (* "" when there aren't any *)
+}
+
+
 let (++) = Filename.concat
 
 let is_directory path name =
@@ -10,55 +19,57 @@ let readdir wiki_dir path =
   Array.to_list |>
   List.filter (fun name -> is_directory full name)
 
+
 let projects = ref []
 let ids = ref []
 
 let init wiki_dir =
   projects :=
     readdir wiki_dir "" |>
-    List.map (fun p ->
-      let default_subproject =
-        try
-          let f =
-            Yojson.Safe.from_file @@ wiki_dir ++ p ++ "config.js"
-          in
-          (try
-            let id =
-              Yojson.Safe.Util.member "wiki_id" f |>
-              Yojson.Safe.Util.to_int
-            in
-            ids := (id, p) :: !ids
-          with _ ->
-            ());
-          try
-            Yojson.Safe.Util.member "default_subproject" f |>
-            Yojson.Safe.Util.to_string
-          with _ ->
-            (* no default subproject *)
-            ""
-        with _ ->
-          (* couldn't read config.js *)
-          Printf.eprintf "couldn't read %s's config.js...\n%!" p;
-          (* no default subproject *)
-          ""
+    List.map (fun name ->
+      let versions =
+        readdir wiki_dir name |>
+        List.map Version.parse |>
+        List.sort (fun x y -> Version.compare y x)
       in
-      readdir wiki_dir p |>
-      List.map Version.parse |>
-      List.sort (fun x y -> Version.compare y x) |> function
+      match versions with
       | [] ->
-        Printf.eprintf "no versions found for %s...\n%!" p;
+        Printf.eprintf "no versions found for %s...\n%!" name;
         []
       | Version.Dev :: latest :: _
       | latest :: _ ->
-        [p, (default_subproject, latest)]
+        let p =
+          try
+            let f =
+              Yojson.Safe.from_file @@ wiki_dir ++ name ++ "config.js"
+            in
+            let default_subproject =
+              Yojson.Safe.Util.member "default_subproject" f |>
+              Yojson.Safe.Util.to_string_option |>
+              Eliom_lib.Option.default_to ""
+            in
+            let manual_main =
+              Yojson.Safe.Util.member "manual_main" f |>
+              Yojson.Safe.Util.to_string_option
+            in
+            Yojson.Safe.Util.member "wiki_id" f |>
+            Yojson.Safe.Util.to_int_option |> function
+            | Some id ->
+              ids := (id, name) :: !ids;
+              {name; versions; latest; manual_main; default_subproject}
+            | None ->
+              {name; versions; latest; manual_main; default_subproject}
+          with _ ->
+            (* couldn't read config.js *)
+            Printf.eprintf "couldn't read %s's config.js...\n%!" name;
+            {name; versions; latest; manual_main=None; default_subproject=""}
+        in
+        [name, p]
     ) |>
     List.flatten
 
-let latest_of project =
-  List.assoc project !projects |> snd
+let get project =
+  List.assoc project !projects
 
 let of_id id =
   List.assoc id !ids
-
-let default_subproject_of project =
-  List.assoc project !projects |> fst
