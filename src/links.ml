@@ -117,7 +117,8 @@ let api prefix bi args contents =
       | None ->
         match bi.Wiki_widgets_interface.bi_page with
         | Document.Project {page = Document.Api {subproject; _}; _}
-          when subproject <> "" ->
+          when subproject <> ""
+          && Projects.default_subproject_of project <> "" ->
             subproject
         | _ -> Projects.default_subproject_of project
     in
