@@ -1,3 +1,6 @@
+exception No_such_project of string
+exception No_such_id of int
+
 type t = {
   name: string;
   versions: Version.t list;
@@ -69,7 +72,13 @@ let init wiki_dir =
     List.flatten
 
 let get project =
-  List.assoc project !projects
+  try
+    List.assoc project !projects
+  with Not_found ->
+    raise (No_such_project project)
 
 let of_id id =
-  List.assoc id !ids
+  try
+    List.assoc id !ids
+  with Not_found ->
+    raise (No_such_id id)
