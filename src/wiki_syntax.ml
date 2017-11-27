@@ -332,9 +332,9 @@ let link_kind bi addr =
               Document {document; fragment = None}
         | "http" | "https" ->
             Absolute addr
-        |  _ ->
+        |  s ->
             (* FIXME menu *)
-            print_endline @@ "unhandled link kind: " ^ addr ^ " in " ^
+            print_endline @@ "unhandled link kind for " ^ s ^ " in " ^
               (Document.to_output (bi.Wiki_widgets_interface.bi_page));
             Absolute addr
 
