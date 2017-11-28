@@ -56,7 +56,14 @@ let a_class project =
   Html.a_class ["ocsforge_doclink_" ^ project]
 
 let manual_link bi args contents =
-  let chapter = get args "chapter" in
+  let project, version = force_project_and_version bi args in
+  let chapter =
+    let default =
+      (Projects.get project).Projects.manual_main |>
+      Eliom_lib.Option.default_to "intro"
+    in
+    get ~default args "chapter"
+  in
   let fragment = get_opt args "fragment" in
   let%lwt contents =
     match contents with
@@ -67,7 +74,9 @@ let manual_link bi args contents =
         contents
     | None -> Lwt.fail (Error.Error "Empty contents")
   in
-  let doc, project = make_project bi args (Document.Manual chapter) in
+  let doc =
+    Document.Project {project; version; page = Document.Manual chapter}
+  in
   let href = Html.a_href (Document.to_uri ?fragment doc) in
   bi.Wiki_widgets_interface.bi_add_link doc;
   Lwt.return [Html.a ~a:[a_class project; href] contents]
