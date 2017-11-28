@@ -1,5 +1,5 @@
 let spaces = Re.rep1 Re.blank |> Re.compile
-let eols = Re.rep1 Re.eol |> Re.compile
+let seps = Re.rep1 (Re.alt [Re.blank; Re.char '\n']) |> Re.compile
 let dot = Re.char '.' |> Re.compile
 
 let get_opt args name =

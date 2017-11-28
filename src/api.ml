@@ -36,8 +36,7 @@ let parse_contents contents =
   match contents with
   | None | Some "" -> raise (Error "contents must be an Ocaml id")
   | Some def ->
-    let def = Re.split spaces def in
-    let def = List.flatten (List.map (Re.split eols) def) in
+    let def = Re.split seps def in
     match def with
     | "intro" :: [] -> [], `Index
     | "index" :: [] -> [], `Index
@@ -86,7 +85,8 @@ let parse_contents contents =
     | "section":: lid ->
       let path, id = parse_lid lid in
       path, `Section id
-    | _ -> raise (Error "invalid contents")
+    | x :: _ -> raise (Error ("invalid contents: " ^ x))
+    | [] -> raise (Error ("empty contents"))
 
 (** OCaml identifier *)
 type id =
