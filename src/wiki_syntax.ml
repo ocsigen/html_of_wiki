@@ -284,9 +284,8 @@ let link_kind bi addr =
             Absolute page
         | "site" ->
             (* TODO parse this and convert links? *)
-            if String.contains page '.' then
-              failwith "links may not contain ."
-            else
+            begin match Re_pcre.exec ~rex:(Re_pcre.regexp "\\.\\.") page with
+            | exception Not_found ->
               let page =
                 if page.[0] = '/' then
                   String.sub page 1 (String.length page - 1)
@@ -294,6 +293,9 @@ let link_kind bi addr =
                   page
               in
               Document {document = Document.Site page; fragment = None}
+            | _ ->
+              failwith "links may not contain .."
+            end
         | "wiki" ->
             let project, version =
               match get_substring result wiki_id_group with
