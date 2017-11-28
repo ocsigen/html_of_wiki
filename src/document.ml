@@ -7,6 +7,7 @@ type t =
     version: Version.t;
     project: string;
   }
+  | Deadlink of exn
 and t' =
   | File of string
   | Template
@@ -31,6 +32,7 @@ let to_string ?(src=false) = function
       | File f -> "manual/files/" ^ f
     in
     project ^ "/" ^ (v |> Version.to_string) ^ "/" ^ p
+  | Deadlink e -> Printexc.to_string e
 
 let to_source = function
   | Project {page = Page _; _} -> None

@@ -50,6 +50,7 @@ let explore max_depth output dry files =
         | Document.Project {project; version; _} ->
           Document.Project {page = Document.Template; project; version}
         | Document.Site _ -> Document.Site "template"
+        | Document.Deadlink _ -> assert false
       in
       let raw =
         Document.to_source template |>
@@ -66,6 +67,7 @@ let explore max_depth output dry files =
   in
   let process add_link = function
     | Document.Project {page = Document.File _; _} as f -> copy f
+    | Document.Deadlink _ as d -> raise (Sys_error (Document.to_string d))
     | d -> compile add_link d
   in
   let dead = ref 0 in

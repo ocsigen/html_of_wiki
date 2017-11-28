@@ -35,6 +35,7 @@ let get_project_and_version bi args =
         Version.to_string (* unrelated! *)
     in
     `Project (project', get ~default args "version" |> Version.parse)
+  | Document.Deadlink _ -> assert false
 
 let force_project_and_version bi args =
   match get_project_and_version bi args with

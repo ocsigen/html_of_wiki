@@ -301,6 +301,7 @@ let link_kind bi addr =
                 begin match bi.Wiki_widgets_interface.bi_page with
                 | Document.Project {project; version; _} -> project, version
                 | Document.Site _ -> failwith "no implicit project"
+                | Document.Deadlink _ -> assert false
                 end
               | wiki ->
                 match exec ~rex:wiki_id_regexp wiki with
@@ -1196,12 +1197,13 @@ module FlowBuilder = struct
     Lwt_list.map_s (fun x -> x) c >|= List.flatten >|= fun c ->
       [Html.a ~a:(Html.a_href (uri_of_href addr) :: a) c]
 
-  let make_href =
-    (fun bi c fragment ->
-      try
-        make_href bi (link_kind bi c) fragment
-      with Failure _ | Not_found (* FIXME *) ->
-        Absolute "???")
+  let make_href bi c fragment =
+    let add_link = bi.Wiki_widgets_interface.bi_add_link in
+    try
+      make_href bi (link_kind bi c) fragment
+    with e ->
+      add_link (Document.Deadlink e);
+      Absolute c
 
   let string_of_href = uri_of_href
 
