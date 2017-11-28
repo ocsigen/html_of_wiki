@@ -148,7 +148,7 @@ let uri_of_href = function
 
 let link_regexp =
   Re_pcre.regexp "([a-z|A-Z-1-9]+)(\\((.*)\\))?:(.*)"
-let wiki_title_regexp = Re_pcre.regexp "\"([a-z|A-Z|_][a-z|A-Z|_|0-9]*)\""
+let wiki_title_regexp = Re_pcre.regexp "\"([a-z|A-Z_][a-zA-Z_0-9-]*)\""
 let wiki_id_regexp = Re_pcre.regexp "([0-9]+)"
 let prototype_group = 1
 let wiki_id_parentheses_group = 2 (* with ()... *)
