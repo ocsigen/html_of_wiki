@@ -112,8 +112,11 @@ let files_img bi args contents =
   let src = Document.to_uri ~ext:"" doc in
   Lwt.return [ Html.img ~src ~alt () ]
 
+let cleanup =
+  Re_pcre.substitute ~rex:(Re_pcre.regexp "\n|\t") ~subst:(fun _ -> "")
+
 let api prefix bi args contents =
-  let id = parse_contents (Eliom_lib.Option.map String.trim contents) in
+  let id = parse_contents (Eliom_lib.Option.map cleanup contents) in
   let doc, project =
     let project, version = force_project_and_version bi args in
     let subproject =
