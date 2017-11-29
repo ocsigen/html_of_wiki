@@ -23,8 +23,11 @@ let doctree bi args contents =
         (Wiki_syntax.cast_wp Wiki_syntax.menu_parser)
         bi'
   in
-  Lwt.map List.concat
-    (menus :> Html_types.flow5 Tyxml_html.elt list list Lwt.t)
+  `Flow5 (
+    Lwt.map
+      List.concat
+      (menus :> Html_types.flow5 Tyxml_html.elt list list Lwt.t)
+  )
 
   (*
   let versions =
@@ -38,4 +41,4 @@ let init () =
     ~name:"doctree"
     ~wp:Wiki_syntax.wikicreole_parser
     ~wp_rec:Wiki_syntax.wikicreole_parser
-    (fun _ -> Error.wrap_flow5 "doctree" doctree);
+    (fun _ -> doctree);
