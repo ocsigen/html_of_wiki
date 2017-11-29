@@ -6,7 +6,7 @@ let rec create_tree dirs =
     create_tree (Filename.dirname dirs);
   (* then, create the child dir (base case, too) *)
   try
-    Unix.mkdir dirs 0755
+    Unix.mkdir dirs 0o755
   with Unix.(Unix_error (EEXIST, _, _)) ->
     ()
 
