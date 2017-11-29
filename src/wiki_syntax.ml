@@ -1062,17 +1062,16 @@ let make_href bi addr fragment =
     addr
 
 let menu_make_href bi c _ =
-  failwith "unused"
-  (*
-  (* Accept only simple page. Ignore fragment and anything else silently... *)
-  try
-    match link_kind bi c with
-    | Wiki_page (wiki, page) ->
-      String_href ("wiki(" ^ wiki ^ "):" ^ page)
-    | _ -> String_href ""
-  with Failure _ ->
-    String_href c
-  *)
+  let project, version = Projects.get_implicit_project bi in
+  let document =
+    if String.contains c '/' then
+      let subproject, file = Ocsimore_lib.String.sep '/' c in
+      Document.(Project {page = Api {subproject; file}; project; version})
+    else
+      Document.(Project {page = Manual c; project; version})
+  in
+  bi.bi_add_link document;
+  Document {document; fragment = None}
 
 
 (*******************************************)

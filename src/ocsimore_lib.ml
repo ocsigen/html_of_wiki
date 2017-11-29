@@ -20,8 +20,8 @@ module String = struct
   let sep char s =
     let len = String.length s in
     let seppos = String.index s char in
-    String.trim (String.sub s 0 (seppos-1)),
-    String.trim (String.sub s (seppos+1) (len-1))
+    String.trim (String.sub s 0 seppos),
+    String.trim (String.sub s (seppos+1) (len-seppos-1))
 end
 
 let section = Lwt_log.Section.make "wiki_syntax"
