@@ -1,18 +1,4 @@
-let () = Links.init (); Only.init ()
-
-let read_file ?(buffer_size=4096) filename =
-  let ch = open_in filename in
-  let buf = Buffer.create buffer_size in
-  begin try
-    while true do
-      Buffer.add_string buf (input_line ch);
-      Buffer.add_char buf '\n';
-    done
-  with End_of_file ->
-    ()
-  end;
-  close_in ch;
-  Buffer.to_bytes buf |> Bytes.to_string
+let () = Links.init (); Only.init (); Menu.init ()
 
 let parse ~page ?title add_link content source = Wiki_syntax.(
   let parser = cast_wp wikicreole_parser in

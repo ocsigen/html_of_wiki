@@ -3,7 +3,7 @@ exception No_such_id of int
 
 type t = {
   name: string;
-  versions: Version.t list;
+  versions: (Version.t * string list) list;
   latest: Version.t;
   manual_main: string option;
   default_subproject: string; (* "" when there aren't any *)
@@ -42,6 +42,16 @@ let init wiki_dir =
       | Version.Dev :: latest :: _
       | latest :: _ ->
         let p =
+          let versions = versions |> List.map @@ fun v ->
+            v,
+            try
+              readdir wiki_dir (name ++ (Version.to_string latest) ++ "api")
+            with Sys_error _ ->
+              Printf.eprintf "no subprojects found for %s %s...\n%!"
+                name
+                (Version.to_string v);
+              []
+          in
           try
             let f =
               Yojson.Safe.from_file @@ wiki_dir ++ name ++ "config.js"
@@ -82,3 +92,9 @@ let of_id id =
     List.assoc id !ids
   with Not_found ->
     raise (No_such_id id)
+
+let get_implicit_project bi =
+  match bi.Wiki_widgets_interface.bi_page with
+  | Document.Project {project; version; _} -> project, version
+  | Document.Site _ -> failwith "no implicit project"
+  | Document.Deadlink _ -> assert false

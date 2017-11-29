@@ -56,3 +56,22 @@ let parse_filename fn =
     Site (Filename.chop_extension fn)
   else
     failwith ("not a .wiki input: " ^ fn)
+
+let read_file ?(buffer_size=4096) filename =
+  let ch = open_in filename in
+  let buf = Buffer.create buffer_size in
+  begin try
+    while true do
+      Buffer.add_string buf (input_line ch);
+      Buffer.add_char buf '\n';
+    done
+  with End_of_file ->
+    ()
+  end;
+  close_in ch;
+  Buffer.to_bytes buf |> Bytes.to_string
+
+let read d =
+  to_source d |>
+  Eliom_lib.Option.force |>
+  read_file

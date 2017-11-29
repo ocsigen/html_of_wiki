@@ -300,11 +300,7 @@ let link_kind bi addr =
             let project, version =
               match get_substring result wiki_id_group with
               | exception Not_found ->
-                begin match bi.Wiki_widgets_interface.bi_page with
-                | Document.Project {project; version; _} -> project, version
-                | Document.Site _ -> failwith "no implicit project"
-                | Document.Deadlink _ -> assert false
-                end
+                Projects.get_implicit_project bi
               | wiki ->
                 match exec ~rex:wiki_id_regexp wiki with
                 | exception Not_found ->

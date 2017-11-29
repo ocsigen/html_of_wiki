@@ -33,11 +33,7 @@ let explore max_depth output dry files =
     in
     let content, title =
       let content =
-        let inp =
-          Document.to_source page |>
-          Eliom_lib.Option.force |>
-          read_file
-        in
+        let inp = Document.read page in
         let empty = Lwt.return [] in
         Lwt_main.run (parse ~page my_add empty inp)
       in
@@ -52,11 +48,7 @@ let explore max_depth output dry files =
         | Document.Site _ -> Document.Site "template"
         | Document.Deadlink _ -> assert false
       in
-      let raw =
-        Document.to_source template |>
-        Eliom_lib.Option.force |>
-        read_file
-      in
+      let raw = Document.read template in
       Lwt_main.run (parse ~page ~title my_add (Lwt.return content) raw), title
     in
     let out_fn = Document.to_output page in
