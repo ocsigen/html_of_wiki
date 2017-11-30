@@ -3,7 +3,7 @@ OPAM_SWITCH=${OPAM_SWITCH:-system}
 FORK_USER=${FORK_USER:-ocsigen}
 
 
-sudo add-apt-repository ppa:avsm/ppa
+sudo add-apt-repository -y ppa:avsm/ppa
 sudo apt-get update
 sudo apt-get install -y opam
 
