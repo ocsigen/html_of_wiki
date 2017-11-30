@@ -1,2 +1,10 @@
-script:
-- echo "hello, world!"
+language: c
+sudo: true
+cache:
+  directories:
+  - $HOME/.opam
+env:
+- FORK_USER=ghuysmans #FIXME
+- OPAM_SWITCH=4.04.0
+install: sh .travis-install.sh
+script: sh .travis.sh
