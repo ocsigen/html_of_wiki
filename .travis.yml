@@ -4,7 +4,6 @@ cache:
   directories:
   - $HOME/.opam
 env:
-- FORK_USER=ghuysmans #FIXME
-- OPAM_SWITCH=4.04.0
+- OPAM_SWITCH=4.04.0 FORK_USER=ghuysmans #FIXME
 install: sh .travis-install.sh
 script: sh .travis.sh
