@@ -1,0 +1,20 @@
+opam-version: "1.2"
+name: "html_of_wiki"
+version: "0.5"
+maintainer: "Guillaume Huysmans <ghuysmans99@gmail.com>"
+authors: "Guillaume Huysmans <ghuysmans99@gmail.com>"
+homepage: "https://github.com/ocsigen/html_of_wiki/"
+bug-reports: "https://github.com/ocsigen/html_of_wiki/issues"
+dev-repo: "https://github.com/ghuysmans/html_of_wiki/"
+build: [
+  [make]
+]
+depends: [
+  "ocamlfind"
+  "lwt"
+  "re"
+  "tyxml"
+  "cmdliner"
+  "yojson"
+  "fileutils"
+]
