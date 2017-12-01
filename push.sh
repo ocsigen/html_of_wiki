@@ -1,5 +1,5 @@
 #!/bin/sh
-if [ `git st --porcelain |wc -l` -ne 0 ]; then
+if [ `git status --porcelain |wc -l` -ne 0 ]; then
 	#no need to test interactivity, since we've (normally) just cloned it
 	echo Please commit your changes to ensure this is reproducible. 2>&1
 	exit 1
