@@ -1,6 +1,6 @@
 #!/bin/sh
 if [ -z "$1" ]; then
-	find . -type d -depth 1 -regex ".*/[^.].*$"
+	find . -type d -maxdepth 1 -regex ".*/[^.].*$"
 else
 	echo ./$1
 fi|
