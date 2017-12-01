@@ -7,8 +7,10 @@ sudo add-apt-repository -y ppa:avsm/ppa
 sudo apt-get update
 sudo apt-get install -y opam
 
-if [ -f "$HOME/.opam/config" ]; then
-	exit 0 #do this just once
+export OPAMYES=1
+if ! [ -f "$HOME/.opam/config" ]; then
+	opam init -a --comp="$OPAM_SWITCH"
 fi
-OPAMYES=1 opam init -a --comp="$OPAM_SWITCH"
 eval $(opam config env)
+opam pin add -n html_of_wiki https://github.com/$FORK_USER/html_of_wiki.git
+opam reinstall html_of_wiki
