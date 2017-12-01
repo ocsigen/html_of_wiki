@@ -5,5 +5,5 @@ cache:
   - $HOME/.opam
 env:
 - OPAM_SWITCH=4.04.0 FORK_USER=ghuysmans #FIXME
-install: sh .travis-install.sh
-script: sh .travis.sh
+install: sh /dev/null
+script: sh tell.sh
