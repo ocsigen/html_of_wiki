@@ -6,4 +6,4 @@ cache:
 env:
 - OPAM_SWITCH=4.04.0 FORK_USER=ghuysmans #FIXME
 install: sh .travis-install.sh
-script: sh .travis.sh
+script: sh .travis.sh eliom
