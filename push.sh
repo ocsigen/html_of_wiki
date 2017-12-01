@@ -18,7 +18,7 @@ while read line; do
 		git add .
 		git commit -m "push.sh on $COMMIT"
 		if ! git push origin gh-pages; then
-			if [ -z "$PS1" ]; then
+			if [ ! -t 0 ]; then
 				echo There are conflicts, aborting!
 				exit 1
 			else
