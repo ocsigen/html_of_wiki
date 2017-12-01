@@ -14,7 +14,7 @@ cut -c 3- |
 while read line; do
 	echo Processing $line...
 	if [ -d "../gen/$line/.git" ]; then
-		cd "../gen/$line/.git"
+		cd "../gen/$line"
 		git add .
 		git commit -m "push.sh on $COMMIT"
 		if ! git push origin gh-pages; then
