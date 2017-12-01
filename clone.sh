@@ -1,5 +1,9 @@
 #!/bin/sh
-find . -type d -depth 1 -regex ".*/[^.].*$" |
+if [ -z "$1" ]; then
+	find . -type d -depth 1 -regex ".*/[^.].*$"
+else
+	echo ./$1
+fi|
 cut -c 3- |
 while read line; do
 	REPOSITORY="git@github.com:ocsigen/$line"
