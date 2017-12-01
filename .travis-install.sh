@@ -9,7 +9,6 @@ sudo apt-get install -y opam
 
 export OPAMYES=1
 if [ -d "$HOME/.opam" ]; then
-	opam unpin html_of_wiki
 	exit 0 #do this just once
 fi
 opam init -a --comp="$OPAM_SWITCH"
