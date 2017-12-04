@@ -12,7 +12,11 @@ how-clone $1
 how index.wiki
 
 eval "$(ssh-agent -s)"
+echo before
+ls -l $HOME/.ssh
 echo "$ssh_key" >$HOME/.ssh/id_rsa
 chmod 600 $HOME/.ssh/id_rsa
+echo after
+ls -l $HOME/.ssh
 ssh-add
 how-push $1
