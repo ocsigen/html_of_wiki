@@ -8,7 +8,7 @@ cut -c 3- |
 while read line; do
 	REPOSITORY="git@github.com:ocsigen/$line"
 	echo Processing $line...
-	mkdir ../gen 2>/dev/null || true
+	mkdir ../gen 2>/dev/null
 	cd ../gen
 	if [ -d "$line" ]; then
 		cd "$line"
@@ -24,7 +24,7 @@ while read line; do
 			exit 1
 		fi
 		cd - >/dev/null
-	elif git clone -b gh-pages $REPOSITORY 2>/dev/null; then
+	elif git clone -b gh-pages --depth 1 $REPOSITORY; then
 		true #nothing else to do!
 	else
 		mkdir ../gen/"$line"
