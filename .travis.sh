@@ -13,6 +13,6 @@ eval $(opam config env)
 git clone --depth 1 https://github.com/ocsigen/ocsigen.org-data
 git clone --depth 1 https://github.com/ocsigen/tyxml
 cd tyxml
-sh .jenkins.sh
+OPAMYES=1 sh .jenkins.sh
 
 echo TODO commit
