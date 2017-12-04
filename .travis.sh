@@ -1,6 +1,11 @@
 #!/bin/sh
 set -e
-ssh_key="$SSH_KEY"
+
+#we use the same key for cloning repositories...
+echo "$SSH_KEY" |base64 -d >$HOME/.ssh/id_rsa
+chmod 600 $HOME/.ssh/id_rsa
+eval "$(ssh-agent -s)"
+ssh-add
 export SSH_KEY=
 
 
@@ -10,9 +15,4 @@ cd data
 
 how-clone $1
 how index.wiki
-
-echo "$ssh_key" |base64 -d >$HOME/.ssh/id_rsa
-chmod 600 $HOME/.ssh/id_rsa
-eval "$(ssh-agent -s)"
-ssh-add
 how-push $1
