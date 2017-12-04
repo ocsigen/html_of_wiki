@@ -11,10 +11,7 @@ cd data
 how-clone $1
 how index.wiki
 
-eval "$(ssh-agent -s)"
-echo "-----BEGIN RSA PRIVATE KEY-----" >$HOME/.ssh/id_rsa
-echo "$ssh_key" >>$HOME/.ssh/id_rsa
-echo "-----END RSA PRIVATE KEY-----" >>$HOME/.ssh/id_rsa
+echo "$ssh_key" |base64 -D >$HOME/.ssh/id_rsa
 chmod 600 $HOME/.ssh/id_rsa
 ssh-add
 how-push $1
