@@ -12,5 +12,3 @@ if ! [ -f "$HOME/.opam/config" ]; then
 	opam init -a --comp="$OPAM_SWITCH"
 fi
 eval $(opam config env)
-opam pin add -n html_of_wiki https://github.com/$FORK_USER/html_of_wiki.git
-opam reinstall html_of_wiki
