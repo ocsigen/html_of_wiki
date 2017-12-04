@@ -11,7 +11,7 @@ cd data
 how-clone $1
 how index.wiki
 
-echo "$ssh_key" |base64 -D >$HOME/.ssh/id_rsa
+echo "$ssh_key" |base64 -d >$HOME/.ssh/id_rsa
 chmod 600 $HOME/.ssh/id_rsa
 ssh-add
 how-push $1
