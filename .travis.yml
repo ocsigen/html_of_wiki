@@ -1,8 +1,6 @@
 language: c
 sudo: true
-cache:
-  directories:
-  - $HOME/.opam
+#FIXME use another cache directory!!
 env:
 - OPAM_SWITCH=4.04.0 FORK_USER=ghuysmans #FIXME
 install: sh .travis-install.sh

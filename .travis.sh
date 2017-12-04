@@ -10,9 +10,9 @@ export SSH_KEY=
 
 
 eval $(opam config env)
-git clone --depth 1 https://github.com/ocsigen/ocsigen.org-data.git data
-cd data
+git clone --depth 1 https://github.com/ocsigen/ocsigen.org-data
+git clone --depth 1 https://github.com/ocsigen/tyxml
+cd tyxml
+./.jenkins.sh
 
-how-clone $1
-how index.wiki
-how-push $1
+echo TODO commit
