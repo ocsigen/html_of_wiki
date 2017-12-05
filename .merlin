@@ -7,3 +7,4 @@ PKG tyxml
 PKG cmdliner
 PKG yojson
 PKG fileutils
+PKG uri

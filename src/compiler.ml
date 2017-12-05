@@ -1,4 +1,4 @@
-let () = Links.init (); Only.init (); Menu.init ()
+let () = Links.init (); Only.init (); Menu.init (); Site_ocsimore.init ()
 
 let parse ~page ?title add_link content source = Wiki_syntax.(
   let parser = cast_wp wikicreole_parser in
