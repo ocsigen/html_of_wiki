@@ -14,7 +14,7 @@ git clone --depth 1 https://github.com/ocsigen/ocsigen.org-data data
 git clone --depth 1 https://github.com/$TRAVIS_REPO_SLUG
 cd data
 PROJECT=`basename $TRAVIS_REPO_SLUG`
-git rm -rf ${PROJECT}/dev
+git rm -rf ${PROJECT}/dev || true
 cd ../$PROJECT
 TARGET_DIR=../data/$PROJECT/dev
 API_DIR=${TARGET_DIR}/api
