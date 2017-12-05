@@ -29,6 +29,7 @@ mkdir -p ${API_DIR}
 mkdir -p ${MANUAL_SRC_DIR}
 mkdir -p ${MANUAL_FILES_DIR}
 OPAMYES=1 . .jenkins.sh
+ls .*.sh
 do_build_doc
 
 cd ../data
