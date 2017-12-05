@@ -13,6 +13,10 @@ eval $(opam config env)
 git clone --depth 1 https://github.com/ocsigen/ocsigen.org-data data
 git clone --depth 1 https://github.com/$TRAVIS_REPO_SLUG
 cd data
+
+#FIXME remove this
+TRAVIS_REPO_SLUG=ocsigen/js_of_ocaml
+
 PROJECT=`basename $TRAVIS_REPO_SLUG`
 git rm -rf ${PROJECT}/dev || true
 cd ../$PROJECT
