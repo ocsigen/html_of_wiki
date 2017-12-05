@@ -10,7 +10,7 @@ export SSH_KEY=
 
 
 #FIXME remove this
-TRAVIS_REPO_SLUG=ocsigen/js_of_ocaml
+TRAVIS_REPO_SLUG=ocsigen/lwt
 
 eval $(opam config env)
 set -x
