@@ -9,14 +9,14 @@ ssh-add
 export SSH_KEY=
 
 
+#FIXME remove this
+TRAVIS_REPO_SLUG=ocsigen/js_of_ocaml
+
 eval $(opam config env)
 set -x
 git clone --depth 1 https://github.com/ocsigen/ocsigen.org-data data
 git clone --depth 1 https://github.com/$TRAVIS_REPO_SLUG
 cd data
-
-#FIXME remove this
-TRAVIS_REPO_SLUG=ocsigen/js_of_ocaml
 
 PROJECT=`basename $TRAVIS_REPO_SLUG`
 git rm -rf ${PROJECT}/dev || true
