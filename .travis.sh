@@ -2,10 +2,10 @@
 set -e
 
 #we use the same key for cloning repositories...
-echo "$SSH_KEY" |base64 -d >$HOME/.ssh/id_rsa
-chmod 600 $HOME/.ssh/id_rsa
+echo "$SSH_KEY" |base64 -d >$HOME/.ssh/github
+chmod 600 $HOME/.ssh/github
 eval "$(ssh-agent -s)"
-ssh-add
+ssh-add $HOME/.ssh/github
 export SSH_KEY=
 
 
