@@ -10,6 +10,7 @@ export SSH_KEY=
 
 
 eval $(opam config env)
+set -x
 git clone --depth 1 https://github.com/ocsigen/ocsigen.org-data data
 git clone --depth 1 https://github.com/$TRAVIS_REPO_SLUG
 cd data
