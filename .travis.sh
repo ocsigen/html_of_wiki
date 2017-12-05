@@ -28,8 +28,8 @@ MANUAL_FILES_DIR=${TARGET_DIR}/manual/files
 mkdir -p ${API_DIR}
 mkdir -p ${MANUAL_SRC_DIR}
 mkdir -p ${MANUAL_FILES_DIR}
+ls -al
 OPAMYES=1 . .jenkins.sh
-ls .*.sh
 do_build_doc
 
 cd ../data
