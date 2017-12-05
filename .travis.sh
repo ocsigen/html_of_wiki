@@ -29,7 +29,8 @@ mkdir -p ${API_DIR}
 mkdir -p ${MANUAL_SRC_DIR}
 mkdir -p ${MANUAL_FILES_DIR}
 ls -al
-OPAMYES=1 . $(pwd)/.jenkins.sh
+export OPAMYES=1
+. $(pwd)/.jenkins.sh
 do_build_doc
 
 cd ../data
