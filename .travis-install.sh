@@ -12,3 +12,4 @@ if ! [ -f "$HOME/.opam/config" ]; then
 	opam init -a --comp="$OPAM_SWITCH"
 fi
 eval $(opam config env)
+opam pin add html_of_wiki https://github.com/ocsigen/wikidoc.git
