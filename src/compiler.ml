@@ -1,4 +1,9 @@
-let () = Links.init (); Only.init (); Menu.init (); Site_ocsimore.init ()
+let () =
+  Links.init ();
+  Only.init ();
+  Menu.init ();
+  Site_ocsimore.init ();
+  Wiki_ext.init ()
 
 let parse ~page ?title add_link content source = Wiki_syntax.(
   let parser = cast_wp wikicreole_parser in
@@ -13,15 +18,16 @@ let parse ~page ?title add_link content source = Wiki_syntax.(
   xml_of_wiki parser bi source
 )
 
-let render ch ~title content =
+let render ch ~title:t content =
   let fmt = Format.formatter_of_out_channel ch in
   let open Tyxml in
   Html.pp () fmt @@
-    Html.html
-      (Html.head (Html.title (Html.pcdata title)) [
-        Html.meta ~a:[Html.a_charset "utf8"] ()
+    Html.(html
+      (head (title (pcdata t)) [
+        meta ~a:[a_charset "utf8"] ()
       ])
-      (Html.body content);
+      (body content)
+    );
   Format.pp_force_newline fmt ();
   Format.pp_print_flush fmt ()
 
