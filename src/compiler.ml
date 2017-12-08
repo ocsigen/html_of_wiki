@@ -18,13 +18,23 @@ let parse ~page ?title add_link content source = Wiki_syntax.(
   xml_of_wiki parser bi source
 )
 
+let script_name = "/client.js"
+let write_script fn =
+  let ch = open_out fn in
+  output_string ch [%blob "../client.js"];
+  close_out ch
+
 let render ch ~title:t content =
   let fmt = Format.formatter_of_out_channel ch in
   let open Tyxml in
   Html.pp () fmt @@
     Html.(html
       (head (title (pcdata t)) [
-        meta ~a:[a_charset "utf8"] ()
+        meta ~a:[a_charset "utf8"] ();
+        (*
+        link ~rel:[`Stylesheet] ~href:"style.css" ();
+        *)
+        script ~a:[a_src script_name] (pcdata "")
       ])
       (body content)
     );

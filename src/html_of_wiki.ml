@@ -82,6 +82,8 @@ let explore max_depth output dry files =
       prerr_endline @@ from ^ e;
       incr dead;
   ) in
+  if not dry then
+    write_script (Filename.concat output script_name);
   let n = C.Set.cardinal set in
   Printf.printf
     "%d targets\n%d dead links\n%d files processed\n"
