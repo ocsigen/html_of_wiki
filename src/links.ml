@@ -98,7 +98,7 @@ let files_link bi args contents =
   let contents =
     match contents with
     | None -> [Html.pcdata (Filename.basename (get args "src"))]
-    | Some contents -> contents
+    | Some contents -> [Html.pcdata contents]
   in
   let doc, project = local_link bi args in
   let href = Html.a_href @@ Document.to_uri ~ext:"" doc in
@@ -153,5 +153,5 @@ let init () =
   register "a_api_code" (api (Some "code_"));
   register "a_api" (api None);
   register "a_manual" manual_link;
-  (* register "a_file" files_link; FIXME WHY *)
+  register "a_file" files_link;
   register "a_img" files_img
