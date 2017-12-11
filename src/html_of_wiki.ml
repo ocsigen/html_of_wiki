@@ -13,12 +13,14 @@ let rec create_tree dirs =
 let copy f =
   let source = Document.to_source f |> Eliom_lib.Option.force in
   let dest = Document.to_output f in
-  create_tree dest;
   try
     (match f with
     | Document.Project {page = Document.Static (_, `File); _} ->
+      let dest = Filename.dirname dest in
+      create_tree dest;
       FileUtil.cp [source] dest
     | Document.Project {page = Document.Static (_, `Folder); _} ->
+      create_tree dest;
       FileUtil.cp ~recurse:true [Filename.dirname source] dest
     | _ ->
       assert false);
