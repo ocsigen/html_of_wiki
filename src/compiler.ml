@@ -19,11 +19,18 @@ let parse ~page ?title add_link content source = Wiki_syntax.(
   xml_of_wiki parser bi source
 )
 
+let write_file ~fn content =
+  let ch = open_out fn in
+  output_string ch content;
+  close_out ch
+
 let script_name = "/client.js"
 let write_script fn =
-  let ch = open_out fn in
-  output_string ch [%blob "../client.js"];
-  close_out ch
+  write_file fn [%blob "../client.js"]
+
+let style_name = "/style.css"
+let write_style fn =
+  write_file fn [%blob "../style.css"]
 
 (* FIXME allow plugins to register scripts? *)
 let scripts = [
@@ -34,7 +41,7 @@ let scripts = [
 
 (* FIXME the same as above *)
 let stylesheets = [
-  "/style.css";
+  style_name;
   "https://cdnjs.cloudflare.com/ajax/libs/prism/1.9.0/themes/prism.min.css";
 ]
 

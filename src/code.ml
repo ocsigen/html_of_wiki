@@ -13,7 +13,7 @@ let attrs args =
 let code bi args contents =
   `Flow5 (
     let contents = Eliom_lib.Option.default_to "" contents |> String.trim in
-    (Lwt.return [Html.(pre [code ~a:(attrs args) [pcdata contents]])])
+    (Lwt.return [Html.(pre ~a:(attrs args) [code [pcdata contents]])])
   )
 
 let code_inline bi args contents =

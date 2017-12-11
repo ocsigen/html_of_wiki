@@ -1,0 +1,8 @@
+/* Hide ReasonML code from OCaml users */
+body:not(.reason) pre.language-reason,
+body:not(.reason) code.language-reason,
+/* Hide OCaml code when it was already translated */
+body.reason pre.translated,
+body.reason code.translated {
+	display: none
+}
