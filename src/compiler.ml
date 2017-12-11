@@ -3,7 +3,8 @@ let () =
   Only.init ();
   Menu.init ();
   Site_ocsimore.init ();
-  Wiki_ext.init ()
+  Wiki_ext.init ();
+  Code.init ()
 
 let parse ~page ?title add_link content source = Wiki_syntax.(
   let parser = cast_wp wikicreole_parser in
@@ -24,18 +25,31 @@ let write_script fn =
   output_string ch [%blob "../client.js"];
   close_out ch
 
+(* FIXME allow plugins to register scripts? *)
+let scripts = [
+  script_name; (* our client-side code *)
+  "https://cdnjs.cloudflare.com/ajax/libs/prism/1.9.0/components/prism-core.min.js";
+  "https://cdnjs.cloudflare.com/ajax/libs/prism/1.9.0/components/prism-ocaml.min.js";
+]
+
+(* FIXME the same as above *)
+let stylesheets = [
+  "/style.css";
+  "https://cdnjs.cloudflare.com/ajax/libs/prism/1.9.0/themes/prism.min.css";
+]
+
 let render ch ~title:t content =
   let fmt = Format.formatter_of_out_channel ch in
   let open Tyxml in
+  let h =
+    Html.(meta ~a:[a_charset "utf8"] () :: (
+      List.map (fun s -> link ~rel:[`Stylesheet] ~href:s ()) stylesheets @
+      List.map (fun s -> script ~a:[a_src s] (pcdata "")) scripts
+    ))
+  in
   Html.pp () fmt @@
     Html.(html
-      (head (title (pcdata t)) [
-        meta ~a:[a_charset "utf8"] ();
-        (*
-        link ~rel:[`Stylesheet] ~href:"style.css" ();
-        *)
-        script ~a:[a_src script_name] (pcdata "")
-      ])
+      (head (title (pcdata t)) h)
       (body content)
     );
   Format.pp_force_newline fmt ();
