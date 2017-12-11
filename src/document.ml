@@ -1,5 +1,7 @@
 let output = ref "../gen/"
 
+let pp_exn _ _ = () (* don't care *)
+
 type t =
   | Site of string
   | Project of {
@@ -8,8 +10,9 @@ type t =
     project: string;
   }
   | Deadlink of exn
+  [@@deriving show]
 and t' =
-  | File of string
+  | Static of string * [`File | `Folder]
   | Template
   | Page of string
   | Manual of string
@@ -17,32 +20,43 @@ and t' =
     subproject: string;
     file: string;
   }
+  [@@deriving show]
 
-let to_string ?(src=false) = function
-  | Site s -> s (* FIXME this won't always work *)
-  | Project {page = Template; project; _} -> project ^ "/template"
+let to_string src d =
+  let src, ext =
+    if src then
+      "src/", ".wiki"
+    else
+      "", ".html"
+  in
+  match d with
+  | Site s -> s ^ ext
+  | Project {page = Template; project; _} -> project ^ "/template" ^ ext
   | Project {page; version = v; project} ->
     let p =
       match page with
-      | Page p -> p
-      | Manual m -> "manual/" ^ (if src then "src/" else "") ^ m
+      | Page p -> p ^ ext
+      | Manual m -> "manual/" ^ src ^ m ^ ext
       | Api {subproject; file} ->
-        "api/" ^ (if subproject = "" then "" else subproject ^ "/") ^ file
+        "api/" ^
+        (if subproject = "" then "" else subproject ^ "/") ^
+        file ^
+        ext
       | Template -> assert false (* handled above... *)
-      | File f -> "manual/files/" ^ f
+      | Static (p, `File) | Static (p, `Folder) -> "manual/files/" ^ p
     in
     project ^ "/" ^ (v |> Version.to_string) ^ "/" ^ p
   | Deadlink e -> Printexc.to_string e
 
 let to_source = function
   | Project {page = Page _; _} -> None
-  | Project {page = File _; _} as d -> Some (to_string ~src:true d)
-  | d -> Some (to_string ~src:true d ^ ".wiki")
+  | d -> Some (to_string true d)
 
-let to_output d = !output ^ to_string d ^ ".html"
+let to_output d =
+  !output ^ to_string false d
 
-let to_uri ?(ext=".html") ?fragment x =
-  "/" ^ to_string x ^ ext ^
+let to_uri ?fragment x =
+  "/" ^ to_string false x ^
   (match fragment with
   | None -> ""
   | Some f -> "#" ^ f)

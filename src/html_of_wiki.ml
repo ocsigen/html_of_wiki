@@ -11,11 +11,20 @@ let rec create_tree dirs =
     ()
 
 let copy f =
-  (* FIXME sometimes copy the whole subdirectory? *)
   let source = Document.to_source f |> Eliom_lib.Option.force in
   let dest = Document.to_output f in
   create_tree dest;
-  FileUtil.cp [source] dest
+  try
+    (match f with
+    | Document.Project {page = Document.Static (_, `File); _} ->
+      FileUtil.cp [source] dest
+    | Document.Project {page = Document.Static (_, `Folder); _} ->
+      FileUtil.cp ~recurse:true [Filename.dirname source] dest
+    | _ ->
+      assert false);
+    print_endline @@ "\t" ^ source
+  with FileUtil.CpError e ->
+    raise (Sys_error e)
 
 (* FIXME avoid leaking handles *)
 let explore max_depth output dry files =
@@ -58,8 +67,8 @@ let explore max_depth output dry files =
     close_out ch
   in
   let process add_link = function
-    | Document.Project {page = Document.File _; _} as f -> copy f
-    | Document.Deadlink _ as d -> raise (Sys_error (Document.to_string d))
+    | Document.Project {page = Document.Static _; _} as f -> copy f
+    | Document.Deadlink _ as d -> raise (Sys_error (Document.to_string true d))
     | d -> compile add_link d
   in
   let dead = ref 0 in

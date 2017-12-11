@@ -85,11 +85,11 @@ let local_link bi args =
   let src = get args "src" in
   match bi.Wiki_widgets_interface.bi_page with
   | Document.Project _ ->
-    make_project bi args (Document.File src) |> fun (d, p) ->
+    make_project bi args (Document.Static (src, `File)) |> fun (d, p) ->
     d, Some p
   | _ ->
     if List.mem_assoc "project" args then
-      make_project bi args (Document.File src) |> fun (d, p) ->
+      make_project bi args (Document.Static (src, `File)) |> fun (d, p) ->
       d, Some p
     else
       Document.Site src, None
@@ -101,7 +101,7 @@ let files_link bi args contents =
     | Some contents -> [Html.pcdata contents]
   in
   let doc, project = local_link bi args in
-  let href = Html.a_href @@ Document.to_uri ~ext:"" doc in
+  let href = Html.a_href @@ Document.to_uri doc in
   let a =
     href ::
     match project with
@@ -118,7 +118,7 @@ let files_img bi args contents =
     | None -> Filename.basename (get args "src")
     | Some contents -> contents
   in
-  let src = Document.to_uri ~ext:"" doc in
+  let src = Document.to_uri doc in
   Lwt.return [ Html.img ~src ~alt () ]
 
 let api prefix bi args contents =

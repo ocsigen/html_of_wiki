@@ -331,9 +331,12 @@ let link_kind bi addr =
                 else if starts_with "files/" page then
                   let f = String.sub page 6 (String.length page - 6) in
                   if f.[String.length f - 1] = '/' then
-                    Document.File (f ^ "index.html")
+                    Document.Static (f, `Folder)
+                  else if ends_with "/index.html" f then
+                    let folder = String.sub f 0 (String.length f - 11) in
+                    Document.Static (folder, `Folder)
                   else
-                    Document.File f
+                    Document.Static (f, `File)
                 else
                   Document.Manual page
               in
