@@ -46,3 +46,23 @@ method outline {Bridge.elem; restrict; depth; ignore; nav; div} =
 
 
 end)
+
+let () =
+  Dom_html.window##.onload := Dom_html.handler @@ fun _ ->
+    (match Dom_html.(getElementById_coerce "search" CoerceTo.form) with
+    | None -> ()
+    | Some form ->
+      form##.onsubmit := Dom_html.handler @@ fun _ ->
+        let engine = "https://google.com/search?q=" in
+        let filter = " site:ocsigen.org" in
+        let q =
+          (match Dom_html.(getElementById_coerce "q" CoerceTo.input) with
+          | None -> filter
+          | Some q -> Js.to_string q##.value ^ filter) |>
+          Js.string |>
+          Js.encodeURIComponent |>
+          Js.to_string
+        in
+        Dom_html.window##.location##.href := Js.string (engine ^ q);
+        Js.bool false);
+    Js.bool true

@@ -169,8 +169,8 @@ let do_client_server_switch bi _ _ =
 let do_google_search _ _ _ =
   `Flow5
     (Lwt.return Html.[
-      form ~a:[a_action "https://google.com/search"] [
-        input ~a:[a_name "q"; a_placeholder "search ..."] ();
+      form ~a:[a_id "search"] [
+        input ~a:[a_name "q"; a_id "q"; a_placeholder "search ..."] ();
         button [pcdata "Search"]
       ]
     ])
