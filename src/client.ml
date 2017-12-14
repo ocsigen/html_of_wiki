@@ -47,7 +47,58 @@ method outline {Bridge.elem; restrict; depth; ignore; nav; div} =
 
 end)
 
+let to_list l =
+  let rec f acc i =
+    if i < l##.length then
+      match Js.Opt.to_option (l##item i) with
+      | None -> f acc (i + 1)
+      | Some x -> f (x :: acc) (i + 1)
+    else
+      List.rev acc
+  in
+  f [] 0
+
+let remove_children n =
+  while Js.to_bool n##hasChildNodes do
+    Js.Opt.iter n##.lastChild (fun c -> ignore (n##removeChild c))
+  done
+
+let insert_after ~existing nw =
+  Js.Opt.iter existing##.parentNode @@ fun p ->
+  let parent = Js.Unsafe.coerce p in
+  parent##insertBefore nw existing##.nextSibling
+
+let to_reason s =
+  Lexing.from_string s |>
+  Reason_toolchain.ML.implementation_with_comments |>
+  Reason_toolchain.RE.print_implementation_with_comments Format.str_formatter;
+  Format.flush_str_formatter ()
+
+(*
+let has_class e c =
+  e##.classList##contains (Js.string c) |>
+  Js.to_bool
+*)
+
+let translate existing =
+  match Js.Opt.to_option (existing##.textContent) with
+  | None -> ()
+  | Some ocaml ->
+    let reason = ocaml |> Js.to_string |> to_reason |> Js.string in
+    let code' =
+      let c = Dom_html.(createCode document) in
+      Dom.appendChild c (Dom_html.document##createTextNode reason);
+      c##.className := Js.string "language-reason";
+      c
+    in
+    insert_after ~existing code';
+    Js.Unsafe.(fun_call (js_expr "Prism.highlightElement")
+                        [| inject code' |]);
+    (* remove translatable, so that we only do this once *)
+    existing##.className := Js.string "language-ocaml"
+
 let () =
+  (* the search form isn't a real one... *)
   Dom_html.window##.onload := Dom_html.handler @@ fun _ ->
     (match Dom_html.(getElementById_coerce "search" CoerceTo.form) with
     | None -> ()
@@ -65,4 +116,25 @@ let () =
         in
         Dom_html.window##.location##.href := Js.string (engine ^ q);
         Js.bool false);
+    (* language switch *)
+    (match Dom_html.getElementById_opt "reason" with
+    | None -> ()
+    | Some btn ->
+      btn##.onclick := Dom_html.handler @@ fun _ ->
+        let n = Js.string "body" in
+        to_list (Dom_html.document##getElementsByTagName n) |>
+        List.iter (fun body ->
+          let empty = Js.string "" in
+          let reason = Js.string "reason" in
+          if body##.className = reason then (
+            body##.className := empty
+          )
+          else (
+            let t = Js.string "translatable" in
+            to_list (Dom_html.document##getElementsByClassName t) |>
+            List.iter translate;
+            body##.className := reason
+          )
+        );
+        Js.bool true);
     Js.bool true

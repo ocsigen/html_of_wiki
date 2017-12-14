@@ -1,8 +1,10 @@
-/* Hide ReasonML code from OCaml users */
-body:not(.reason) pre.language-reason,
+/* <pre> is shared among the original and automatically translated code, so we
+ * only hide those containing manually translated code, which would otherwise
+ * appear as empty boxes (with a background, because <code> is inline). */
+body:not(.reason) pre.language-reason.manually-translated,
+body.reason pre.language-ocaml.manually-translated,
 body:not(.reason) code.language-reason,
-/* Hide OCaml code when it was already translated */
-body.reason pre.translated,
-body.reason code.translated {
+/* Hide the original OCaml code from ReasonML users */
+body.reason code.language-ocaml {
 	display: none
 }
