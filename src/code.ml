@@ -32,7 +32,7 @@ let code_inline bi args contents =
 
 let reason _ _ _ =
   `Flow5 Html.(
-    Lwt.return [button ~a:[a_id "reason"] [pcdata "Reason"]]
+    Lwt.return [button ~a:[a_id "reason"] [pcdata "Switch to "]]
   )
 
 
