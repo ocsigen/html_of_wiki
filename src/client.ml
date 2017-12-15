@@ -69,10 +69,15 @@ let insert_after ~existing nw =
   parent##insertBefore nw existing##.nextSibling
 
 let to_reason s =
-  Regexp.(global_replace (regexp "\xa0") s " ") |>
-  Lexing.from_string |>
-  Reason_toolchain.ML.implementation_with_comments |>
-  Reason_toolchain.RE.print_implementation_with_comments Format.str_formatter;
+  let clean = Regexp.(global_replace (regexp "\xa0") s " ") in
+  (try
+    Lexing.from_string clean |>
+    Reason_toolchain.ML.interface_with_comments |>
+    Reason_toolchain.RE.print_interface_with_comments Format.str_formatter
+  with _ ->
+    Lexing.from_string clean |>
+    Reason_toolchain.ML.implementation_with_comments |>
+    Reason_toolchain.RE.print_implementation_with_comments Format.str_formatter);
   Format.flush_str_formatter ()
 
 (*
@@ -81,22 +86,60 @@ let has_class e c =
   Js.to_bool
 *)
 
+let create_code ~language code =
+  let c = Dom_html.(createCode document) in
+  Dom.appendChild c (Dom_html.document##createTextNode code);
+  c##.className := Js.string @@ "language-" ^ language;
+  c
+
+let highlight_element (node: Dom_html.element Js.t) : unit =
+  Js.Unsafe.(fun_call (js_expr "Prism.highlightElement")
+                      [| inject node |])
+
 let translate existing =
   match Js.Opt.to_option (existing##.textContent) with
   | None -> ()
   | Some ocaml ->
-    let reason = ocaml |> Js.to_string |> to_reason |> Js.string in
-    let code' =
-      let c = Dom_html.(createCode document) in
-      Dom.appendChild c (Dom_html.document##createTextNode reason);
-      c##.className := Js.string "language-reason";
-      c
-    in
-    insert_after ~existing code';
-    Js.Unsafe.(fun_call (js_expr "Prism.highlightElement")
-                        [| inject code' |]);
-    (* remove translatable, so that we only do this once *)
-    existing##.className := Js.string "language-ocaml"
+    try
+      (* to_bytestring is required because there are 0xa0 bytes *)
+      let reason = ocaml |> Js.to_bytestring |> to_reason |> Js.string in
+      let code' = create_code ~language:"reason" reason in
+      insert_after ~existing code';
+      highlight_element code';
+      (* remove translatable, so that we only do this once *)
+      existing##.className := Js.string "language-ocaml"
+    with e ->
+      if ocaml##indexOf (Js.string "sig..end") = -1 then (
+        let t = Dom_html.document##createTextNode (Js.string "(* Error *) \n") in
+        let parent = Js.Unsafe.coerce existing in
+        parent##insertBefore t existing##.firstChild
+      );
+      (* remove translatable, so that we only do this once *)
+      existing##.className := Js.string "language-ocaml error"
+
+let convert pre =
+  let code = Dom_html.(createCode document) in
+  code##.className := Js.string "language-ocaml translatable";
+  code##.innerHTML := pre##.innerHTML;
+  remove_children pre;
+  Dom.appendChild pre code;
+  pre##.className := Js.string "language-ocaml"
+
+let toggle_reason () =
+  let n = Js.string "body" in
+  to_list (Dom_html.document##getElementsByTagName n) |>
+  List.iter (fun body ->
+    let reason = Js.string "reason" in
+    if body##.className = reason then (
+      body##.className := Js.string ""
+    )
+    else (
+      let t = Js.string "translatable" in
+      to_list (Dom_html.document##getElementsByClassName t) |>
+      List.iter translate;
+      body##.className := reason
+    )
+  )
 
 let () =
   (* the search form isn't a real one... *)
@@ -122,20 +165,11 @@ let () =
     | None -> ()
     | Some btn ->
       btn##.onclick := Dom_html.handler @@ fun _ ->
-        let n = Js.string "body" in
-        to_list (Dom_html.document##getElementsByTagName n) |>
-        List.iter (fun body ->
-          let empty = Js.string "" in
-          let reason = Js.string "reason" in
-          if body##.className = reason then (
-            body##.className := empty
-          )
-          else (
-            let t = Js.string "translatable" in
-            to_list (Dom_html.document##getElementsByClassName t) |>
-            List.iter translate;
-            body##.className := reason
-          )
-        );
+        toggle_reason ();
         Js.bool true);
+    (* API conversion *)
+    let f = Js.string "odocwiki_code" in
+    to_list (Dom_html.document##getElementsByClassName f) |>
+    List.iter convert;
+    (* done! *)
     Js.bool true

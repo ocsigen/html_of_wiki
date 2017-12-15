@@ -17,6 +17,6 @@ body:not(.reason) code.language-reason,
 body.reason pre.language-ocaml.standalone,
 body:not(.reason) pre.language-reason.standalone,
 /* Hide the original OCaml code from ReasonML users */
-body.reason code.language-ocaml {
+body.reason code.language-ocaml:not(.error) {
 	display: none
 }
