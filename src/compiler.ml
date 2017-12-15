@@ -39,6 +39,7 @@ let scripts = [
   "https://cdnjs.cloudflare.com/ajax/libs/prism/1.9.0/components/prism-ocaml.min.js";
   "https://cdnjs.cloudflare.com/ajax/libs/prism/1.9.0/components/prism-clike.min.js";
   "https://cdnjs.cloudflare.com/ajax/libs/prism/1.9.0/components/prism-reason.min.js";
+  "https://cdnjs.cloudflare.com/ajax/libs/prism/1.9.0/components/prism-javascript.min.js";
 ]
 
 (* FIXME the same as above *)
