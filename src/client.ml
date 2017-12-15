@@ -69,7 +69,8 @@ let insert_after ~existing nw =
   parent##insertBefore nw existing##.nextSibling
 
 let to_reason s =
-  Lexing.from_string s |>
+  Regexp.(global_replace (regexp "\xa0") s " ") |>
+  Lexing.from_string |>
   Reason_toolchain.ML.implementation_with_comments |>
   Reason_toolchain.RE.print_implementation_with_comments Format.str_formatter;
   Format.flush_str_formatter ()
