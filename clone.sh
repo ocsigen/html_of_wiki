@@ -6,7 +6,7 @@ else
 fi|
 cut -c 3- |
 while read line; do
-	REPOSITORY="git@github.com:ocsigen/$line"
+	REPOSITORY="https://github.com/ocsigen/$line"
 	echo Processing $line...
 	mkdir ../gen 2>/dev/null
 	cd ../gen
