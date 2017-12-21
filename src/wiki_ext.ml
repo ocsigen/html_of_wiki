@@ -54,7 +54,7 @@ let do_outline wp bi args c =
        let params = {Bridge.elem; restrict; depth; ignore; nav = id; div} in
        let buf = Buffer.create 256 in
        Bridge.outline_params_to_json buf params;
-       let js = "outline(" ^ Buffer.to_bytes buf ^ ")" in
+       let js = "outline(" ^ Buffer.contents buf ^ ")" in
        Html.(script @@ cdata_script js)
      in
    Lwt.return [nav; script])
