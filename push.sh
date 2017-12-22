@@ -13,7 +13,7 @@ while read line; do
 		cd "../gen/$line"
 		git add .
 		git commit -m "push.sh on $COMMIT"
-		if ! git "$REPOSITORY" gh-pages; then
+		if ! git push "$REPOSITORY" gh-pages; then
 			if [ ! -t 0 ]; then
 				echo There are conflicts, aborting!
 				exit 1
