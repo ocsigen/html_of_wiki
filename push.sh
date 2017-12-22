@@ -1,9 +1,4 @@
 #!/bin/sh
-if [ `git status --porcelain |wc -l` -ne 0 ]; then
-	#no need to test interactivity, since we've (normally) just cloned it
-	echo Please commit your changes to ensure this is reproducible. 2>&1
-	exit 1
-fi
 COMMIT=`git rev-parse HEAD`
 if [ -z "$1" ]; then
 	find . -type d -maxdepth 1 -regex ".*/[^.].*$"
