@@ -16,8 +16,7 @@ contain the old one.
 ```shell
 cd ../ocsigen.org-data
 make doc
-PATH=$PATH:../html_of_wiki
-clone.sh
-html_of_wiki.byte index.wiki
-push.sh
+how-clone
+how index.wiki
+how-push
 ```
