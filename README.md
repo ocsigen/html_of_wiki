@@ -13,9 +13,15 @@ contain the old one.
 
 ## How to update the docs
 
+First, update the project's documentation by issuing this:
+```shell
+cd project
+make doc
+```
+
+Then, generate the HTML files using html_of_wiki (`how`):
 ```shell
 cd ../ocsigen.org-data
-make doc
 how-clone
 how index.wiki
 how-push
