@@ -8,8 +8,8 @@ cut -c 3- |
 while read line; do
 	REPOSITORY="https://github.com/ocsigen/$line"
 	echo Processing $line...
-	mkdir ../gen 2>/dev/null
-	cd ../gen
+	mkdir ../ocsigen.org-repositories 2>/dev/null
+	cd ../ocsigen.org-repositories
 	if [ -d "$line" ]; then
 		cd "$line"
 		if [ -d .git ]; then
@@ -27,8 +27,8 @@ while read line; do
 	elif git clone -b gh-pages --depth 1 $REPOSITORY; then
 		true #nothing else to do!
 	else
-		mkdir ../gen/"$line"
-		cd ../gen/"$line"
+		mkdir ../ocsigen.org-repositories/"$line"
+		cd ../ocsigen.org-repositories/"$line"
 		git init
 		git checkout -b gh-pages
 		git remote add origin $REPOSITORY

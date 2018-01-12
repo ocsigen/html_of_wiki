@@ -1,4 +1,4 @@
-let output = ref "../gen/"
+let output = ref "../ocsigen.org-repositories/"
 
 let pp_exn _ _ = () (* don't care *)
 
