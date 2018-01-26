@@ -1,4 +1,5 @@
 #!/bin/sh
+echo Cloning branch gh-pages of all projects in ../ocsigen.org-repositories
 if [ -z "$1" ]; then
 	find . -maxdepth 1 -type d -regex ".*/[^.].*$"
 else
