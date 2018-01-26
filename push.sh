@@ -10,13 +10,18 @@ cut -c 3- |
 while read line; do
         echo
 	echo Processing $line...
-	REPOSITORY="git@github.com:ocsigen/$line"
+        REPOSITORY="git@github.com:ocsigen/$line"
+        if [ "$line" = "ocsigen.github.io" ]; then
+            BRANCH=master
+        else
+	    BRANCH=gh-pages
+        fi
 	if [ -d "../ocsigen.org-repositories/$line/.git" ]; then
 		cd "../ocsigen.org-repositories/$line"
 		git add .
 		git commit -m "how-push on $COMMIT"
                 echo Pushing ../ocsigen.org-repositories/$line to github
-		if ! git push "$REPOSITORY" gh-pages; then
+		if ! git push "$REPOSITORY" $BRANCH; then
 			if [ ! -t 0 ]; then
 				echo There are conflicts, aborting!
 				exit 1

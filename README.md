@@ -6,9 +6,9 @@ Html_of_wiki makes it possible to update the new ocsigen.org Web Site
 on Github from wiki documentation of each project.
 
 It takes the Wiki documentation of each project from repository
-ocsigen.org-data (which are themselves taken from each project repository).
+`ocsigen.org-data` (which are themselves taken from each project repository).
 
-It translates the wiki into html and saves the html in branch gh-pages
+It translates the wiki into html and saves the html in branch `gh-pages`
 of each project, and pushes this branch to github to make it available
 online.
 
@@ -32,3 +32,12 @@ how-clone
 how index.wiki
 how-push
 ```
+
+## Main pages
+
+The site main pages are hosted as organization github pages.
+The wiki sources are in repository `ocsigen.org`
+and then copied into directory `ocsigen.github.io`
+of repository `ocsigen.org-data`.
+The generated html files are in repository `ocsigen.github.io`
+(branch `master`).

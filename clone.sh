@@ -7,14 +7,20 @@ else
 fi|
 cut -c 3- |
 while read line; do
-	REPOSITORY="https://github.com/ocsigen/$line"
-	echo Processing $line...
-	mkdir ../ocsigen.org-repositories 2>/dev/null
-	cd ../ocsigen.org-repositories
-	if [ -d "$line" ]; then
+    echo
+    echo Processing $line...
+    mkdir ../ocsigen.org-repositories 2>/dev/null
+    cd ../ocsigen.org-repositories
+    REPOSITORY="https://github.com/ocsigen/$line"
+    if [ "$line" = "ocsigen.github.io" ]; then
+        BRANCH=master
+    else
+        BRANCH=gh-pages
+    fi
+    if [ -d $line ]; then
 		cd "$line"
 		if [ -d .git ]; then
-			git pull origin gh-pages
+			git pull origin $BRANCH
 			if [ `git diff --name-only --diff-filter=U |wc -l` -ne 0 ]; then
 				echo Please resolve conflicts in $line and press Ctrl-D...
 				$SHELL
@@ -25,13 +31,13 @@ while read line; do
 			exit 1
 		fi
 		cd - >/dev/null
-	elif git clone -b gh-pages --depth 1 $REPOSITORY; then
+	elif git clone -b $BRANCH --depth 1 $REPOSITORY $line; then
 		true #nothing else to do!
 	else
 		mkdir ../ocsigen.org-repositories/"$line"
 		cd ../ocsigen.org-repositories/"$line"
 		git init
-		git checkout -b gh-pages
+		git checkout -b $BRANCH
 		git remote add origin $REPOSITORY
 		cd - >/dev/null
 	fi
