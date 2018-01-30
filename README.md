@@ -23,6 +23,13 @@ Beware: since `style.css` is included by a ppx, `src/compiler.ml` won't be
 updated after you edit the stylesheet, and the resulting program will still
 contain the old one.
 
+## Doc
+
+```shell
+how --help
+```
+gives command line options.
+
 ## How to update the docs
 
 Generate the HTML files using html_of_wiki (`how`):
@@ -32,6 +39,16 @@ how-clone
 how index.wiki
 how-push
 ```
+
+`how-clone` will clone or update branch gh-pages of all repositories in
+`../ocsigen.org-repositories`.
+
+`how index.wiki` will generate the html documentation from wiki files
+accessible from `index.wiki`, and wiki files in
+`../ocsigen.org-data`. The results is saved in branch `gh-pages`
+of each repository.
+
+`how-push` pushes all changes on Github.
 
 ## Main pages
 
