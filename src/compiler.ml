@@ -28,7 +28,7 @@ let script_name = "/client.js"
 let write_script fn =
   write_file fn [%blob "../client.js"]
 
-let style_name = "/style.css"
+let style_name = "/css/style.css"
 let write_style fn =
   write_file fn [%blob "../style.css"]
 
