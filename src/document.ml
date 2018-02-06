@@ -22,12 +22,12 @@ and t' =
   }
   [@@deriving show]
 
-let to_string src d =
+let to_string src with_html d =
   let src, ext =
     if src then
       "src/", ".wiki"
     else
-      "", ".html"
+      "", if with_html then ".html" else ""
   in
   match d with
   | Site s -> s ^ ext
@@ -50,13 +50,13 @@ let to_string src d =
 
 let to_source = function
   | Project {page = Page _; _} -> None
-  | d -> Some (to_string true d)
+  | d -> Some (to_string true false d)
 
 let to_output d =
-  !output ^ to_string false d
+  !output ^ to_string false true d
 
 let to_uri ?fragment x =
-  "/" ^ to_string false x ^
+  "/" ^ to_string false false x ^
   (match fragment with
   | None -> ""
   | Some f -> "#" ^ f)

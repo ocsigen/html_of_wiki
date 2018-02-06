@@ -19,10 +19,6 @@ online.
 opam pin add html_of_wiki .
 ```
 
-Beware: since `style.css` is included by a ppx, `src/compiler.ml` won't be
-updated after you edit the stylesheet, and the resulting program will still
-contain the old one.
-
 ## Doc
 
 ```shell

@@ -24,7 +24,7 @@ let write_file ~fn content =
   output_string ch content;
   close_out ch
 
-let script_name = "/client.js"
+let script_name = "/js/client.js"
 let write_script fn =
   write_file fn [%blob "../client.js"]
 

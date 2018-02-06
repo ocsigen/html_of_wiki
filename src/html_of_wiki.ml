@@ -70,7 +70,8 @@ let explore max_depth output dry files =
   in
   let process add_link = function
     | Document.Project {page = Document.Static _; _} as f -> copy f
-    | Document.Deadlink _ as d -> raise (Sys_error (Document.to_string true d))
+    | Document.Deadlink _ as d ->
+      raise (Sys_error (Document.to_string true false d))
     | d -> compile add_link d
   in
   let dead = ref 0 in
@@ -92,11 +93,13 @@ let explore max_depth output dry files =
       in
       prerr_endline @@ from ^ e;
       incr dead;
-  ) in
-  if not dry then (
-    write_script (Filename.concat output script_name);
-    write_style (Filename.concat output style_name)
-  );
+    ) in
+  (* VVV Removing this and commiting style.css and client.js separately.
+     It was not working anyway. *)
+  (* if not dry then ( *)
+  (*   write_script (Filename.concat output script_name); *)
+  (*   write_style (Filename.concat output style_name) *)
+  (* ); *)
   let n = C.Set.cardinal set in
   Printf.printf
     "%d targets\n%d dead links\n%d files processed\n"
