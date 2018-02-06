@@ -60,6 +60,24 @@ let do_outline wp bi args c =
    Lwt.return [nav; script])
 
 
+let f_link bi args c =
+  let wiki = Ocsimore_lib.list_assoc_default "wiki" args "" in
+  let page = Ocsimore_lib.list_assoc_default "page" args "" in
+  let fragment = Ocsimore_lib.list_assoc_opt "fragment" args in
+  let content =
+    match c with
+    | Some c -> c
+    | None -> Lwt.return [Html.pcdata page]
+  in
+  (* class and id attributes will be taken by Wiki_syntax.a_elem *)
+  ( Wiki_syntax_types.Absolute
+      (match fragment with
+       | None -> Printf.sprintf "/%s/%s" wiki page
+       | Some fragment -> Printf.sprintf "/%s/%s#%s" wiki page fragment),
+    args,
+    content )
+
+
 let init () =
   Wiki_syntax.register_raw_wiki_extension ~name:"outline"
     ~wp:Wiki_syntax.wikicreole_parser
@@ -68,4 +86,7 @@ let init () =
   Wiki_syntax.register_raw_wiki_extension ~name:"outline"
     ~wp:Wiki_syntax.wikicreole_parser_without_header_footer
     ~wp_rec:Wiki_syntax.wikicreole_parser_without_header_footer
-    do_outline
+    do_outline;
+  Wiki_syntax.register_link_flow_extension ~name:"link"
+    { Wiki_syntax.lfpp = f_link };
+  Wiki_syntax.register_link_phrasing_extension ~name:"link-inline" f_link

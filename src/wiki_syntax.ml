@@ -1224,7 +1224,7 @@ module FlowBuilder = struct
       [(Html.span ~a r : [>`Span] Html.elt)]
 
 
-  let nbsp = Lwt.return [(Html.pcdata " " : [>`PCDATA] Html.elt)]
+  let nbsp = Lwt.return [(Html.pcdata " " : [>`PCDATA] Html.elt)]
 
   let endash = Lwt.return [(Html.pcdata "–" : [>`PCDATA] Html.elt)]
 
