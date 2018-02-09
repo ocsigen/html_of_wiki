@@ -18,7 +18,7 @@ method outline {Bridge.elem; restrict; depth; ignore; nav; div} =
       let fragment =
         if div then
           try
-            let open Eliom_lib.Option in
+            let open How_lib.Option in
             (HTML5outliner.find_previous_heading nav |> Js.Opt.to_option) >>=
             HTML5outliner.get_fragment
           with Not_found ->

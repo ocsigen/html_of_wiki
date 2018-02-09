@@ -8,7 +8,7 @@ let () =
 
 let parse ~page ?title add_link content source = Wiki_syntax.(
   let parser = cast_wp wikicreole_parser in
-  let bi_title = Eliom_lib.Option.default_to "" title in
+  let bi_title = How_lib.Option.default_to "" title in
   let bi = Wiki_widgets_interface.{
     bi_page = page;
     bi_sectioning = true;

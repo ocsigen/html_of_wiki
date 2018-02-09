@@ -11,7 +11,7 @@ let rec create_tree dirs =
     ()
 
 let copy f =
-  let source = Document.to_source f |> Eliom_lib.Option.force in
+  let source = Document.to_source f |> How_lib.Option.force in
   let dest = Document.to_output f in
   try
     (match f with
@@ -50,7 +50,7 @@ let explore max_depth output dry files =
       in
       let title =
         extract_h1 content |>
-        Eliom_lib.Option.default_to "Ocsigen"
+        How_lib.Option.default_to "Ocsigen"
       in
       let template =
         match page with
@@ -89,7 +89,7 @@ let explore max_depth output dry files =
         match pred with
         | None -> ""
         | Some d ->
-          (Document.to_source d |> Eliom_lib.Option.force) ^ " -> "
+          (Document.to_source d |> How_lib.Option.force) ^ " -> "
       in
       prerr_endline @@ from ^ e;
       incr dead;

@@ -59,7 +59,7 @@ let init wiki_dir =
             let default_subproject =
               Yojson.Safe.Util.member "default_subproject" f |>
               Yojson.Safe.Util.to_string_option |>
-              Eliom_lib.Option.default_to ""
+              How_lib.Option.default_to ""
             in
             let manual_main =
               Yojson.Safe.Util.member "manual_main" f |>

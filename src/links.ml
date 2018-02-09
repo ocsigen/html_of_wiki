@@ -60,7 +60,7 @@ let manual_link bi args contents =
   let chapter =
     let default =
       (Projects.get project).Projects.manual_main |>
-      Eliom_lib.Option.default_to "intro"
+      How_lib.Option.default_to "intro"
     in
     get ~default args "chapter"
   in
@@ -122,7 +122,7 @@ let files_img bi args contents =
   Lwt.return [ Html.img ~src ~alt () ]
 
 let api prefix bi args contents =
-  let id = parse_contents (Eliom_lib.Option.map String.trim contents) in
+  let id = parse_contents (How_lib.Option.map String.trim contents) in
   let doc, project =
     let project, version = force_project_and_version bi args in
     let subproject =

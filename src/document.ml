@@ -87,5 +87,5 @@ let read_file ?(buffer_size=4096) filename =
 
 let read d =
   to_source d |>
-  Eliom_lib.Option.force |>
+  How_lib.Option.force |>
   read_file

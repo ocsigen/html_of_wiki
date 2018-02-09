@@ -18,14 +18,14 @@ let attrs args =
 
 let code bi args contents =
   `Flow5 (
-    let contents = Eliom_lib.Option.default_to "" contents |> String.trim in
+    let contents = How_lib.Option.default_to "" contents |> String.trim in
     let p_a, c_a = attrs args in
     (Lwt.return [Html.(pre ~a:p_a [code ~a:c_a [pcdata contents]])])
   )
 
 let code_inline bi args contents =
   `Phrasing_without_interactive (
-    let contents = Eliom_lib.Option.default_to "" contents |> String.trim in
+    let contents = How_lib.Option.default_to "" contents |> String.trim in
     let _, c_a = attrs args in
     (Lwt.return [Html.(code ~a:c_a [pcdata contents])])
   )

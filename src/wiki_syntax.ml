@@ -29,7 +29,7 @@ open Wiki_types
 open Wiki_syntax_types
 open Wiki_widgets_interface
 open Tyxml
-open Eliom_lib
+open How_lib
 
 let class_wikibox wb = Printf.sprintf "wikiboxcontent%s" (string_of_wikibox wb)
 
@@ -323,7 +323,7 @@ let link_kind bi addr =
                 if page = "" then
                   let def =
                     (Projects.get project).Projects.manual_main |>
-                    Eliom_lib.Option.default_to "intro"
+                    How_lib.Option.default_to "intro"
                   in
                   Document.Manual def
                 else if starts_with "manual/" page then
