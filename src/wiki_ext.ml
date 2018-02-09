@@ -77,6 +77,28 @@ let f_link bi args c =
     args,
     content )
 
+let do_drawer wp bi args c =
+  let open Html in
+  `Flow5
+    (let attrs = Wiki_syntax.parse_common_attribs args in
+     let%lwt content =
+       match c with
+       | Some c ->
+         (Wiki_syntax.xml_of_wiki wp bi c
+          :> Html_types.flow5 Html.elt list Lwt.t)
+       | None -> Lwt.return []
+     in
+     let button = input ~a:[ a_id "how-drawer-toggle"
+                           ; a_input_type `Checkbox ] ()
+     in
+     let label =
+       label ~a:[ a_label_for "how-drawer-toggle" ; a_id "how-drawer-label" ]
+         [ span ~a:[ a_class [ "how-drawer-icon" ] ] [] ]
+     in
+     let content = nav ~a:[ a_class [ "how-drawer-content" ] ] content in
+     let elt = div ~a:[ a_class [ "how-drawer" ] ] [ button ; label ; content ]
+     in
+     Lwt.return [ elt ])
 
 let init () =
   Wiki_syntax.register_raw_wiki_extension ~name:"outline"
@@ -89,4 +111,8 @@ let init () =
     do_outline;
   Wiki_syntax.register_link_flow_extension ~name:"link"
     { Wiki_syntax.lfpp = f_link };
-  Wiki_syntax.register_link_phrasing_extension ~name:"link-inline" f_link
+  Wiki_syntax.register_link_phrasing_extension ~name:"link-inline" f_link;
+  Wiki_syntax.register_raw_wiki_extension ~name:"drawer"
+    ~wp:Wiki_syntax.wikicreole_parser
+    ~wp_rec:Wiki_syntax.wikicreole_parser
+    do_drawer
