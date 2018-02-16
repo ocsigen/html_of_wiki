@@ -34,12 +34,12 @@ let write_style fn =
 
 (* FIXME allow plugins to register scripts? *)
 let scripts = [
-  script_name; (* our client-side code *)
   "https://cdnjs.cloudflare.com/ajax/libs/prism/1.9.0/components/prism-core.min.js";
   "https://cdnjs.cloudflare.com/ajax/libs/prism/1.9.0/components/prism-ocaml.min.js";
   "https://cdnjs.cloudflare.com/ajax/libs/prism/1.9.0/components/prism-clike.min.js";
   "https://cdnjs.cloudflare.com/ajax/libs/prism/1.9.0/components/prism-reason.min.js";
   "https://cdnjs.cloudflare.com/ajax/libs/prism/1.9.0/components/prism-javascript.min.js";
+  script_name; (* our client-side code *)
 ]
 
 (* FIXME the same as above *)
