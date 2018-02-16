@@ -2,6 +2,7 @@ open Tyxml
 
 let attrs args =
   let open Ocsimore_lib in
+  let attrs = Wiki_syntax.parse_common_attribs args in
   let lang = get_opt args "language" in
   match lang with
   | None ->
@@ -13,7 +14,7 @@ let attrs args =
       else
         ["manually-translated"], []
     in
-    [Html.a_class pre_classes],
+    attrs @ [Html.a_class pre_classes],
     [Html.a_class @@ ("language-" ^ lang) :: code_classes]
 
 let code bi args contents =
