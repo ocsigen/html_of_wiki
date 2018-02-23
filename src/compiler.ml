@@ -52,7 +52,10 @@ let render ch ~title:t content =
   let fmt = Format.formatter_of_out_channel ch in
   let open Tyxml in
   let h =
-    Html.(meta ~a:[a_charset "utf8"] () :: (
+    Html.(meta ~a:[a_charset "utf8"] ()
+          :: meta ~a:[ a_content "width=device-width, initial-scale=1"
+                     ; a_name "viewport" ] ()
+          :: (
       List.map (fun s -> link ~rel:[`Stylesheet] ~href:s ()) stylesheets @
       List.map (fun s -> script ~a:[a_src s] (pcdata "")) scripts
     ))
