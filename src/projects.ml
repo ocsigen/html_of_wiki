@@ -45,7 +45,7 @@ let init wiki_dir =
           let versions = versions |> List.map @@ fun v ->
             v,
             try
-              readdir wiki_dir (name ++ (Version.to_string latest) ++ "api")
+              readdir wiki_dir (name ++ (Version.to_string v) ++ "api")
             with Sys_error _ ->
               Printf.eprintf "no subprojects found for %s %s...\n%!"
                 name
