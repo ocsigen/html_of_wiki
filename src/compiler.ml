@@ -48,7 +48,7 @@ let stylesheets = [
   "https://cdnjs.cloudflare.com/ajax/libs/prism/1.9.0/themes/prism.min.css";
 ]
 
-let render ch ~title:t content =
+let render ch ~title:t ~page content =
   let fmt = Format.formatter_of_out_channel ch in
   let open Tyxml in
   let h =
@@ -60,10 +60,16 @@ let render ch ~title:t content =
       List.map (fun s -> script ~a:[a_src s] (pcdata "")) scripts
     ))
   in
+  let a_cl = match page with
+    | Document.Project {project; version; _} ->
+      Some [ Html.a_class [ project
+                          ; Version.to_string version ] ]
+    | _ -> None
+  in
   Html.pp () fmt @@
     Html.(html
       (head (title (pcdata t)) h)
-      (body content)
+      (body ?a:a_cl content)
     );
   Format.pp_force_newline fmt ();
   Format.pp_print_flush fmt ()

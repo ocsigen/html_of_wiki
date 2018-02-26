@@ -65,7 +65,7 @@ let explore max_depth output dry files =
     let out_fn = Document.to_output page in
     create_tree (Filename.dirname out_fn);
     let ch = open_out (if dry then "/dev/null" else out_fn) in
-    render ch ~title content;
+    render ch ~title ~page content;
     close_out ch
   in
   let process add_link = function
@@ -93,7 +93,8 @@ let explore max_depth output dry files =
       in
       prerr_endline @@ from ^ e;
       incr dead;
-    ) in
+    )
+  in
   (* VVV Removing this and commiting style.css and client.js separately.
      It was not working anyway. *)
   (* if not dry then ( *)
