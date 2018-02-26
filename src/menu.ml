@@ -49,7 +49,7 @@ let docversion bi args contents =
         else
           Html.a
             ~a:[ a_href
-                   Document.(to_string false false
+                   Document.(to_uri
                                (match bi.Wiki_widgets_interface.bi_page with
                                 | Project p ->
                                   Project { page = p.page
