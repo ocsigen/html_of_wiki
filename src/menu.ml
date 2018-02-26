@@ -1,9 +1,13 @@
+open Tyxml
+open Tyxml.Html
+
 let doctree bi args contents =
+  let attrs = Wiki_syntax.parse_common_attribs args in
   let project, version = Projects.get_implicit_project bi in
   let files =
     Document.(Project {page = Manual "menu"; version; project}) ::
     (List.assoc version (Projects.get project).Projects.versions |>
-    List.map (fun subproject ->
+     List.map (fun subproject ->
       let file = "menu" in
       Document.(Project {page = Api {subproject; file}; version; project})
     ))
@@ -14,7 +18,8 @@ let doctree bi args contents =
     bi_add_link = bi.bi_add_link;
     bi_content = Lwt.return [];
     bi_title = "";
-  } in
+  }
+  in
   let menus =
     files |>
     List.map Document.read |>
@@ -24,17 +29,51 @@ let doctree bi args contents =
         bi'
   in
   `Flow5 (
-    Lwt.map
-      List.concat
-      (menus :> Html_types.flow5 Tyxml_html.elt list list Lwt.t)
+    let%lwt r = Lwt.map
+        List.concat
+        (menus :> Html_types.flow5 Tyxml_html.elt list list Lwt.t)
+    in
+    Lwt.return [ div ~a:( a_class [ "how-doctree" ] :: attrs) r ]
   )
 
-  (*
-  let versions =
-    (Projects.get bi."eliom").Projects.versions |>
-    List.map fst |>
-    List.map Version.to_string
-  *)
+let docversion bi args contents =
+  let attrs = Wiki_syntax.parse_common_attribs args in
+  let project, cur_version = Projects.get_implicit_project bi in
+  let versions_links =
+    (Projects.get project).Projects.versions |>
+    List.map (fun (version, _) ->
+        if version = cur_version
+        then
+          span ~a:[ a_class [ "how-versions-all-current" ] ]
+            [ pcdata (Version.to_string version) ]
+        else
+          Html.a
+            ~a:[ a_href
+                   Document.(to_string false false
+                               (match bi.Wiki_widgets_interface.bi_page with
+                                | Project p ->
+                                  Project { page = p.page
+                                          ; version
+                                          ; project = p.project }
+                                | _ ->
+                                  Project { page = Manual ""
+                                          ; version
+                                          ; project })) ]
+            [ pcdata (Version.to_string version) ])
+  in
+  `Flow5 (
+    Lwt.return @@
+    [ div ~a:( a_class [ "how-versions" ] :: attrs)
+        [ input ~a:[ a_id "how-versions-toggle"
+                   ; a_input_type `Checkbox ] ()
+        ; label ~a:[ a_for "how-versions-toggle"
+                   ; a_class [ "how-versions-current" ] ]
+            [ pcdata "Version "
+            ; pcdata (Version.to_string cur_version) ]
+        ; div ~a:[ a_class [ "how-versions-all" ] ] versions_links ]
+    ]
+  )
+
 
 let init () =
   Wiki_syntax.register_raw_wiki_extension
@@ -42,3 +81,8 @@ let init () =
     ~wp:Wiki_syntax.wikicreole_parser
     ~wp_rec:Wiki_syntax.wikicreole_parser
     (fun _ -> doctree);
+  Wiki_syntax.register_raw_wiki_extension
+    ~name:"docversion"
+    ~wp:Wiki_syntax.wikicreole_parser
+    ~wp_rec:Wiki_syntax.wikicreole_parser
+    (fun _ -> docversion)
