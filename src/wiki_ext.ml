@@ -59,10 +59,11 @@ let do_outline wp bi args c =
      in
    Lwt.return [nav; script])
 
-
+(* TODO: support for extended link syntax (wiki(toto):titi etc.) *)
 let f_link bi args c =
   let wiki = Ocsimore_lib.list_assoc_default "wiki" args "" in
   let page = Ocsimore_lib.list_assoc_default "page" args "" in
+  let href = Ocsimore_lib.list_assoc_opt "href" args in
   let fragment = Ocsimore_lib.list_assoc_opt "fragment" args in
   let content =
     match c with
@@ -71,9 +72,10 @@ let f_link bi args c =
   in
   (* class and id attributes will be taken by Wiki_syntax.a_elem *)
   ( Wiki_syntax_types.Absolute
-      (match fragment with
-       | None -> Printf.sprintf "/%s/%s" wiki page
-       | Some fragment -> Printf.sprintf "/%s/%s#%s" wiki page fragment),
+      (match href, fragment with
+       | Some href, _ -> href
+       | _, None -> Printf.sprintf "/%s/%s" wiki page
+       | _, Some fragment -> Printf.sprintf "/%s/%s#%s" wiki page fragment),
     args,
     content )
 
