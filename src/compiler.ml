@@ -61,9 +61,18 @@ let render ch ~title:t ~page content =
     ))
   in
   let a_cl = match page with
-    | Document.Project {project; version; _} ->
-      Some [ Html.a_class [ project
-                          ; Version.to_string version ] ]
+    | Document.Project {project; version; page} ->
+      let open Document in
+      let page_class = match page with
+        | Static (s, _) -> [ s ]
+        | Template -> []
+        | Page s -> [ s ]
+        | Manual s -> [ s ]
+        | Api {subproject; file} -> [ subproject ; file ]
+      in
+      Some [ Html.a_class ( project
+                            :: Version.to_string version
+                            :: page_class) ]
     | _ -> None
   in
   Html.pp () fmt @@
