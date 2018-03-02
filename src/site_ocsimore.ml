@@ -129,8 +129,9 @@ let do_paragraph bi args xml =
 (** Extension Client/Server-Switch *)
 
 
-let do_client_server_switch bi _ _ =
+let do_client_server_switch bi args _ =
   `Flow5 (Lwt.return @@
+    let attrs = Wiki_syntax.parse_common_attribs args in
     match bi.Wiki_widgets_interface.bi_page with
     | Document.Site _ -> []
     | Document.Deadlink _ -> assert false
@@ -142,11 +143,11 @@ let do_client_server_switch bi _ _ =
           let document = Document.Project {project; version; page} in
           bi.Wiki_widgets_interface.bi_add_link document;
           Html.[
-            div ~a:[a_class ["client-server-switch-wrapper"]] [
+            div ~a:(a_class ["client-server-switch-wrapper"] :: attrs) [
               div ~a:[a_class ["client-server-switch"]] [
                 span ~a:[a_class [subproject; "source"]]
                      [pcdata ("This is "^subproject^" API")];
-                pcdata " API (go to ";
+                pcdata " (go to ";
                 a ~a:[a_class [subproject'; "target"];
                       a_href @@ Document.to_uri document]
                   [pcdata subproject'];

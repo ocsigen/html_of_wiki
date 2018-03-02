@@ -98,7 +98,8 @@ let do_drawer wp bi args c =
          [ span ~a:[ a_class [ "how-drawer-icon" ] ] [] ]
      in
      let content = nav ~a:[ a_class [ "how-drawer-content" ] ] content in
-     let elt = div ~a:[ a_class [ "how-drawer" ] ] [ button ; label ; content ]
+     let elt = div ~a:( a_class [ "how-drawer" ]
+                        :: attrs) [ button ; label ; content ]
      in
      Lwt.return [ elt ])
 
