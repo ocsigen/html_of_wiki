@@ -7,8 +7,9 @@ method outline {Bridge.elem; restrict; depth; ignore; nav; div} =
   let nav = (Dom_html.getElementById nav :> Dom.node Js.t) in
   let ignore = (fun (n: Dom.node Js.t) ->
     let tag = String.lowercase_ascii (Js.to_string n##.nodeName) in
-    n == nav || List.mem tag ignore) in
-  let elem, restrict =
+    n == nav || List.mem tag ignore)
+  in
+  let elem, restrict2 =
     match elem with
     | `Id id ->
        ( (Dom_html.document##getElementById (Js.string id) :>
@@ -27,6 +28,10 @@ method outline {Bridge.elem; restrict; depth; ignore; nav; div} =
           None
       in
       (HTML5outliner.find_container nav, fragment)
+  in
+  let restrict = match restrict with
+    | None -> restrict2
+    | _ -> restrict
   in
   match Js.Opt.to_option elem with
   | None -> ()

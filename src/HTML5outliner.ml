@@ -132,7 +132,9 @@ let init_st ?(ignore = (fun _ -> false)) tag =
 
 let rec walk st node =
   let tag = String.lowercase_ascii (Js.to_string node##.nodeName) in
-  if List.mem tag heading_content then
+  if st.ignore node
+  then st
+  else if List.mem tag heading_content then
     let node = find_first_heading node in
     let childrens =
       List.map

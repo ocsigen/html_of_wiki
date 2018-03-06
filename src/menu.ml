@@ -33,7 +33,7 @@ let doctree bi args contents =
         List.concat
         (menus :> Html_types.flow5 Tyxml_html.elt list list Lwt.t)
     in
-    Lwt.return [ div ~a:( a_class [ "how-doctree" ] :: attrs) r ]
+    Lwt.return [ nav ~a:( a_class [ "how-doctree" ] :: attrs) r ]
   )
 
 let docversion bi args contents =
