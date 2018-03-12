@@ -115,7 +115,7 @@ let translate existing =
       existing##.className := Js.string "language-ocaml"
     with e ->
       if ocaml##indexOf (Js.string "sig..end") = -1 then (
-        let t = Dom_html.document##createTextNode (Js.string "(* Error *) \n") in
+        let t = Dom_html.document##createTextNode (Js.string "(* Error while translating to Reason *) \n") in
         let parent = Js.Unsafe.coerce existing in
         parent##insertBefore t existing##.firstChild
       );
@@ -148,33 +148,38 @@ let toggle_reason () =
 
 let () =
   (* the search form isn't a real one... *)
-  Dom_html.window##.onload := Dom_html.handler @@ fun _ ->
-    (match Dom_html.(getElementById_coerce "search" CoerceTo.form) with
-    | None -> ()
-    | Some form ->
-      form##.onsubmit := Dom_html.handler @@ fun _ ->
-        let engine = "https://google.com/search?q=" in
-        let filter = " site:ocsigen.org" in
-        let q =
-          (match Dom_html.(getElementById_coerce "q" CoerceTo.input) with
-          | None -> filter
-          | Some q -> Js.to_string q##.value ^ filter) |>
-          Js.string |>
-          Js.encodeURIComponent |>
-          Js.to_string
-        in
-        Dom_html.window##.location##.href := Js.string (engine ^ q);
-        Js.bool false);
-    (* language switch *)
-    (match Dom_html.getElementById_opt "reason" with
-    | None -> ()
-    | Some btn ->
-      btn##.onclick := Dom_html.handler @@ fun _ ->
-        toggle_reason ();
-        Js.bool true);
-    (* API conversion *)
-    let f = Js.string "odocwiki_code" in
-    to_list (Dom_html.document##getElementsByClassName f) |>
-    List.iter convert;
-    (* done! *)
-    Js.bool true
+  ignore @@ Dom.addEventListener
+    Dom_html.window
+    (Dom_html.Event.make "load")
+    (Dom_html.handler @@ fun _ ->
+     (match Dom_html.(getElementById_coerce "search" CoerceTo.form) with
+      | None -> ()
+      | Some form ->
+        form##.onsubmit := Dom_html.handler @@ fun _ ->
+          let engine = "https://google.com/search?q=" in
+          let filter = " site:ocsigen.org" in
+          let q =
+            (match Dom_html.(getElementById_coerce "q" CoerceTo.input) with
+             | None -> filter
+             | Some q -> Js.to_string q##.value ^ filter) |>
+            Js.string |>
+            Js.encodeURIComponent |>
+            Js.to_string
+          in
+          Dom_html.window##.location##.href := Js.string (engine ^ q);
+          Js.bool false);
+     (* language switch *)
+     (match Dom_html.getElementById_opt "reason" with
+      | None -> ()
+      | Some btn ->
+        btn##.onclick := Dom_html.handler @@ fun _ ->
+          toggle_reason ();
+          Js.bool true);
+     (* API conversion *)
+     let f = Js.string "odocwiki_code" in
+     to_list (Dom_html.document##getElementsByClassName f) |>
+     List.iter convert;
+     (* done! *)
+     Js._true
+    )
+    Js._false
