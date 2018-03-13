@@ -43,13 +43,9 @@ let init () =
     ~wp:Wiki_syntax.wikicreole_parser
     ~wp_rec:Wiki_syntax.wikicreole_parser
     (fun _ -> reason);
-  Wiki_syntax.register_raw_wiki_extension
+  Wiki_syntax.register_simple_flow_extension
     ~name:"code"
-    ~wp:Wiki_syntax.wikicreole_parser
-    ~wp_rec:Wiki_syntax.wikicreole_parser
-    (fun _ -> code);
-  Wiki_syntax.register_raw_wiki_extension
+    code;
+  Wiki_syntax.register_simple_phrasing_extension
     ~name:"code-inline"
-    ~wp:Wiki_syntax.wikicreole_parser
-    ~wp_rec:Wiki_syntax.wikicreole_parser
-    (fun _ -> code_inline);
+    code_inline
