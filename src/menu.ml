@@ -6,11 +6,20 @@ let doctree bi args contents =
   let project, version = Projects.get_implicit_project bi in
   let files =
     Document.(Project {page = Manual "menu"; version; project}) ::
-    (List.assoc version (Projects.get project).Projects.versions |>
-     List.map (fun subproject ->
-      let file = "menu" in
-      Document.(Project {page = Api {subproject; file}; version; project})
-    ))
+    (List.assoc version (Projects.get project).Projects.versions |> fun v ->
+     let file = "menu" in
+     if v = []
+     then (* no sub project *)
+       [ Document.(Project { page = Api { subproject = ""; file };
+                             version;
+                             project }) ]
+     else
+       List.map (fun subproject ->
+           Document.(Project { page = Api { subproject; file };
+                               version;
+                               project })
+         ) v
+    )
   in
   let bi' = Wiki_widgets_interface.{
     bi_page = Document.(Project {page = Template; project; version});
@@ -76,13 +85,10 @@ let docversion bi args contents =
 
 
 let init () =
-  Wiki_syntax.register_raw_wiki_extension
+  Wiki_syntax.register_interactive_simple_flow_extension
     ~name:"doctree"
-    ~wp:Wiki_syntax.wikicreole_parser
-    ~wp_rec:Wiki_syntax.wikicreole_parser
-    (fun _ -> doctree);
-  Wiki_syntax.register_raw_wiki_extension
-    ~name:"docversion"
-    ~wp:Wiki_syntax.wikicreole_parser
-    ~wp_rec:Wiki_syntax.wikicreole_parser
-    (fun _ -> docversion)
+    doctree;
+  Wiki_syntax.register_simple_extension
+    Wiki_syntax.wikicreole_parser
+    "docversion"
+    docversion
