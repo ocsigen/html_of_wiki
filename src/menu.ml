@@ -53,11 +53,11 @@ let docversion bi args contents =
     List.map (fun (version, _) ->
         if version = cur_version
         then
-          span ~a:[ a_class [ "how-versions-all-current" ] ]
-            [ pcdata (Version.to_string version) ]
+          option ~a:[ a_class [ "how-versions-all-current" ] ]
+            (pcdata (Version.to_string version))
         else
-          Html.a
-            ~a:[ a_href
+          option
+            ~a:[ a_value
                    Document.(to_uri
                                (match bi.Wiki_widgets_interface.bi_page with
                                 | Project p ->
@@ -68,19 +68,13 @@ let docversion bi args contents =
                                   Project { page = Manual ""
                                           ; version
                                           ; project })) ]
-            [ pcdata (Version.to_string version) ])
+            (pcdata (Version.to_string version)))
   in
   `Flow5 (
     Lwt.return @@
-    [ div ~a:( a_class [ "how-versions" ] :: attrs)
-        [ input ~a:[ a_id "how-versions-toggle"
-                   ; a_input_type `Checkbox ] ()
-        ; label ~a:[ a_for "how-versions-toggle"
-                   ; a_class [ "how-versions-current" ] ]
-            [ pcdata "Version "
-            ; pcdata (Version.to_string cur_version) ]
-        ; div ~a:[ a_class [ "how-versions-all" ] ] versions_links ]
-    ]
+    [ pcdata "Version "
+    ; select ~a:( a_class [ "how-versions" ] ::
+                  a_onchange "location = this.value;" :: attrs) versions_links ]
   )
 
 

@@ -25,12 +25,10 @@ let write_file ~fn content =
   close_out ch
 
 let script_name = "/js/client.js"
-let script_name = "/home/balat/ocsigen/html_of_wiki/client.js"
 let write_script fn =
   write_file fn [%blob "../client.js"]
 
 let style_name = "/css/style.css"
-let style_name = "/home/balat/ocsigen/ocsigen.github.io/css/style.css"
 let write_style fn =
   write_file fn [%blob "../style.css"]
 
