@@ -4,8 +4,10 @@ open Tyxml.Html
 let doctree bi args contents =
   let attrs = Wiki_syntax.parse_common_attribs args in
   let project, version = Projects.get_implicit_project bi in
-  let files =
-    Document.(Project {page = Manual "menu"; version; project}) ::
+  let manual_file =
+    Document.(Project {page = Manual "menu"; version; project})
+  in
+  let api_files =
     (List.assoc version (Projects.get project).Projects.versions |> fun v ->
      let file = "menu" in
      if v = []
@@ -21,21 +23,39 @@ let doctree bi args contents =
          ) v
     )
   in
-  let bi' = Wiki_widgets_interface.{
-    bi_page = Document.(Project {page = Template; project; version});
-    bi_sectioning = true;
-    bi_add_link = bi.bi_add_link;
-    bi_content = Lwt.return [];
-    bi_title = "";
+  let api_bi = Wiki_widgets_interface.{
+      bi_page = Document.(Project { page = Api { subproject = ""; file = ""}
+                                  ; project; version});
+      bi_sectioning = true;
+      bi_add_link = bi.bi_add_link;
+      bi_content = Lwt.return [];
+      bi_title = "";
+  }
+  in
+  let manual_bi = Wiki_widgets_interface.{
+      bi_page = Document.(Project {page = Manual ""; project; version});
+      bi_sectioning = true;
+      bi_add_link = bi.bi_add_link;
+      bi_content = Lwt.return [];
+      bi_title = "";
   }
   in
   let menus =
-    files |>
+    api_files |>
     List.map Document.read |>
     Lwt_list.map_p @@
       Wiki_syntax.xml_of_wiki
         (Wiki_syntax.cast_wp Wiki_syntax.menu_parser)
-        bi'
+        api_bi
+  in
+  let menus =
+    let%lwt menus = menus in
+    let%lwt m = Wiki_syntax.xml_of_wiki
+        (Wiki_syntax.cast_wp Wiki_syntax.menu_parser)
+        manual_bi
+        (Document.read manual_file)
+    in
+    Lwt.return (m :: menus)
   in
   `Flow5 (
     let%lwt r = Lwt.map
@@ -81,6 +101,7 @@ let docversion bi args contents =
 let init () =
   Wiki_syntax.register_interactive_simple_flow_extension
     ~name:"doctree"
+    ~reduced:false
     doctree;
   Wiki_syntax.register_simple_extension
     Wiki_syntax.wikicreole_parser

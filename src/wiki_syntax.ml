@@ -1067,10 +1067,17 @@ let make_href bi addr fragment =
 let menu_make_href bi c _ =
   let project, version = Projects.get_implicit_project bi in
   let document =
-    if String.contains c '/' then
-      let subproject, file = Ocsimore_lib.String.sep '/' c in
-      Document.(Project {page = Api {subproject; file}; project; version})
-    else
+    match bi.bi_page with
+    | Document.(Project { page = Api _ }) ->
+      if String.contains c '/'
+      then
+        let subproject, file = Ocsimore_lib.String.sep '/' c in
+        Document.(Project {page = Api {subproject; file}; project; version})
+      else
+        Document.(Project { page = Api {subproject = ""; file = c}
+                          ; project
+                          ; version})
+    | _ ->
       Document.(Project {page = Manual c; project; version})
   in
   bi.bi_add_link document;
