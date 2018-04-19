@@ -40,9 +40,10 @@ let doctree bi args contents =
       bi_title = "";
   }
   in
+  let try_read f = try Document.read f with _ -> "" in
   let menus =
     api_files |>
-    List.map Document.read |>
+    List.map try_read |>
     Lwt_list.map_p @@
       Wiki_syntax.xml_of_wiki
         (Wiki_syntax.cast_wp Wiki_syntax.menu_parser)
@@ -53,7 +54,7 @@ let doctree bi args contents =
     let%lwt m = Wiki_syntax.xml_of_wiki
         (Wiki_syntax.cast_wp Wiki_syntax.menu_parser)
         manual_bi
-        (Document.read manual_file)
+        (try_read manual_file)
     in
     Lwt.return (m :: menus)
   in
@@ -73,8 +74,7 @@ let docversion bi args contents =
     List.map (fun (version, _) ->
         if version = cur_version
         then
-          option ~a:[ a_class [ "how-versions-all-current" ] ]
-            (pcdata (Version.to_string version))
+          option ~a:[ a_selected () ] (pcdata (Version.to_string version))
         else
           option
             ~a:[ a_value
