@@ -114,12 +114,6 @@ let translate existing =
       (* remove translatable, so that we only do this once *)
       existing##.className := Js.string "language-ocaml"
     with e ->
-      if ocaml##indexOf (Js.string "sig..end") = -1 then (
-        let t = Dom_html.document##createTextNode (Js.string "(* Error while translating to Reason *) \n") in
-        let parent = Js.Unsafe.coerce existing in
-        parent##insertBefore t existing##.firstChild
-      );
-      (* remove translatable, so that we only do this once *)
       existing##.className := Js.string "language-ocaml error"
 
 let convert pre =
@@ -130,19 +124,37 @@ let convert pre =
   Dom.appendChild pre code;
   pre##.className := Js.string "language-ocaml"
 
+let remove_error_message n =
+  let p = Js.Unsafe.coerce n in
+  if (Js.string p##.firstChild == Js.string "[object Text]" && p##.firstChild##.data == Js.string "(* Error while translating to Reason *) \n") then (
+    Js.Opt.iter n##.firstChild (fun c -> ignore (n##removeChild c)) (*clean this*)
+  )
+
+let add_error_message n =
+  let t = Dom_html.document##createTextNode (Js.string "(* Error while translating to Reason *) \n") in
+  let parent = Js.Unsafe.coerce n in
+  parent##insertBefore t n##.firstChild
+
 let toggle_reason () =
   let n = Js.string "body" in
   to_list (Dom_html.document##getElementsByTagName n) |>
   List.iter (fun body ->
     let reason = Js.string "reason" in
     if body##.className = reason then (
+      let t = Js.string "language-ocaml error" in
+      to_list (Dom_html.document##getElementsByClassName t) |>
+      List.iter remove_error_message;
       body##.className := Js.string ""
     )
     else (
       let t = Js.string "translatable" in
       to_list (Dom_html.document##getElementsByClassName t) |>
       List.iter translate;
+      let t = Js.string "error" in
+      to_list (Dom_html.document##getElementsByClassName t) |>
+      List.iter add_error_message;
       body##.className := reason
+
     )
   )
 
