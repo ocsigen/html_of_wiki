@@ -141,17 +141,16 @@ let toggle_reason () =
   let n = Js.string "body" in
   to_list (Dom_html.document##getElementsByTagName n) |>
   List.iter (fun body ->
-      let tmp = Js.Unsafe.coerce body in
-      match Regexp.(string_match (regexp "reason") (Js.to_string tmp##.className) 0) with
-      | Some res ->
+      let class_list = body##.classList in
+      if (Js.to_bool (class_list##contains (Js.string "reason"))) then
          begin
           let t = Js.string "language-ocaml error" in
           to_list (Dom_html.document##getElementsByClassName t) |>
           List.iter remove_error_message;
           let tmp = Js.to_string body##.className in
-          body##.className := Js.string (String.sub tmp 7 ((String.length tmp) - 7));
+          class_list##remove (Js.string "reason")
          end
-      | None ->
+      else
          begin
           let t = Js.string "translatable" in
           to_list (Dom_html.document##getElementsByClassName t) |>
@@ -159,7 +158,7 @@ let toggle_reason () =
           let t = Js.string "error" in
           to_list (Dom_html.document##getElementsByClassName t) |>
           List.iter add_error_message;
-          body##.className := Js.string ("reason " ^ (Js.to_string body##.className));
+          class_list##add (Js.string "reason");
          end
     )
 
