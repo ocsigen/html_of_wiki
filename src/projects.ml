@@ -56,22 +56,13 @@ let init wiki_dir =
             let f =
               Yojson.Safe.from_file @@ wiki_dir ++ name ++ "config.js"
             in
-            let default_subproject =
-              Yojson.Safe.Util.member "default_subproject" f |>
-              Yojson.Safe.Util.to_string_option |>
-              How_lib.Option.default_to ""
-            in
-            let manual_main =
-              Yojson.Safe.Util.member "manual_main" f |>
-              Yojson.Safe.Util.to_string_option
-            in
             Yojson.Safe.Util.member "wiki_id" f |>
             Yojson.Safe.Util.to_int_option |> function
             | Some id ->
               ids := (id, name) :: !ids;
-              {name; versions; latest; manual_main; default_subproject}
+              {name; versions; latest; manual_main=None; default_subproject=""}
             | None ->
-              {name; versions; latest; manual_main; default_subproject}
+              {name; versions; latest; manual_main=None; default_subproject=""}
           with _ ->
             (* couldn't read config.js *)
             Printf.eprintf "couldn't read %s's config.js...\n%!" name;
@@ -79,7 +70,7 @@ let init wiki_dir =
         in
         [name, p]
     ) |>
-    List.flatten
+      List.flatten
 
 let get project =
   try
