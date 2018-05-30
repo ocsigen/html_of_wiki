@@ -24,7 +24,6 @@ let readdir wiki_dir path =
 
 
 let projects = ref []
-let ids = ref []
 
 let init wiki_dir =
   projects :=
@@ -52,21 +51,7 @@ let init wiki_dir =
                 (Version.to_string v);
               []
           in
-          try
-            let f =
-              Yojson.Safe.from_file @@ wiki_dir ++ name ++ "config.js"
-            in
-            Yojson.Safe.Util.member "wiki_id" f |>
-            Yojson.Safe.Util.to_int_option |> function
-            | Some id ->
-              ids := (id, name) :: !ids;
-              {name; versions; latest; manual_main=None; default_subproject=""}
-            | None ->
-              {name; versions; latest; manual_main=None; default_subproject=""}
-          with _ ->
-            (* couldn't read config.js *)
-            Printf.eprintf "couldn't read %s's config.js...\n%!" name;
-            {name; versions; latest; manual_main=None; default_subproject=""}
+          {name; versions; latest; manual_main=None; default_subproject=""}
         in
         [name, p]
     ) |>
@@ -77,12 +62,6 @@ let get project =
     List.assoc project !projects
   with Not_found ->
     raise (No_such_project project)
-
-let of_id id =
-  try
-    List.assoc id !ids
-  with Not_found ->
-    raise (No_such_id id)
 
 let get_implicit_project bi =
   match bi.Wiki_widgets_interface.bi_page with

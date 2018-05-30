@@ -184,86 +184,6 @@ let list_suffix ~prefix list =
   in
   aux (prefix, list)
 
-let normalize_link =
-  let module Result = struct
-    let success_replace' s = Lwt.return (Some s)
-    let success_replace fmt = Printf.ksprintf success_replace' fmt
-    let failure_malformed_link' pos desugar_param msg =
-      Wiki_syntax_types.(desugar_param.dc_warnings <- (pos, "Malformed link: "^msg) :: desugar_param.dc_warnings);
-      Lwt.return None
-    let failure_malformed_link pos desugar_param fmt = Printf.ksprintf (failure_malformed_link' pos desugar_param) fmt
-    let no_replacement = Lwt.return None
-  end in
-  fun pos addr fragment desugar_param ->
-    let open Re_pcre in
-    match exec ~rex:link_regexp addr with
-      | g when get_substring g prototype_group = "wiki" ->
-          let wiki = get_substring g wiki_id_group in
-          begin match exec ~rex:wiki_id_regexp wiki with
-            | result -> (* [[wiki(ix):path]] => [[wiki("title"):path]] *)
-                let id = get_substring result 1 in
-                begin try%lwt
-                  let project = Projects.of_id (int_of_string id) in
-                  let wiki_name = "\"" ^ project ^ "\"" in
-                  let replacement =
-                    replace_regexp_group ~str:addr ~result ~group:wiki_id_group ~replacement:wiki_name
-                  in
-                  Result.success_replace' replacement
-                with Not_found ->
-                  Result.failure_malformed_link pos desugar_param "no wiki %s" id
-                end
-            | exception Not_found -> Result.no_replacement
-          end
-      | _ -> (* [addr] is no [link_regexp] *)
-          (*
-          let replacement_addr =
-            let page_wiki_name = desugar_param.dc_page_wiki in
-            *)
-            if String.length addr = 0 then (* [[]] => [[wiki(name):a/b/c]] *)
-              failwith "self-link?"
-              (* FIXME #anchor seems to be the only case. *)
-              (*
-              Result.success_replace "wiki(%s):%s"
-                page_wiki_name
-                (* FIXME why concat? where is it split? *)
-                  desugar_param.dc_page_path
-                Option.(
-                  desugar_param.dc_page_path |>
-                  map (String.concat "/") |>
-                  default_to "" |>
-                  force
-                )
-              *)
-            else
-              failwith "please tell me where this is used... if it is."
-              (*
-              match path_or_link with
-                | `Path path -> (* [[xyz]] => [[wiki(25):a/b/xyz]] et al. *)
-                    begin try
-                      let page_wiki, page_path =
-                        let wiki_page_for_path_option path =
-                          try Some (Wiki_self_services.get_wiki_page_for_path path)
-                          with Not_found -> None
-                        in
-                        match wiki_page_for_path_option path, wiki_page_for_path_option ("" :: path) with
-                          | Some ((_, page_path) as page), Some ((_, page_path') as page') ->
-                              if List.(length page_path < length page_path') then page else page'
-                          | Some page, None | None, Some page -> page
-                          | None, None -> raise Not_found
-                      in
-                      Result.success_replace "wiki(%s):%s"
-                        (Wiki_types.string_of_wiki page_wiki)
-                        (Url.string_of_url_path ~encode:false page_path)
-                    with Not_found -> (* No wiki page at [path] *)
-                      Result.success_replace "site:%s" (Url.string_of_url_path ~encode:false path)
-                    end
-                | `Link res -> res
-          in
-          let append_fragment addr = addr ^ get_map_option ~default:"" ~f:((^) "#") fragment in
-          replacement_addr >|= Option.map append_fragment
-      | _ -> Result.no_replacement
-          *)
-
 let starts_with prefix s =
   let p = String.length prefix in
   String.length s >= p && String.sub s 0 p = prefix
@@ -312,9 +232,7 @@ let link_kind bi addr =
                     wiki, (Projects.get wiki).Projects.latest
                   end
                 | result -> (* [[wiki(ix):path]] *)
-                  let id = int_of_string (get_substring result 1) in
-                  let project = Projects.of_id id in
-                  project, (Projects.get project).Projects.latest
+                  failwith (Printf.sprintf "wiki_id is not longuer supported\n")
             in
             if page = "install" then
               Absolute ("https://github.com/ocsigen/" ^ project)
@@ -928,89 +846,6 @@ module MakeParser(B: RawParser) :
       with type param = substitutions * Wiki_types.wikibox
       and type flow = unit)
 
-  let normalize_href_ref = ref normalize_link
-
-  let desugarer =
-    let module Desugarer = struct
-      type param = substitutions * Wiki_syntax_types.desugar_param
-      include UnitBuilder
-
-      let plugin_action : string -> int -> int -> (param, unit) Wikicreole.plugin =
-        fun name start end_ (subst, wb) attribs content ->
-        let desugar_attributes () =
-          let%lwt attribs' =
-            let f = function
-              | "item", it ->
-                  let%lwt it' =
-                    let link, text =
-                      try String.sep '|' it
-                      with Not_found -> it, it
-                    in
-                    match%lwt !normalize_href_ref (0,0) link None wb with
-                      | Some link' ->
-                          Lwt.return (link'^"|"^text)
-                      | None -> Lwt.return it
-                  in
-                  Lwt.return ("item", it')
-              | x -> Lwt.return x
-            in
-            Lwt_list.map_s f attribs
-          in
-          Lwt.return (
-            if attribs' <> attribs then
-              Some (string_of_extension name attribs' content)
-            else
-              None
-          )
-        in
-        let desugar_content desugar_string_with_parser =
-          match content with
-            | None ->
-                Lwt.return None
-            | Some content ->
-                let%lwt content' = desugar_string_with_parser wb content in
-                Lwt.return (
-                  if content' <> content then
-                    Some (string_of_extension name attribs (Some content'))
-                  else None
-                )
-        in
-        try
-          let plugin, _ = Hashtbl.find plugin_assoc name in
-          let content' =
-            match plugin with
-              | SimplePlugin _ ->
-                  desugar_attributes ()
-              | WikiPlugin p ->
-                  desugar_content (let module Plugin = (val p: WikiPlugin) in
-                                   (fun a b ->
-                                     (desugar_string Plugin.wikiparser) a b))
-              | LinkPlugin p ->
-                  desugar_content (let module Plugin = (val p: LinkPlugin) in
-                                   (fun a b ->
-                                     (desugar_string Plugin.wikiparser) a b))
-              | RawWikiPlugin p ->
-                  desugar_content (let module Plugin = (val p: RawWikiPlugin) in
-                                   (fun a b ->
-                                     (desugar_string Plugin.wikiparser) a b))
-          in
-          subst := (start, end_, content') :: !subst
-        with _ (* was Not_found *) -> ()
-
-      let link_action : string -> string option -> _ -> int * int -> param -> unit =
-        fun _ _ _ _ _ -> ()
-
-      let href_action : string -> string option -> _ -> int * int -> param -> unit =
-        fun addr fragment _ ((start, end_) as pos) (subst, wikipage) ->
-          subst := (start,
-                    end_,
-                    try !normalize_href_ref pos addr fragment wikipage
-                    with _ -> Lwt.return None) ::!subst
-    end in
-    (module Desugarer : Wikicreole.Builder
-      with type param = substitutions * Wiki_syntax_types.desugar_param
-      and type flow = unit)
-
   let apply_subst subst content =
     let buf = Buffer.create 1024 in
     Lwt_list.fold_left_s
@@ -1044,7 +879,6 @@ module MakeParser(B: RawParser) :
     with_actions ?href_action ?link_action
       (fun () ->
          let subst = ref [] in
-         ignore (Wikicreole.from_string (subst, wb) desugarer content : unit list);
          apply_subst (List.rev !subst) content)
 
   let preparse_string ?href_action ?link_action wb content =
