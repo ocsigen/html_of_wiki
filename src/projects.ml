@@ -5,8 +5,6 @@ type t = {
   name: string;
   versions: (Version.t * string list) list;
   latest: Version.t;
-  manual_main: string option;
-  default_subproject: string; (* "" when there aren't any *)
 }
 
 
@@ -51,7 +49,7 @@ let init wiki_dir =
                 (Version.to_string v);
               []
           in
-          {name; versions; latest; manual_main=None; default_subproject=""}
+          {name; versions; latest}
         in
         [name, p]
     ) |>

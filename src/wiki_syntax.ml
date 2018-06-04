@@ -239,9 +239,7 @@ let link_kind bi addr =
             else
               let page =
                 if page = "" then
-                  let def =
-                    (Projects.get project).Projects.manual_main |>
-                    How_lib.Option.default_to "intro"
+                  let def = "intro"
                   in
                   Document.Manual def
                 else if starts_with "manual/" page then

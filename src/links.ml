@@ -59,8 +59,7 @@ let manual_link bi args contents =
   let project, version = force_project_and_version bi args in
   let chapter =
     let default =
-      (Projects.get project).Projects.manual_main |>
-      How_lib.Option.default_to "intro"
+      "intro"
     in
     get ~default args "chapter"
   in
@@ -131,10 +130,9 @@ let api prefix bi args contents =
       | None ->
         match bi.Wiki_widgets_interface.bi_page with
         | Document.Project {page = Document.Api {subproject; _}; _}
-          when subproject <> ""
-          && (Projects.get project).Projects.default_subproject <> "" ->
+          when subproject <> "" ->
             subproject
-        | _ -> (Projects.get project).Projects.default_subproject
+        | _ -> ""
     in
     let file = path_of_id ?prefix id in
     let page = Document.Api {subproject; file} in
