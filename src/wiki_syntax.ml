@@ -229,7 +229,10 @@ let link_kind bi addr =
                     failwith (Printf.sprintf "Not a valid wiki: %S" wiki)
                   | result -> (* [[wiki("name"):path]] *)
                     let wiki = get_substring result 1 in
-                    wiki, (Projects.get wiki).Projects.latest
+                    try
+                      wiki, (Projects.get wiki).Projects.latest
+                    with
+                    | _ -> wiki, Version.Dev
                   end
                 | result -> (* [[wiki(ix):path]] *)
                   failwith (Printf.sprintf "wiki_id is not longuer supported\n")
