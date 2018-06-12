@@ -56,6 +56,13 @@ let a_class project =
   Html.a_class ["ocsforge_doclink_" ^ project]
 
 let manual_link bi args contents =
+  let current_project =
+    begin match bi.Wiki_widgets_interface.bi_page with
+    | Site _ -> ""
+    | Project tmp -> tmp.project
+    | _ -> "deadlink"
+    end
+  in
   let project, version = force_project_and_version bi args in
   let chapter =
     let default =
@@ -77,7 +84,8 @@ let manual_link bi args contents =
     Document.Project {project; version; page = Document.Manual chapter}
   in
   let href = Html.a_href (Document.to_uri ?fragment doc) in
-  bi.Wiki_widgets_interface.bi_add_link doc;
+  if ((String.length current_project == 0) || (String.compare project current_project == 0)) then
+    bi.Wiki_widgets_interface.bi_add_link doc;
   Lwt.return [Html.a ~a:[a_class project; href] contents]
 
 let local_link bi args =
@@ -94,6 +102,13 @@ let local_link bi args =
       Document.Site src, None
 
 let files_link bi args contents =
+  let current_project =
+    begin match bi.Wiki_widgets_interface.bi_page with
+    | Site _ -> ""
+    | Project tmp -> tmp.project
+    | _ -> "deadlink"
+    end
+  in
   let contents =
     match contents with
     | None -> [Html.pcdata (Filename.basename (get args "src"))]
@@ -105,9 +120,12 @@ let files_link bi args contents =
     href ::
     match project with
     | None -> []
-    | Some p -> [a_class p]
+    | Some p ->
+       if ((String.length current_project == 0) || (String.compare p current_project == 0)) then
+         bi.Wiki_widgets_interface.bi_add_link doc;
+       [a_class p]
+
   in
-  bi.Wiki_widgets_interface.bi_add_link doc;
   Lwt.return [Html.a ~a contents]
 
 let files_img bi args contents =
@@ -122,6 +140,13 @@ let files_img bi args contents =
 
 let api prefix bi args contents =
   let id = parse_contents (How_lib.Option.map String.trim contents) in
+  let current_project =
+    begin match bi.Wiki_widgets_interface.bi_page with
+    | Site _ -> ""
+    | Project tmp -> tmp.project
+    | _ -> "deadlink"
+    end
+  in
   let doc, project =
     let project, version = force_project_and_version bi args in
     let subproject =
@@ -142,9 +167,9 @@ let api prefix bi args contents =
   let body = [Html.pcdata @@ get ~default args "text"] in
   let fragment = fragment_of_id id in
   let href = Html.a_href @@ Document.to_uri ?fragment doc in
-  bi.Wiki_widgets_interface.bi_add_link doc;
+  if ((String.length current_project == 0) || (String.compare project current_project == 0)) then
+      bi.Wiki_widgets_interface.bi_add_link doc;
   Lwt.return [Html.a ~a:[a_class project; href] body]
-
 
 let init () =
   register "a_api_type" (api (Some "type_"));
