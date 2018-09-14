@@ -70,33 +70,55 @@ let pprint oc html =
   Format.pp_print_flush fmt ()
 
 let infer_wiki_name = Filename.remove_extension
-let inout_paths file = (file, (infer_wiki_name file) ^ ".html")
+let infer_output_file file = (infer_wiki_name file) ^ ".html"
 
-let ohow file =
-  let (file_in, file_out) = inout_paths file in
-  let oc = open_out file_out in
-  file_in
+let ohow file oc =
+  file
   |> readfile
   |> compile
   |> build_page
   |> pprint oc;
   close_out oc
 
-let main file =
-  if Sys.file_exists file
-  then ohow file
-  else failwith @@ "no such file: " ^ file
+let get_output_channel output_channel file = match output_channel with
+  | Some out -> out
+  | None -> open_out @@ infer_output_file file
+
+let process_file output_channel file =
+  get_output_channel output_channel file |> ohow file
+
+let main print outfile files =
+  if List.for_all Sys.file_exists files
+  then
+    ((match (outfile, print) with
+        | (Some file, _) -> Some (open_out file)
+        | (None, true) -> Some stdout
+        | _ -> None)
+     |> process_file
+     |> List.map) @@ files
+  else
+    (* NOTE should not happen because Cmdliner checks that *)
+    failwith "Some input files doesn't exist..."
 
 let () = Cmdliner.(
-    let file_t =
+    let file_cmd =
       let doc = "The wikicreole file to convert to HTML." in
-      Arg.(required & pos ~rev:true 0 (some string) None
-           & info [] ~docv:"FILE" ~doc)
+      Arg.(non_empty & pos_all file [] & info [] ~docv:"FILE" ~doc)
     in
-    let info_ =
+    let print_cmd =
+      let doc = "Print the HTML to stdout." in
+      Arg.(value & flag & info ["p"; "print"] ~doc)
+    in
+    let outfile_cmd =
+      let doc = "Writes the HTML into the given file. Always overwrites.
+Overrides --print." in
+      Arg.(value & opt (some string) None & info ["o"; "output"]
+             ~docv:"FILE" ~doc)
+    in
+    let info_cmd =
       let doc = "Converts a wikicreole file into an HTML file." in
       let man = [] in
       Term.info "ohow" ~version:"v0.0.0" ~doc ~exits:Term.default_exits ~man
     in
-    let ohow_t = Term.(const main $ file_t) in
-    Term.(exit @@ eval (ohow_t, info_)))
+    let ohow_cmd = Term.(const main $ print_cmd $ outfile_cmd $ file_cmd) in
+    Term.(exit @@ eval (ohow_cmd, info_cmd)))
