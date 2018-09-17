@@ -3,6 +3,8 @@ all:
 	js_of_ocaml +weak.js client.byte
 	ocamlbuild -use-ocamlfind -ocamlc "ocamlc ${CFLAGS}" src/html_of_wiki.byte
 
+ohow:
+	ocamlbuild -use-ocamlfind -ocamlc "ocamlc ${CFLAGS}" src/ohow.byte
 
 clean:
 	ocamlbuild -clean
