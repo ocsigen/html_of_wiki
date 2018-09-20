@@ -5,18 +5,12 @@
 *)
 open Utils
 
-let test = function
-  | Document.Site s -> print_endline s
-  | Document.Deadlink exc -> print_endline @@ "Deadlink: " ^ (Printexc.to_string exc)
-  | Document.Project { page; version; project } ->
-    print_endline @@ "Project: " ^ project
-
 let compile text = Wiki_syntax.(
     let par = cast_wp wikicreole_parser in
     let bi = Wiki_widgets_interface.{
         bi_page = Site "";
         bi_sectioning = false;
-        bi_add_link = test;
+        bi_add_link = ignore;
         bi_content = Lwt.return [];
         bi_title = "";
       }
@@ -57,18 +51,6 @@ let build_page content =
   Tyxml.Html.(html
                 (head (title (pcdata ti)) [])
                 (body content))
-
-let rec traverse prefix = function
-  | [] -> ()
-  | x :: xs -> match Tyxml_xml.content x with
-    | Tyxml_xml.Node (ename, attrs, children) ->
-      print_endline @@ prefix ^ "<" ^ ename;
-      traverse (prefix ^ "  ") children;
-      traverse prefix xs
-    | Leaf (ename, attrs) -> print_endline @@ prefix ^ ename
-    | Entity s -> print_endline @@ prefix ^ "E!" ^ s
-    | PCDATA s -> print_endline @@ prefix ^ "#PCDATA"
-    | _ -> ()
 
 let readfile file =
   let ic = open_in file in
