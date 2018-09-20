@@ -1,4 +1,4 @@
-open Utils
+open Utils.Operators
 
 let get_opts ?defaults opts args =
   let values = List.map (Ocsimore_lib.get_opt args) opts in

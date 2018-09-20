@@ -1,13 +1,14 @@
-(* Bind operator *)
-let (>>=) x f = match x with
-  | Some x -> Some (f x)
-  | None -> None
+module Operators = struct
+  (* Bind operator *)
+  let (>>=) x f = match x with
+    | Some x -> Some (f x)
+    | None -> None
 
-(* Elvis operator ?: *)
-let (|?) x default = match x with
-  | Some x -> x
-  | None -> default
-
+  (* Elvis operator ?: *)
+  let (|?) x default = match x with
+    | Some x -> x
+    | None -> default
+end
 
 let concatl = List.fold_left Filename.concat ""
 let path_of_list = concatl

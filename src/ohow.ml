@@ -3,7 +3,7 @@
    Converts a wikicreole file into an HTML file.
    See README.md for build instructions.
 *)
-open Utils
+open Utils.Operators
 
 let compile text = Wiki_syntax.(
     let par = cast_wp wikicreole_parser in
@@ -97,9 +97,9 @@ let main print outfile root manual api files =
   check_errors [("Some input files doesn't exist...",
                  lazy (List.for_all Sys.file_exists files))];
   Wiki_ext.init ();
-  let root = realpath root in
-  let manual = path_rm_prefix root @@ realpath manual in
-  let api = path_rm_prefix root @@ realpath api in
+  let root = Utils.realpath root in
+  let manual = Utils.path_rm_prefix root @@ Utils.realpath manual in
+  let api = Utils.path_rm_prefix root @@ Utils.realpath api in
   ((match (outfile, print) with
       | (Some file, _) -> Some (open_out file)
       | (None, true) -> Some stdout

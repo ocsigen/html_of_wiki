@@ -1,5 +1,7 @@
-open Utils
+open Utils.Operators
 open Tyxml
+
+let catl = Utils.concatl
 
 let a_link_of_uri ?fragment uri contents =
   let uri = uri ^ ".html" ^ (fragment >>= (fun f -> "#" ^ f) |? "") in
@@ -8,12 +10,12 @@ let a_link_of_uri ?fragment uri contents =
 let manual_link file root manual contents = function
   | [project; chapter; fragment; Some version] ->
     let uri = match (project, chapter) with
-      | (Some p, Some c) -> concatl [rewind root file; (* inside this version dir *)
+      | (Some p, Some c) -> catl [Utils.rewind root file; (* inside this version dir *)
                                      ".."; (* inside all versions dir *)
                                      ".."; (* inside all project dir *)
                                      p; version; manual; c]
-      | (Some p, None) -> concatl [rewind root file; ".."; ".."; p; version; "index"]
-      | (None, Some c) -> concatl [rewind root file; manual; c]
+      | (Some p, None) -> catl [Utils.rewind root file; ".."; ".."; p; version; "index"]
+      | (None, Some c) -> catl [Utils.rewind root file; manual; c]
       | (None, None) -> failwith "a_manual: no project nor chapter arg found"
     in
     let link = match fragment with
@@ -27,10 +29,10 @@ let api_link prefix file root api contents = function
   | [project; subproject; text; Some version] ->
     let id = Api.parse_contents (contents >>= String.trim) in
     let base = match (project, subproject) with
-      | (Some p, Some s) -> concatl [rewind root file; ".."; ".."; p; "latest"; api; s]
-      | (Some p, None) -> concatl [rewind root file; ".."; ".."; p; "latest"; api]
-      | (None, Some s) -> concatl [rewind root file; api; s]
-      | (None, None) -> Filename.concat (rewind root file) api
+      | (Some p, Some s) -> catl [Utils.rewind root file; ".."; ".."; p; "latest"; api; s]
+      | (Some p, None) -> catl [Utils.rewind root file; ".."; ".."; p; "latest"; api]
+      | (None, Some s) -> catl [Utils.rewind root file; api; s]
+      | (None, None) -> Filename.concat (Utils.rewind root file) api
     in
     let uri = Filename.concat base @@ Api.path_of_id ?prefix id in
     let fragment = Api.fragment_of_id id in
