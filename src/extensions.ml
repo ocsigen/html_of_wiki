@@ -1,6 +1,12 @@
 open Utils
 
-let get_opts opts args = List.map (Ocsimore_lib.get_opt args) opts
+let get_opts ?defaults opts args =
+  let values = List.map (Ocsimore_lib.get_opt args) opts in
+  defaults >>= (fun def ->
+      List.map2 (fun sx -> function
+          | Some d -> Some (sx |? d)
+          | None -> sx) values def) |? values
+
 
 let _reg name f =
   let wp_rec = Wiki_syntax.phrasing_wikicreole_parser in
@@ -17,7 +23,8 @@ let _reg name f =
     ~wp:Wiki_syntax.menu_parser
     ~wp_rec (fun _ -> Error.wrap_phrasing name f)
 
-let extension_with_opts opts ext = fun _ args contents ->
-  ext contents @@ get_opts opts args
+let extension_with_opts ?defaults opts ext = fun _ args contents ->
+  ext contents @@ get_opts ?defaults opts args
 
-let register name opts f = _reg name @@ extension_with_opts opts f
+let register ?defaults name opts f =
+  _reg name @@ extension_with_opts ?defaults opts f
