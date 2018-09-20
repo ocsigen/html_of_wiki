@@ -113,9 +113,7 @@ let check_errors : (string * bool lazy_t) list -> unit =
 
 let main print outfile root manual api files =
   check_errors [("Some input files doesn't exist...",
-                 lazy (List.for_all Sys.file_exists files));
-                ("One of the given manual or api isn't a directory...",
-                 lazy (List.for_all Sys.is_directory [manual; api]))];
+                 lazy (List.for_all Sys.file_exists files))];
   Wiki_ext.init ();
   let root = realpath root in
   let manual = path_rm_prefix root @@ realpath manual in
