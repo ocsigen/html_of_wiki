@@ -107,48 +107,4 @@ let main print outfile root manual api files =
    |> process_file root manual api
    |> List.iter) @@ files
 
-let () = Cmdliner.(
-    let file_cmd =
-      let doc = "The wikicreole file to convert to HTML." in
-      Arg.(non_empty & pos_all file [] & info [] ~docv:"FILE" ~doc)
-    in
-    let print_cmd =
-      let doc = "Print the HTML to stdout." in
-      Arg.(value & flag & info ["p"; "print"] ~doc)
-    in
-    let outfile_cmd =
-      let doc = "Writes the HTML into the given file. Always overwrites.
-Overrides --print." in
-      Arg.(value & opt (some string) None & info ["o"; "output"]
-             ~docv:"FILE" ~doc)
-    in
-    let cwd = Sys.getcwd () in
-    let root_cmd =
-      let doc = "Use the given root directory." in
-      Arg.(value & opt string cwd & info ["root"]
-             ~docv:"DIR" ~doc)
-    in
-    let manual_cmd =
-      let doc = "Use the given manual path." in
-      Arg.(value & opt string cwd & info ["manual"]
-             ~docv:"DIR" ~doc)
-    in
-    let api_cmd =
-      let doc = "Use the given api path." in
-      Arg.(value & opt string cwd & info ["api"]
-             ~docv:"DIR" ~doc)
-    in
-    let info_cmd =
-      let doc = "Converts a wikicreole file into an HTML file." in
-      let man = [] in
-      Term.info "ohow" ~version:"v0.0.0" ~doc ~exits:Term.default_exits ~man
-    in
-    let ohow_cmd = Term.(
-        const main
-        $ print_cmd
-        $ outfile_cmd
-        $ root_cmd
-        $ manual_cmd
-        $ api_cmd
-        $ file_cmd) in
-    Term.(exit @@ eval (ohow_cmd, info_cmd)))
+let () = Cli.run main
