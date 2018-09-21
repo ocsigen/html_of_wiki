@@ -124,19 +124,17 @@ Overrides --print." in
     in
     let cwd = Sys.getcwd () in
     let root_cmd =
-      let doc = "Mark the given directory being the 'root directory', the directory that contains the version X of the documentation. The project directory must contain several root directories. The current directory by default." in
+      let doc = "Use the given root directory." in
       Arg.(value & opt string cwd & info ["root"]
              ~docv:"DIR" ~doc)
     in
     let manual_cmd =
-      let doc = "Mark the given directory being the 'manual directory'.
- The current directory by default." in
+      let doc = "Use the given manual path." in
       Arg.(value & opt string cwd & info ["manual"]
              ~docv:"DIR" ~doc)
     in
     let api_cmd =
-      let doc = "Mark the given directory being the 'API directory'.
- The current directory by default." in
+      let doc = "Use the given api path." in
       Arg.(value & opt string cwd & info ["api"]
              ~docv:"DIR" ~doc)
     in
