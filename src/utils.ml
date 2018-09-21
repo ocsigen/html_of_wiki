@@ -1,17 +1,14 @@
 module Operators = struct
-  (* Bind operator *)
   let (>>=) x f = match x with
     | Some x -> Some (f x)
     | None -> None
 
-  (* Elvis operator ?: *)
   let (|?) x default = match x with
     | Some x -> x
     | None -> default
 end
 
-let concatl = List.fold_left Filename.concat ""
-let path_of_list = concatl
+let path_of_list = List.fold_left Filename.concat ""
 
 let rec list_of_path = function
   | "/" | "." as p -> [p]
@@ -40,8 +37,6 @@ let rec remove_prefixl l l' = match (l, l') with
   | (x :: l, y :: l') when x = y -> remove_prefixl l l'
   | (_, _) -> failwith "remove_prefixl: no list is a prefix of the other"
 
-(* Return `rest' such as `path/rest=sub'
-   E.g: pathdiff "foo/bar" "foo/bar/baz/x" => "baz/x" *)
 let path_rm_prefix prefix p = (* works the other way round ;) *)
   let revlop p = list_of_path p |> List.rev in
   remove_prefixl (revlop prefix) (revlop p) |> List.rev |> path_of_list
