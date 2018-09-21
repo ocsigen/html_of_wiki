@@ -33,8 +33,7 @@ let info_cmd = Cmdliner.(
     let man = [
       `S Manpage.s_description;
       `P "$(tname) is a command line utility for compiling Wikicreole files
-into HTML. A description of its syntax can be found at
-<http://ocsigen-1.inria.fr/ocsimore/dev/manual/wiki>.";
+into HTML.";
 
       `S "EXTENSIONS";
       `P "Extensions are supported. Some are built-in which are described
