@@ -86,8 +86,8 @@ let get_output_channel output_channel file = match output_channel with
   | None -> open_out @@ infer_output_file file
 
 
-let process_file root manual api output_channel file =
-  Links.init file root manual api;
+let process_file root manual api images output_channel file =
+  Links.init file root manual api images;
   get_output_channel output_channel file |> ohow file
 
 let check_errors : (string * bool lazy_t) list -> unit =
@@ -100,18 +100,19 @@ let init_extensions () =
   Only.init ();
   Site_ocsimore.init ()
 
-let main print outfile root manual api files =
+let main print outfile root manual api images files =
   check_errors [("Some input files doesn't exist...",
                  lazy (List.for_all Sys.file_exists files))];
   init_extensions ();
   let root = Utils.realpath root in
   let manual = Utils.path_rm_prefix root @@ Utils.realpath manual in
   let api = Utils.path_rm_prefix root @@ Utils.realpath api in
+  let images = Utils.path_rm_prefix root @@ Utils.realpath images in
   ((match (outfile, print) with
       | (Some file, _) -> Some (open_out file)
       | (None, true) -> Some stdout
       | _ -> None)
-   |> process_file root manual api
+   |> process_file root manual api images
    |> List.iter) @@ files
 
 let () = Cli.run main

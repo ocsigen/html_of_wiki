@@ -40,7 +40,15 @@ let api_link prefix file root api contents = function
     Lwt.return [a_link_of_uri ?fragment uri (Some body)]
   | _ -> assert false
 
-let init file root manual api = Extensions.(
+let img_link file root images contents = function
+  | [Some src] ->
+    let uri = cat [Utils.rewind root file; images; src] in
+    let alt = Filename.basename src in
+    Lwt.return [Html.img ~src:uri ~alt ()]
+  | [None] -> failwith "a_img: no src argument error"
+  | _ -> assert false
+
+let init file root manual api images = Extensions.(
     register "a_manual"
       ["project"; "chapter"; "fragment"; "version"]
       ~defaults:[None; None; None; Some "latest"]
@@ -51,4 +59,5 @@ let init file root manual api = Extensions.(
         register name
           ["project"; "subproject"; "text"; "version"]
           ~defaults:[None; None; None; Some "latest"]
-          (api_link prefix file root api)))
+          (api_link prefix file root api));
+    register "a_img" ["src"] (img_link file root images))
