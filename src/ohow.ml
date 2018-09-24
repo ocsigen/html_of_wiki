@@ -93,10 +93,17 @@ let process_file root manual api output_channel file =
 let check_errors : (string * bool lazy_t) list -> unit =
   List.iter (fun (err, b) -> if Lazy.force b then () else failwith err)
 
+let init_extensions () =
+  Wiki_ext.init ();
+  Code.init ();
+  Menu.init ();
+  Only.init ();
+  Site_ocsimore.init ()
+
 let main print outfile root manual api files =
   check_errors [("Some input files doesn't exist...",
                  lazy (List.for_all Sys.file_exists files))];
-  Wiki_ext.init ();
+  init_extensions ();
   let root = Utils.realpath root in
   let manual = Utils.path_rm_prefix root @@ Utils.realpath manual in
   let api = Utils.path_rm_prefix root @@ Utils.realpath api in
