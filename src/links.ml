@@ -1,157 +1,54 @@
+open Utils.Operators
 open Tyxml
-open Ocsimore_lib
-open Api
 
-let register name f =
-  let wp_rec = Wiki_syntax.phrasing_wikicreole_parser in
-  Wiki_syntax.register_raw_wiki_extension ~name
-    ~wp:Wiki_syntax.wikicreole_parser
-    ~wp_rec (fun _ -> Error.wrap_phrasing name f);
-  Wiki_syntax.register_raw_wiki_extension ~name
-    ~wp:Wiki_syntax.wikicreole_parser_without_header_footer
-    ~wp_rec (fun _ -> Error.wrap_phrasing name f);
-  Wiki_syntax.register_raw_wiki_extension ~name
-    ~wp:Wiki_syntax.phrasing_wikicreole_parser
-    ~wp_rec (fun _ -> Error.wrap_phrasing name f);
-  Wiki_syntax.register_raw_wiki_extension ~name
-    ~wp:Wiki_syntax.menu_parser
-    ~wp_rec (fun _ -> Error.wrap_phrasing name f)
+let cat = Utils.path_of_list
 
-let get_project_and_version bi args =
-  match bi.Wiki_widgets_interface.bi_page with
-  | Document.Site _ ->
-    `Maybe_in_args
-  | Document.Project {project; version; _} ->
-    let project' =
-      match get_opt args "project" with
-      | None -> project
-      | Some project' -> project'
+let a_link_of_uri ?fragment uri contents =
+  let uri = uri ^ ".html" ^ (fragment >>= (fun f -> "#" ^ f) |? "") in
+  Html.a ~a:[Html.a_href uri] [Html.pcdata (contents |? uri)]
+
+let manual_link file root manual contents = function
+  | [project; chapter; fragment; Some version] ->
+    let uri = match (project, chapter) with
+      | (Some p, Some c) -> cat [Utils.rewind root file; (* inside this version dir *)
+                                 ".."; (* inside all versions dir *)
+                                 ".."; (* inside all project dir *)
+                                 p; version; manual; c]
+      | (Some p, None) -> cat [Utils.rewind root file; ".."; ".."; p; version; "index"]
+      | (None, Some c) -> cat [Utils.rewind root file; manual; c]
+      | (None, None) -> failwith "a_manual: no project nor chapter arg found"
     in
-    let default =
-      if project = project' then
-        version |> Version.to_string
-      else
-        (Projects.get project').Projects.latest |>
-        Version.to_string (* unrelated! *)
+    let link = match fragment with
+      | Some fragment -> a_link_of_uri ~fragment
+      | None -> a_link_of_uri ?fragment:None
     in
-    `Project (project', get ~default args "version" |> Version.parse)
-  | Document.Deadlink _ -> assert false
+    Lwt.return [link uri contents]
+  | _ -> assert false
 
-let force_project_and_version bi args =
-  match get_project_and_version bi args with
-  | `Project (p, v) -> p, v
-  | `Maybe_in_args ->
-    let project = get args "project" in
-    let default =
-      (Projects.get project).Projects.latest |>
-      Version.to_string
+let api_link prefix file root api contents = function
+  | [project; subproject; text; Some version] ->
+    let id = Api.parse_contents (contents >>= String.trim) in
+    let base = match (project, subproject) with
+      | (Some p, Some s) -> cat [Utils.rewind root file; ".."; ".."; p; "latest"; api; s]
+      | (Some p, None) -> cat [Utils.rewind root file; ".."; ".."; p; "latest"; api]
+      | (None, Some s) -> cat [Utils.rewind root file; api; s]
+      | (None, None) -> Filename.concat (Utils.rewind root file) api
     in
-    project, get ~default args "version" |> Version.parse
+    let uri = Filename.concat base @@ Api.path_of_id ?prefix id in
+    let fragment = Api.fragment_of_id id in
+    let body = text |? (Api.string_of_id ~spacer:"." id) in
+    Lwt.return [a_link_of_uri ?fragment uri (Some body)]
+  | _ -> assert false
 
-let make_project bi args page =
-  let project, version = force_project_and_version bi args in
-  Document.Project {project; version; page}, project
-
-let a_class project =
-  Html.a_class ["ocsforge_doclink_" ^ project]
-
-let manual_link bi args contents =
-  let project, version = force_project_and_version bi args in
-  let chapter =
-    let default =
-      (Projects.get project).Projects.manual_main |>
-      How_lib.Option.default_to "intro"
-    in
-    get ~default args "chapter"
-  in
-  let fragment = get_opt args "fragment" in
-  let%lwt contents =
-    match contents with
-    | Some contents ->
-      Wiki_syntax.xml_of_wiki
-        (Wiki_syntax.cast_niwp Wiki_syntax.phrasing_wikicreole_parser)
-        bi
-        contents
-    | None -> Lwt.fail (Error.Error "Empty contents")
-  in
-  let doc =
-    Document.Project {project; version; page = Document.Manual chapter}
-  in
-  let href = Html.a_href (Document.to_uri ?fragment doc) in
-  bi.Wiki_widgets_interface.bi_add_link doc;
-  Lwt.return [Html.a ~a:[a_class project; href] contents]
-
-let local_link bi args =
-  let src = get args "src" in
-  match bi.Wiki_widgets_interface.bi_page with
-  | Document.Project _ ->
-    make_project bi args (Document.Static (src, `File)) |> fun (d, p) ->
-    d, Some p
-  | _ ->
-    if List.mem_assoc "project" args then
-      make_project bi args (Document.Static (src, `File)) |> fun (d, p) ->
-      d, Some p
-    else
-      Document.Site src, None
-
-let files_link bi args contents =
-  let contents =
-    match contents with
-    | None -> [Html.pcdata (Filename.basename (get args "src"))]
-    | Some contents -> [Html.pcdata contents]
-  in
-  let doc, project = local_link bi args in
-  let href = Html.a_href @@ Document.to_uri doc in
-  let a =
-    href ::
-    match project with
-    | None -> []
-    | Some p -> [a_class p]
-  in
-  bi.Wiki_widgets_interface.bi_add_link doc;
-  Lwt.return [Html.a ~a contents]
-
-let files_img bi args contents =
-  let doc, _ = local_link bi args in
-  let alt =
-    match contents with
-    | None -> Filename.basename (get args "src")
-    | Some contents -> contents
-  in
-  let src = Document.to_uri doc in
-  Lwt.return [ Html.img ~src ~alt () ]
-
-let api prefix bi args contents =
-  let id = parse_contents (How_lib.Option.map String.trim contents) in
-  let doc, project =
-    let project, version = force_project_and_version bi args in
-    let subproject =
-      match get_opt args "subproject" with
-      | Some subproject -> subproject
-      | None ->
-        match bi.Wiki_widgets_interface.bi_page with
-        | Document.Project {page = Document.Api {subproject; _}; _}
-          when subproject <> ""
-          && (Projects.get project).Projects.default_subproject <> "" ->
-            subproject
-        | _ -> (Projects.get project).Projects.default_subproject
-    in
-    let file = path_of_id ?prefix id in
-    let page = Document.Api {subproject; file} in
-    Document.Project {project; version; page}, project
-  in
-  let default = string_of_id ~spacer:".​" id in
-  let body = [Html.pcdata @@ get ~default args "text"] in
-  let fragment = fragment_of_id id in
-  let href = Html.a_href @@ Document.to_uri ?fragment doc in
-  bi.Wiki_widgets_interface.bi_add_link doc;
-  Lwt.return [Html.a ~a:[a_class project; href] body]
-
-
-let init () =
-  register "a_api_type" (api (Some "type_"));
-  register "a_api_code" (api (Some "code_"));
-  register "a_api" (api None);
-  register "a_manual" manual_link;
-  register "a_file" files_link;
-  register "a_img" files_img
+let init file root manual api = Extensions.(
+    register "a_manual"
+      ["project"; "chapter"; "fragment"; "version"]
+      ~defaults:[None; None; None; Some "latest"]
+      (manual_link file root manual);
+    [None; Some "type"; Some "code"] |> List.iter (fun p ->
+        let name = "a_api" ^ (p >>= (fun p -> "_" ^ p) |? "") in
+        let prefix = p >>= (fun p -> p ^ "_") in
+        register name
+          ["project"; "subproject"; "text"; "version"]
+          ~defaults:[None; None; None; Some "latest"]
+          (api_link prefix file root api)))

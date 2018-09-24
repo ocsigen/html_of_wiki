@@ -3,13 +3,14 @@
    Converts a wikicreole file into an HTML file.
    See README.md for build instructions.
 *)
+open Utils.Operators
 
 let compile text = Wiki_syntax.(
     let par = cast_wp wikicreole_parser in
     let bi = Wiki_widgets_interface.{
         bi_page = Site "";
         bi_sectioning = false;
-        bi_add_link = (fun _ -> ());
+        bi_add_link = ignore;
         bi_content = Lwt.return [];
         bi_title = "";
       }
@@ -84,41 +85,26 @@ let get_output_channel output_channel file = match output_channel with
   | Some out -> out
   | None -> open_out @@ infer_output_file file
 
-let process_file output_channel file =
+
+let process_file root manual api output_channel file =
+  Links.init file root manual api;
   get_output_channel output_channel file |> ohow file
 
-let main print outfile files =
-  if List.for_all Sys.file_exists files
-  then
-    ((match (outfile, print) with
-        | (Some file, _) -> Some (open_out file)
-        | (None, true) -> Some stdout
-        | _ -> None)
-     |> process_file
-     |> List.map) @@ files
-  else
-    (* NOTE should not happen because Cmdliner checks that *)
-    failwith "Some input files doesn't exist..."
+let check_errors : (string * bool lazy_t) list -> unit =
+  List.iter (fun (err, b) -> if Lazy.force b then () else failwith err)
 
-let () = Cmdliner.(
-    let file_cmd =
-      let doc = "The wikicreole file to convert to HTML." in
-      Arg.(non_empty & pos_all file [] & info [] ~docv:"FILE" ~doc)
-    in
-    let print_cmd =
-      let doc = "Print the HTML to stdout." in
-      Arg.(value & flag & info ["p"; "print"] ~doc)
-    in
-    let outfile_cmd =
-      let doc = "Writes the HTML into the given file. Always overwrites.
-Overrides --print." in
-      Arg.(value & opt (some string) None & info ["o"; "output"]
-             ~docv:"FILE" ~doc)
-    in
-    let info_cmd =
-      let doc = "Converts a wikicreole file into an HTML file." in
-      let man = [] in
-      Term.info "ohow" ~version:"v0.0.0" ~doc ~exits:Term.default_exits ~man
-    in
-    let ohow_cmd = Term.(const main $ print_cmd $ outfile_cmd $ file_cmd) in
-    Term.(exit @@ eval (ohow_cmd, info_cmd)))
+let main print outfile root manual api files =
+  check_errors [("Some input files doesn't exist...",
+                 lazy (List.for_all Sys.file_exists files))];
+  Wiki_ext.init ();
+  let root = Utils.realpath root in
+  let manual = Utils.path_rm_prefix root @@ Utils.realpath manual in
+  let api = Utils.path_rm_prefix root @@ Utils.realpath api in
+  ((match (outfile, print) with
+      | (Some file, _) -> Some (open_out file)
+      | (None, true) -> Some stdout
+      | _ -> None)
+   |> process_file root manual api
+   |> List.iter) @@ files
+
+let () = Cli.run main
