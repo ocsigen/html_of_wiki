@@ -43,3 +43,31 @@ let rec remove_prefixl l l' = match (l, l') with
 
 let path_rm_prefix prefix p = (* works the other way round ;) *)
   remove_prefixl (list_of_path prefix) (list_of_path p) |> path_of_list
+
+let read_in_channel ic =
+  let rec readall () =
+    try
+      let line = input_line ic in
+      line :: readall ()
+    with End_of_file -> []
+  in
+  String.concat "\n" @@ readall ()
+
+let readfile file =
+  let ic = open_in file in
+  let result = read_in_channel ic in
+  close_in ic;
+  result
+
+
+let compile text = Wiki_syntax.(
+    let par = cast_wp wikicreole_parser in
+    let bi = Wiki_widgets_interface.{
+        bi_page = Site "";
+        bi_sectioning = false;
+        bi_add_link = ignore;
+        bi_content = Lwt.return [];
+        bi_title = "";
+      }
+    in
+    Lwt_main.run @@ xml_of_wiki par bi text)

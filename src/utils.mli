@@ -29,3 +29,13 @@ val remove_prefixl : 'a list -> 'a list -> 'a list
 
 (** Does the same work thab remove_prefixl but for paths. *)
 val path_rm_prefix : string -> string -> string
+
+(** Reads all the content of ic and returns it as a string. *)
+val read_in_channel : in_channel -> string
+
+(** Read all the content of file and returns it as a string. *)
+val readfile : string -> string
+
+
+(** Compile the wikicreole text and returns its Tyxml structure. *)
+val compile : string -> Html_types.flow5 Tyxml.Html.elt list
