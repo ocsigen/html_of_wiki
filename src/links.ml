@@ -3,8 +3,8 @@ open Tyxml
 
 let cat = Utils.path_of_list
 
-let a_link_of_uri ?fragment uri contents =
-  let uri = uri ^ ".html" ^ (fragment >>= (fun f -> "#" ^ f) |? "") in
+let a_link_of_uri ?fragment ?suffix uri contents =
+  let uri = uri ^ (suffix |? "") ^ (fragment >>= (fun f -> "#" ^ f) |? "") in
   Html.a ~a:[Html.a_href uri] [Html.pcdata (contents |? uri)]
 
 let manual_link file root manual contents = function
@@ -22,7 +22,7 @@ let manual_link file root manual contents = function
       | Some fragment -> a_link_of_uri ~fragment
       | None -> a_link_of_uri ?fragment:None
     in
-    Lwt.return [link uri contents]
+    Lwt.return [link ~suffix:".html" uri contents]
   | _ -> assert false
 
 let api_link prefix file root api contents = function
@@ -37,10 +37,25 @@ let api_link prefix file root api contents = function
     let uri = Filename.concat base @@ Api.path_of_id ?prefix id in
     let fragment = Api.fragment_of_id id in
     let body = text |? (Api.string_of_id ~spacer:"." id) in
-    Lwt.return [a_link_of_uri ?fragment uri (Some body)]
+    Lwt.return [a_link_of_uri ?fragment ~suffix:".html" uri (Some body)]
   | _ -> assert false
 
-let init file root manual api = Extensions.(
+let img_link file root images contents = function
+  | [Some src] ->
+    let uri = cat [Utils.rewind root file; images; src] in
+    let alt = Filename.basename src in
+    Lwt.return [Html.img ~src:uri ~alt ()]
+  | [None] -> failwith "a_img: no src argument error"
+  | _ -> assert false
+
+let file_link file root assets contents = function
+  | [Some src] ->
+    let uri = cat [Utils.rewind root file; assets; src] in
+    Lwt.return [a_link_of_uri uri (Some (contents |? Filename.basename uri))]
+  | [None] -> failwith "a_file: no src argument error"
+  | _ -> assert false
+
+let init file root manual api images assets = Extensions.(
     register "a_manual"
       ["project"; "chapter"; "fragment"; "version"]
       ~defaults:[None; None; None; Some "latest"]
@@ -51,4 +66,6 @@ let init file root manual api = Extensions.(
         register name
           ["project"; "subproject"; "text"; "version"]
           ~defaults:[None; None; None; Some "latest"]
-          (api_link prefix file root api)))
+          (api_link prefix file root api));
+    register "a_img" ["src"] (img_link file root images);
+    register "a_file" ["src"] (file_link file root assets))

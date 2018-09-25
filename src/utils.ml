@@ -10,9 +10,13 @@ end
 
 let path_of_list = List.fold_left Filename.concat ""
 
-let rec list_of_path = function
-  | "/" | "." as p -> [p]
-  | p -> (Filename.basename p) :: list_of_path (Filename.dirname p)
+let list_of_path p =
+  let rec list_of_path = function
+    | "." -> []
+    | "/" | ".." as p -> [p]
+    | p -> (Filename.basename p) :: list_of_path (Filename.dirname p)
+  in
+  list_of_path p |> List.rev
 
 let realpath = function
   | p when Filename.is_relative p -> Filename.concat (Sys.getcwd ()) p
@@ -38,5 +42,4 @@ let rec remove_prefixl l l' = match (l, l') with
   | (_, _) -> failwith "remove_prefixl: no list is a prefix of the other"
 
 let path_rm_prefix prefix p = (* works the other way round ;) *)
-  let revlop p = list_of_path p |> List.rev in
-  remove_prefixl (revlop prefix) (revlop p) |> List.rev |> path_of_list
+  remove_prefixl (list_of_path prefix) (list_of_path p) |> path_of_list

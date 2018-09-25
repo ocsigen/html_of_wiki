@@ -28,6 +28,16 @@ let api_cmd =
   Cmdliner.Arg.(value & opt string cwd & info ["api"]
                   ~docv:"DIR" ~doc)
 
+let img_cmd =
+  let doc = "Use the given image directory path." in
+  Cmdliner.Arg.(value & opt string cwd & info ["images"]
+                  ~docv:"DIR" ~doc)
+
+let assets_cmd =
+  let doc = "Use the given assets directory path." in
+  Cmdliner.Arg.(value & opt string cwd & info ["assets"]
+                  ~docv:"DIR" ~doc)
+
 let info_cmd = Cmdliner.(
     let doc = "Converts a wikicreole file into an HTML file." in
     let man = [
@@ -95,6 +105,8 @@ let run main =
       $ root_cmd
       $ manual_cmd
       $ api_cmd
+      $ img_cmd
+      $ assets_cmd
       $ file_cmd)
   in
   Cmdliner.Term.(exit @@ eval (ohow_cmd, info_cmd))
