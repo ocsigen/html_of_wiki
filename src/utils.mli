@@ -7,6 +7,13 @@ module Operators : sig
   val (|?) : 'a option -> 'a -> 'a
 end
 
+(** The identity function. *)
+val id : 'a -> 'a
+
+(** Continuation argument zipper.
+    [f (fun a -> g (fun b -> ...))] = [zipk f g (fun a b -> ...)] *)
+val zipk : (('a -> 'b) -> 'c) -> (('d -> 'e) -> 'b) -> ('a -> 'd -> 'e) -> 'c
+
 (** Concatenates the paths together in one single path *)
 val path_of_list : string list -> string
 (** Splits the given path in a list of basenames *)

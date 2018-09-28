@@ -8,6 +8,12 @@ module Operators = struct
     | None -> default
 end
 
+
+let id x = x
+
+let zipk f g k = f (fun fk -> g (fun gk -> k fk gk))
+
+
 let path_of_list = List.fold_left Filename.concat ""
 
 let list_of_path p =
@@ -30,7 +36,7 @@ let rec path_eql p p' = match (p, p') with
 let rewind dir file =
   let dir = realpath dir in
   let rec rew = function
-    | p when path_eql p dir -> ""
+    | p when path_eql p dir -> "."
     | "." | "/" -> failwith @@ "rewind: " ^ file ^ " cannot be rewinded to dir " ^ dir
     | p -> Filename.concat ".." @@ rew @@ Filename.dirname p
   in
