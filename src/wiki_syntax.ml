@@ -147,16 +147,16 @@ let uri_of_href = function
   | Document {document; fragment} -> Document.to_uri ?fragment document
 
 let link_regexp =
-  Re_pcre.regexp "([a-z|A-Z-1-9]+)(\\((.*)\\))?:(.*)"
-let wiki_title_regexp = Re_pcre.regexp "\"([a-z|A-Z_][a-zA-Z_0-9-]*)\""
-let wiki_id_regexp = Re_pcre.regexp "([0-9]+)"
+  Re.Pcre.regexp "([a-z|A-Z-1-9]+)(\\((.*)\\))?:(.*)"
+let wiki_title_regexp = Re.Pcre.regexp "\"([a-z|A-Z_][a-zA-Z_0-9-]*)\""
+let wiki_id_regexp = Re.Pcre.regexp "([0-9]+)"
 let prototype_group = 1
 let wiki_id_parentheses_group = 2 (* with ()... *)
 let wiki_id_group = 3
 let page_group = 4
 
 let replace_regexp_group ~str ~result ~group ~replacement =
-  let open Re_pcre in
+  let open Re.Pcre in
   let before =
     String.sub str 0 (Re.Group.start result group)
   in
