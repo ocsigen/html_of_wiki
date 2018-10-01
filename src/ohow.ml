@@ -52,7 +52,7 @@ let infer_output_file file = (infer_wiki_name file) ^ ".html"
 let ohow file oc =
   file
   |> Utils.readfile
-  |> Utils.compile
+  |> Wiki_syntax.compile
   |> build_page
   |> pprint oc;
   close_out oc

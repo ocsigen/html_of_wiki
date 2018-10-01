@@ -14,6 +14,9 @@ val id : 'a -> 'a
     [f (fun a -> g (fun b -> ...))] = [zipk f g (fun a b -> ...)] *)
 val zipk : (('a -> 'b) -> 'c) -> (('d -> 'e) -> 'b) -> ('a -> 'd -> 'e) -> 'c
 
+(** [trim c s] returns [s] with the trailing occurences of [c] removed. *)
+val trim : char -> string -> string
+
 (** Concatenates the paths together in one single path *)
 val path_of_list : string list -> string
 (** Splits the given path in a list of basenames *)
@@ -37,12 +40,11 @@ val remove_prefixl : 'a list -> 'a list -> 'a list
 (** Does the same work thab remove_prefixl but for paths. *)
 val path_rm_prefix : string -> string -> string
 
+(** [uri_absolute uri] returns whether [uri] is an absolute URI. *)
+val uri_absolute : string -> bool
+
 (** Reads all the content of ic and returns it as a string. *)
 val read_in_channel : in_channel -> string
 
 (** Read all the content of file and returns it as a string. *)
 val readfile : string -> string
-
-
-(** Compile the wikicreole text and returns its Tyxml structure. *)
-val compile : string -> Html_types.flow5 Tyxml.Html.elt list

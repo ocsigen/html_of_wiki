@@ -14,6 +14,16 @@ let id x = x
 let zipk f g k = f (fun fk -> g (fun gk -> k fk gk))
 
 
+let trim char string =
+  let rem_first s = String.sub s 1 (String.length s - 1) in
+  let rec trim = function
+    | "" -> ""
+    | s when s.[0] = char -> trim @@ rem_first s
+    | s -> s
+  in
+  trim string
+
+
 let path_of_list = List.fold_left Filename.concat ""
 
 let list_of_path p =
@@ -50,6 +60,14 @@ let rec remove_prefixl l l' = match (l, l') with
 let path_rm_prefix prefix p = (* works the other way round ;) *)
   remove_prefixl (list_of_path prefix) (list_of_path p) |> path_of_list
 
+
+let uri_absolute =
+  let rex = Re.Pcre.regexp "^(http|https|file|localhost:\\d+)://" in
+  Re.Pcre.pmatch ~rex
+
+
+
+
 let read_in_channel ic =
   let rec readall () =
     try
@@ -64,16 +82,3 @@ let readfile file =
   let result = read_in_channel ic in
   close_in ic;
   result
-
-
-let compile text = Wiki_syntax.(
-    let par = cast_wp wikicreole_parser in
-    let bi = Wiki_widgets_interface.{
-        bi_page = Site "";
-        bi_sectioning = false;
-        bi_add_link = ignore;
-        bi_content = Lwt.return [];
-        bi_title = "";
-      }
-    in
-    Lwt_main.run @@ xml_of_wiki par bi text)
