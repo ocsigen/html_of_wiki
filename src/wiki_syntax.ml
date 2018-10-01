@@ -212,7 +212,7 @@ let rec deabbrev_address = function
 let wiki_kind prot page =
   let is_number = Re.Pcre.(pmatch ~rex:(regexp "^\\d+$")) in
   let extract_wiki_name quoted_wiki =
-    match Re.Pcre.(exec ~rex:(regexp "^\"(\\w+)\"$") quoted_wiki) with
+    match Re.Pcre.(exec ~rex:(regexp "^\"([a-zA-Z0-9_-]+)\"$") quoted_wiki) with
     | exception Not_found -> failwith @@ "invalid wiki name: " ^ quoted_wiki
     | groups -> Re.Pcre.get_substring groups 1
   in
