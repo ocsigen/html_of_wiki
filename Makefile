@@ -6,5 +6,9 @@ all:
 ohow:
 	ocamlbuild -use-ocamlfind -ocamlc "ocamlc ${CFLAGS}" src/ohow.byte
 
+wit:
+	ocamlbuild -use-ocamlfind -ocamlc "ocamlc ${CFLAGS}" src/wit.byte
+
+
 clean:
 	ocamlbuild -clean

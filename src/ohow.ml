@@ -5,18 +5,6 @@
 *)
 open Utils.Operators
 
-let compile text = Wiki_syntax.(
-    let par = cast_wp wikicreole_parser in
-    let bi = Wiki_widgets_interface.{
-        bi_page = Site "";
-        bi_sectioning = false;
-        bi_add_link = ignore;
-        bi_content = Lwt.return [];
-        bi_title = "";
-      }
-    in
-    Lwt_main.run @@ xml_of_wiki par bi text)
-
 let build_page content =
   let rec flatten elt = Tyxml_xml.(
       match content elt with
@@ -52,18 +40,6 @@ let build_page content =
                 (head (title (pcdata ti)) [])
                 (body content))
 
-let readfile file =
-  let ic = open_in file in
-  let rec readall () =
-    try
-      let line = input_line ic in
-      line :: readall ()
-    with End_of_file -> []
-  in
-  let lines = readall() in
-  close_in ic;
-  String.concat "\n" lines
-
 let pprint oc html =
   let fmt = Format.formatter_of_out_channel oc in
   Tyxml.Html.pp_elt () fmt html;
@@ -75,8 +51,8 @@ let infer_output_file file = (infer_wiki_name file) ^ ".html"
 
 let ohow file oc =
   file
-  |> readfile
-  |> compile
+  |> Utils.readfile
+  |> Utils.compile
   |> build_page
   |> pprint oc;
   close_out oc
