@@ -1098,7 +1098,7 @@ module FlowBuilder = struct
     let addr, text = match addr with
       | Absolute "" -> "", Some "."
       | Absolute a when Utils.uri_absolute a -> a, None
-      | Absolute a -> a ^ suffix, Some (Filename.basename a)
+      | Absolute a -> a ^ suffix, None
       | _ -> assert false
     in
     Lwt_list.map_s (fun x -> x) c >|= List.flatten >|= fun c ->
