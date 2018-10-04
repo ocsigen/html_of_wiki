@@ -6,8 +6,8 @@ let doctree _ args _ =
   let {Cli.root; manual; api} = Cli.options () in
   let proot = [root] in (* root is an absolute path *)
   let pman = proot @ [manual] in
-  let pman_menu = Utils.path_of_list (pman @ ["menu.wiki"]) in
-  let papi_menus = Utils.find_files "menu.wiki" @@ Utils.path_of_list (proot @ [api]) in
+  let pman_menu = Pxu.path_of_list (pman @ ["menu.wiki"]) in
+  let papi_menus = Utils.find_files "menu.wiki" @@ Pxu.path_of_list (proot @ [api]) in
 
   let menu_exc_msg =
     Printf.sprintf "missing required file %s for doctree" pman_menu
@@ -49,13 +49,13 @@ let docversion bi args contents =
   let attrs = Wiki_syntax.parse_common_attribs args in
   let file = Global.current_file () in
   let {Cli.root} = Cli.options () in
-  let versions_dir = Utils.path_of_list [root; ".."] in
+  let versions_dir = Pxu.path_of_list [root; ".."] in
   let versions = versions_dir
                  |> Utils.a'_sorted_dir_files
-                 |> List.filter Utils.is_visible_dir
+                 |> List.filter Pxu.is_visible_dir
   in
   let links = versions |> List.map (fun v ->
-      let dst = Utils.(path_of_list [rewind root file; ".."; v; "index.html"]) in
+      let dst = Pxu.(path_of_list [rewind root file; ".."; v; "index.html"]) in
       option ~a:[a_value dst] (pcdata v))
   in
   `Flow5 (Lwt.return [pcdata "Version ";

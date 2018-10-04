@@ -91,8 +91,8 @@ let main {Cli.print; outfile; root; manual; api; images; assets; files} =
   Utils.check_errors [("Some input files doesn't exist...",
                        lazy (List.for_all Sys.file_exists files))];
   init_extensions ();
-  let root = Utils.realpath root in
-  let relative_to_root p = Utils.path_rm_prefix root @@ Utils.realpath p in
+  let root = Pxu.realpath root in
+  let relative_to_root p = Pxu.path_rm_prefix root @@ Pxu.realpath p in
   let manual = relative_to_root manual in
   let api = relative_to_root api in
   let images = relative_to_root images in
