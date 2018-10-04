@@ -78,8 +78,6 @@ let process_file {Cli.root; manual; api; images; assets} output_channel file =
   Global.with_current_file file (fun () ->
       get_output_channel output_channel file |> ohow file)
 
-let check_errors : (string * bool lazy_t) list -> unit =
-  List.iter (fun (err, b) -> if Lazy.force b then () else failwith err)
 
 let init_extensions () =
   Wiki_ext.init ();
@@ -90,8 +88,8 @@ let init_extensions () =
   Site_ocsimore.init ()
 
 let main {Cli.print; outfile; root; manual; api; images; assets; files} =
-  check_errors [("Some input files doesn't exist...",
-                 lazy (List.for_all Sys.file_exists files))];
+  Utils.check_errors [("Some input files doesn't exist...",
+                       lazy (List.for_all Sys.file_exists files))];
   init_extensions ();
   let root = Utils.realpath root in
   let relative_to_root p = Utils.path_rm_prefix root @@ Utils.realpath p in

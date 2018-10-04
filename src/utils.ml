@@ -13,6 +13,8 @@ let id x = x
 
 let zipk f g k = f (fun fk -> g (fun gk -> k fk gk))
 
+let check_errors =
+  List.iter (fun (err, b) -> if Lazy.force b then () else failwith err)
 
 let trim char string =
   let rem_first s = String.sub s 1 (String.length s - 1) in
@@ -25,6 +27,9 @@ let trim char string =
 
 
 let path_of_list = List.fold_left Filename.concat ""
+let sorted_dir_files sort dir = Sys.readdir dir |> Array.to_list |> sort
+let dir_files = sorted_dir_files id
+let a'_sorted_dir_files = sorted_dir_files (List.sort compare)
 
 let list_of_path p =
   let rec list_of_path = function
@@ -59,6 +64,19 @@ let rec remove_prefixl l l' = match (l, l') with
 
 let path_rm_prefix prefix p = (* works the other way round ;) *)
   remove_prefixl (list_of_path prefix) (list_of_path p) |> path_of_list
+
+let is_visible = function "" -> false | f -> f.[0] <> '.'
+let is_visible_dir d = Sys.is_directory d && is_visible d
+
+(* FIXME use Lwt_unix.files_of_directory *)
+let rec find_files name = function
+  | file when Filename.basename file = name -> [file]
+  | dir when Sys.is_directory dir ->
+    dir_files dir
+    |> List.map (fun f -> path_of_list [dir; f])
+    |> List.map (find_files name)
+    |> List.concat
+  | _ -> []
 
 
 let uri_absolute =
