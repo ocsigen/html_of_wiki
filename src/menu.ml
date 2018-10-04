@@ -3,7 +3,7 @@ open Tyxml.Html
 
 let doctree _ args _ =
   let attrs = Wiki_syntax.parse_common_attribs args in
-  let {Cli.root; manual; api} = Cli.options () in
+  let {Global.root; manual; api} = Global.options () in
   let proot = [root] in (* root is an absolute path *)
   let pman = proot @ [manual] in
   let pman_menu = Pxu.path_of_list (pman @ ["menu.wiki"]) in
@@ -48,7 +48,7 @@ let doctree _ args _ =
 let docversion bi args contents =
   let attrs = Wiki_syntax.parse_common_attribs args in
   let file = Global.current_file () in
-  let {Cli.root} = Cli.options () in
+  let root = Global.root () in
   let versions_dir = Pxu.path_of_list [root; ".."] in
   let versions = versions_dir
                  |> Utils.a'_sorted_dir_files

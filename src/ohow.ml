@@ -74,7 +74,7 @@ let get_output_channel output_channel file = match output_channel with
   | None -> open_out @@ infer_output_file file
 
 
-let process_file {Cli.root; manual; api; images; assets} output_channel file =
+let process_file {Global.root; manual; api; images; assets} output_channel file =
   Global.with_current_file file (fun () ->
       get_output_channel output_channel file |> ohow file)
 
@@ -87,7 +87,7 @@ let init_extensions () =
   Only.init ();
   Site_ocsimore.init ()
 
-let main {Cli.print; outfile; root; manual; api; images; assets; files} =
+let main {Global.print; outfile; root; manual; api; images; assets; files} =
   Utils.check_errors [("Some input files doesn't exist...",
                        lazy (List.for_all Sys.file_exists files))];
   init_extensions ();
@@ -97,13 +97,13 @@ let main {Cli.print; outfile; root; manual; api; images; assets; files} =
   let api = relative_to_root api in
   let images = relative_to_root images in
   let assets = relative_to_root assets in
-  Cli.with_options {print; outfile; root; manual; api; images; assets; files}
+  Global.with_options {print; outfile; root; manual; api; images; assets; files}
     (fun () ->
        ((match (outfile, print) with
            | (Some file, _) -> Some (open_out file)
            | (None, true) -> Some stdout
            | _ -> None)
-        |> process_file @@ Cli.options ()
+        |> process_file @@ Global.options ()
         |> List.iter) @@ files)
 
 let () = Cli.run main

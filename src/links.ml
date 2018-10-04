@@ -10,7 +10,7 @@ let a_link_of_uri ?fragment ?suffix uri contents =
 let manual_link contents = function
   | [project; chapter; fragment; Some version] ->
     let file = Global.current_file () in
-    let {Cli.root; manual} = Cli.options () in
+    let {Global.root; manual} = Global.options () in
     let uri = match (project, chapter) with
       | (Some p, Some c) -> cat [Pxu.rewind root file; (* inside this version dir *)
                                  ".."; (* inside all versions dir *)
@@ -30,7 +30,7 @@ let manual_link contents = function
 let api_link prefix contents = function
   | [project; subproject; text; Some version] ->
     let file = Global.current_file () in
-    let {Cli.root; api} = Cli.options () in
+    let {Global.root; api} = Global.options () in
     let id = Api.parse_contents (contents >>= String.trim) in
     let base = match (project, subproject) with
       | (Some p, Some s) -> cat [Pxu.rewind root file; ".."; ".."; p; "latest"; api; s]
@@ -47,7 +47,7 @@ let api_link prefix contents = function
 let img_link contents = function
   | [Some src] ->
     let file = Global.current_file () in
-    let {Cli.root; images} = Cli.options () in
+    let {Global.root; images} = Global.options () in
     let uri = cat [Pxu.rewind root file; images; src] in
     let alt = Filename.basename src in
     Lwt.return [Html.img ~src:uri ~alt ()]
@@ -57,7 +57,7 @@ let img_link contents = function
 let file_link contents = function
   | [Some src] ->
     let file = Global.current_file () in
-    let {Cli.root; assets} = Cli.options () in
+    let {Global.root; assets} = Global.options () in
     let uri = cat [Pxu.rewind root file; assets; src] in
     Lwt.return [a_link_of_uri uri (Some (contents |? Filename.basename uri))]
   | [None] -> failwith "a_file: no src argument error"

@@ -1,3 +1,9 @@
+let parent = ".."
+let current = "."
+let up = parent
+let here = current
+
+
 let path_of_list = List.fold_left Filename.concat ""
 
 let list_of_path p =

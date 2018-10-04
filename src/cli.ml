@@ -98,35 +98,9 @@ manual directory and the api directory."
     Term.info "ohow" ~version:"v0.0.0" ~doc ~exits:Term.default_exits ~man)
 
 
-type cli_options = {
-  files: string list;
-  print: bool;
-  outfile: string option;
-  root: string;
-  manual: string;
-  api: string;
-  images: string;
-  assets: string;
-}
-let ref_options : cli_options option ref = ref None
-
-let with_options opts k =
-  let old = !ref_options in
-  ref_options := Some opts;
-  let r = k () in
-  ref_options := old;
-  r
-
-let using_options k = match !ref_options with
-  | Some options -> k options
-  | None -> failwith "Cli.options isn't properly intialized."
-
-let options () = using_options Utils.id
-
 let register_options k print outfile root manual api images assets files =
-  let opts = {print; outfile; root; manual; api; images; assets; files} in
-  ref_options := Some opts;
-  k opts
+  let opts = {Global.print; outfile; root; manual; api; images; assets; files} in
+  Global.with_options opts (fun () -> k opts)
 
 let run main =
   let ohow_cmd = Cmdliner.Term.(

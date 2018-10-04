@@ -225,12 +225,12 @@ let wiki_kind prot page =
     | wiki ->
       let wiki = extract_wiki_name wiki in
       let file = Global.current_file () in
-      let {Cli.root} = Cli.options () in
+      let root = Global.root () in
       Absolute (Pxu.(path_of_list [rewind root file; ".."; ".."; wiki; page]))
 
 let this_wiki_kind prot page =
   let file = Global.current_file () in
-  let {Cli.root} = Cli.options () in
+  let root = Global.root () in
   Absolute (Pxu.(path_of_list [rewind root file; page]))
 
 let link_kind bi addr =
@@ -241,7 +241,7 @@ let link_kind bi addr =
       | "href" -> Absolute page
       | "site" ->
         let file = Global.current_file () in
-        let {Cli.root} = Cli.options () in
+        let root = Global.root () in
         Absolute Pxu.(path_of_list [rewind root file; ".."; ".."; (Utils.trim '/' page)])
       | p when starts_with "wiki(" p -> wiki_kind p page
       | p when starts_with "wiki" p -> this_wiki_kind p page

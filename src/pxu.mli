@@ -1,3 +1,8 @@
+val parent : string
+val current : string
+val up : string
+val here : string
+
 (** Concatenates the paths together in one single path *)
 val path_of_list : string list -> string
 
