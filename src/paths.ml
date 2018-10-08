@@ -1,8 +1,7 @@
-let parent = ".."
-let current = "."
-let up = parent
-let here = current
+let up = ".."
+let here = "."
 
+let (+/+) = Filename.concat
 
 let path_of_list = List.fold_left Filename.concat ""
 
@@ -39,7 +38,6 @@ let rec remove_prefixl l l' = match (l, l') with
 
 let path_rm_prefix prefix p = (* works the other way round ;) *)
   remove_prefixl (list_of_path prefix) (list_of_path p) |> path_of_list
-
 
 let is_visible = function "" -> false | f -> f.[0] <> '.'
 let is_visible_dir d = Sys.is_directory d && is_visible d

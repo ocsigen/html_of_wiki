@@ -5,6 +5,9 @@ module Operators : sig
 
   (** Elvis operator *)
   val (|?) : 'a option -> 'a -> 'a
+
+  (** Path concatenation operator. See module [Pxu]. *)
+  val (+/+) : string -> string -> string
 end
 
 (** The identity function. *)

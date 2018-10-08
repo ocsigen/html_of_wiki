@@ -226,12 +226,12 @@ let wiki_kind prot page =
       let wiki = extract_wiki_name wiki in
       let file = Global.current_file () in
       let root = Global.root () in
-      Absolute (Paths.(path_of_list [rewind root file; ".."; ".."; wiki; page]))
+      Absolute (Paths.(rewind root file +/+ up +/+ up +/+ wiki +/+ page))
 
 let this_wiki_kind prot page =
   let file = Global.current_file () in
   let root = Global.root () in
-  Absolute (Paths.(path_of_list [rewind root file; page]))
+  Absolute (Paths.(rewind root file +/+ page))
 
 let link_kind bi addr =
   match deabbrev_address addr |> String.split_on_char ':' with
@@ -242,7 +242,7 @@ let link_kind bi addr =
       | "site" ->
         let file = Global.current_file () in
         let root = Global.root () in
-        Absolute Paths.(path_of_list [rewind root file; ".."; ".."; (Utils.trim '/' page)])
+        Absolute Paths.(rewind root file +/+ up +/+ up +/+ (Utils.trim '/' page))
       | p when starts_with "wiki(" p -> wiki_kind p page
       | p when starts_with "wiki" p -> this_wiki_kind p page
       | _ -> failwith @@ "unknown prototype: '" ^ p ^ "'"
@@ -967,7 +967,7 @@ let menu_make_href bi c fragment =
   match link_kind bi c with
   | Absolute a as h ->
     let open Utils.Operators in
-    fragment >>= (fun f -> Absolute (Paths.path_of_list [a; "#" ^ f]))
+    fragment >>= (fun f -> Absolute Paths.(a +/+ ("#" ^ f)))
                  |? h
   | _ -> assert false
 
@@ -1112,7 +1112,7 @@ module FlowBuilder = struct
     match link_kind bi c with
     | Absolute a as h ->
       let open Utils.Operators in
-      fragment >>= (fun f -> Absolute (Paths.path_of_list [a; "#" ^ f]))
+      fragment >>= (fun f -> Absolute Paths.(a +/+ ("#" ^ f)))
                    |? h
     | _ -> assert false
 

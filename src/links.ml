@@ -1,8 +1,6 @@
 open Utils.Operators
 open Tyxml
 
-let cat = Paths.path_of_list
-
 let a_link_of_uri ?fragment ?suffix uri contents =
   let uri = uri ^ (suffix |? "") ^ (fragment >>= (fun f -> "#" ^ f) |? "") in
   Html.a ~a:[Html.a_href uri] [Html.pcdata (contents |? uri)]
@@ -12,12 +10,12 @@ let manual_link contents = function
     let file = Global.current_file () in
     let {Global.root; manual} = Global.options () in
     let uri = match (project, chapter) with
-      | (Some p, Some c) -> cat [Paths.rewind root file; (* inside this version dir *)
-                                 ".."; (* inside all versions dir *)
-                                 ".."; (* inside all project dir *)
-                                 p; version; manual; c]
-      | (Some p, None) -> cat [Paths.rewind root file; ".."; ".."; p; version; "index"]
-      | (None, Some c) -> cat [Paths.rewind root file; manual; c]
+      | (Some p, Some c) -> Paths.(rewind root file (* inside this version dir *)
+                                 +/+ ".." (* inside project dir *)
+                                 +/+ ".." (* inside all projects dir *)
+                                 +/+ p +/+ version +/+ manual +/+ c)
+      | (Some p, None) -> Paths.(rewind root file +/+ up +/+ up +/+ p +/+ version +/+ "index")
+      | (None, Some c) -> Paths.(rewind root file +/+ manual +/+ c)
       | (None, None) -> failwith "a_manual: no project nor chapter arg found"
     in
     let link = match fragment with
@@ -33,10 +31,10 @@ let api_link prefix contents = function
     let {Global.root; api} = Global.options () in
     let id = Api.parse_contents (contents >>= String.trim) in
     let base = match (project, subproject) with
-      | (Some p, Some s) -> cat [Paths.rewind root file; ".."; ".."; p; "latest"; api; s]
-      | (Some p, None) -> cat [Paths.rewind root file; ".."; ".."; p; "latest"; api]
-      | (None, Some s) -> cat [Paths.rewind root file; api; s]
-      | (None, None) -> Filename.concat (Paths.rewind root file) api
+      | (Some p, Some s) -> Paths.(rewind root file +/+ up +/+ up +/+ p +/+ "latest" +/+ api +/+ s)
+      | (Some p, None) -> Paths.(rewind root file +/+ up +/+ up +/+ p +/+ "latest" +/+ api)
+      | (None, Some s) -> Paths.(rewind root file +/+ api +/+ s)
+      | (None, None) -> (Paths.rewind root file) +/+ api
     in
     let uri = Filename.concat base @@ Api.path_of_id ?prefix id in
     let fragment = Api.fragment_of_id id in
@@ -48,7 +46,7 @@ let img_link contents = function
   | [Some src] ->
     let file = Global.current_file () in
     let {Global.root; images} = Global.options () in
-    let uri = cat [Paths.rewind root file; images; src] in
+    let uri = Paths.(rewind root file +/+ images +/+ src) in
     let alt = Filename.basename src in
     Lwt.return [Html.img ~src:uri ~alt ()]
   | [None] -> failwith "a_img: no src argument error"
@@ -58,7 +56,7 @@ let file_link contents = function
   | [Some src] ->
     let file = Global.current_file () in
     let {Global.root; assets} = Global.options () in
-    let uri = cat [Paths.rewind root file; assets; src] in
+    let uri = Paths.(rewind root file +/+ assets +/+ src) in
     Lwt.return [a_link_of_uri uri (Some (contents |? Filename.basename uri))]
   | [None] -> failwith "a_file: no src argument error"
   | _ -> assert false
