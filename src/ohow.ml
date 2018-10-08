@@ -52,7 +52,7 @@ let infer_output_file file = (infer_wiki_name file) ^ ".html"
 let ohow file oc =
   file
   |> Utils.readfile
-  |> Utils.compile
+  |> Wiki_syntax.compile
   |> build_page
   |> pprint oc;
   close_out oc
@@ -62,21 +62,22 @@ let get_output_channel output_channel file = match output_channel with
   | None -> open_out @@ infer_output_file file
 
 
-let process_file root manual api images assets output_channel file =
-  Links.init file root manual api images assets;
-  get_output_channel output_channel file |> ohow file
+let process_file {Cli.root; manual; api; images; assets} output_channel file =
+  Global.with_current_file file (fun () ->
+      get_output_channel output_channel file |> ohow file)
 
 let check_errors : (string * bool lazy_t) list -> unit =
   List.iter (fun (err, b) -> if Lazy.force b then () else failwith err)
 
 let init_extensions () =
   Wiki_ext.init ();
+  Links.init ();
   Code.init ();
   Menu.init ();
   Only.init ();
   Site_ocsimore.init ()
 
-let main print outfile root manual api images assets files =
+let main {Cli.print; outfile; root; manual; api; images; assets; files} =
   check_errors [("Some input files doesn't exist...",
                  lazy (List.for_all Sys.file_exists files))];
   init_extensions ();
@@ -86,11 +87,13 @@ let main print outfile root manual api images assets files =
   let api = relative_to_root api in
   let images = relative_to_root images in
   let assets = relative_to_root assets in
-  ((match (outfile, print) with
-      | (Some file, _) -> Some (open_out file)
-      | (None, true) -> Some stdout
-      | _ -> None)
-   |> process_file root manual api images assets
-   |> List.iter) @@ files
+  Cli.with_options {print; outfile; root; manual; api; images; assets; files}
+    (fun () ->
+       ((match (outfile, print) with
+           | (Some file, _) -> Some (open_out file)
+           | (None, true) -> Some stdout
+           | _ -> None)
+        |> process_file @@ Cli.options ()
+        |> List.iter) @@ files)
 
 let () = Cli.run main
