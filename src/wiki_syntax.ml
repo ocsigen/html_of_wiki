@@ -249,6 +249,14 @@ let link_kind bi addr =
     end
   | _ -> failwith @@ "ill formed link: '" ^ addr ^ "'"
 
+let href_of_link_kind bi addr fragment =
+  match link_kind bi addr with
+  | Absolute a as h ->
+    let open Utils.Operators in
+    fragment >>= (fun f -> Absolute Paths.(a +/+ ("#" ^ f)))
+                 |? h
+  | _ -> assert false
+
 (** **)
 
 type preparser = Wiki_syntax_types.preparser
@@ -963,13 +971,7 @@ let make_href bi addr fragment =
     bi.bi_add_link document;
     addr
 
-let menu_make_href bi c fragment =
-  match link_kind bi c with
-  | Absolute a as h ->
-    let open Utils.Operators in
-    fragment >>= (fun f -> Absolute Paths.(a +/+ ("#" ^ f)))
-                 |? h
-  | _ -> assert false
+let menu_make_href = href_of_link_kind
 
 (*******************************************)
 (* Type information for predefined parser. *)
@@ -1108,13 +1110,7 @@ module FlowBuilder = struct
     Lwt_list.map_s (fun x -> x) c >|= List.flatten >|= fun c ->
       [Html.a ~a:(Html.a_href (uri_of_href addr) :: a) c]
 
-  let make_href bi c fragment =
-    match link_kind bi c with
-    | Absolute a as h ->
-      let open Utils.Operators in
-      fragment >>= (fun f -> Absolute Paths.(a +/+ ("#" ^ f)))
-                   |? h
-    | _ -> assert false
+  let make_href = href_of_link_kind
 
   let string_of_href = uri_of_href
 
