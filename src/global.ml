@@ -50,6 +50,7 @@ let api () = (options ()).api
 let images () = (options ()).images
 let assets () = (options ()).assets
 
+(* Preserve absolute path *)
 let version_dir = root
-let project_dir () = Pxu.path_of_list [version_dir (); Pxu.up]
-let all_projects_dir () = Pxu.path_of_list [project_dir (); Pxu.up]
+let project_dir () = version_dir () |> Filename.dirname
+let all_projects_dir () = project_dir () |> Filename.dirname
