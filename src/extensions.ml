@@ -2,7 +2,7 @@ open Utils.Operators
 
 let get_opts ?defaults opts args =
   let values = List.map (Ocsimore_lib.get_opt args) opts in
-  defaults >>= (fun def ->
+  defaults <$> (fun def ->
       List.map2 (fun sx -> function
           | Some d -> Some (sx |? d)
           | None -> sx) values def) |? values

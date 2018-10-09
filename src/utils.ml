@@ -1,5 +1,9 @@
 module Operators = struct
   let (>>=) x f = match x with
+    | Some x -> f x
+    | None -> None
+
+  let (<$>) x f = match x with
     | Some x -> Some (f x)
     | None -> None
 

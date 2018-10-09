@@ -1,7 +1,10 @@
 (** Defines general purpose operators. *)
 module Operators : sig
-  (** Bind operator for Maybe monad *)
-  val (>>=) : 'a option -> ('a -> 'b) -> 'b option
+  (** Bind operator for the Maybe monad *)
+  val (>>=) : 'a option -> ('a -> 'b option) -> 'b option
+
+  (** Map operator for the Maybe monad *)
+  val (<$>) : 'a option -> ('a -> 'b) -> 'b option
 
   (** Elvis operator *)
   val (|?) : 'a option -> 'a -> 'a

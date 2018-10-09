@@ -253,8 +253,7 @@ let href_of_link_kind bi addr fragment =
   match link_kind bi addr with
   | Absolute a as h ->
     let open Utils.Operators in
-    fragment >>= (fun f -> Absolute Paths.(a +/+ ("#" ^ f)))
-                 |? h
+    fragment <$> (fun f -> Absolute Paths.(a +/+ ("#" ^ f))) |? h
   | _ -> assert false
 
 (** **)
@@ -1097,12 +1096,12 @@ module FlowBuilder = struct
                   (* NOTE address is always Some x for now but one could add
                   another case to the matching above in which the original
                   address is to be used. *)
-                  address >>= (fun a -> Absolute a) |? addr)
+                  address <$> (fun a -> Absolute a) |? addr)
                  |> uri_of_href
                  |> Html.a_href
                  |> (fun x -> x :: a))
         (let open Utils.Operators in
-         text >>= (fun t -> [Html.pcdata t]) |? c)
+         text >>= (fun t -> Some [Html.pcdata t]) |? c)
       :> Html_types.phrasing Html.elt)]
 
   let a_elem_flow attribs addr c =

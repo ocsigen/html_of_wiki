@@ -2,7 +2,7 @@ open Utils.Operators
 open Tyxml
 
 let a_link_of_uri ?fragment ?suffix uri contents =
-  let uri = uri ^ (suffix |? "") ^ (fragment >>= (fun f -> "#" ^ f) |? "") in
+  let uri = uri ^ (suffix |? "") ^ (fragment <$> (fun f -> "#" ^ f) |? "") in
   Html.a ~a:[Html.a_href uri] [Html.pcdata (contents |? uri)]
 
 let manual_link contents = function
@@ -29,7 +29,7 @@ let api_link prefix contents = function
   | [project; subproject; text; Some version] ->
     let file = Global.current_file () in
     let {Global.root; api} = Global.options () in
-    let id = Api.parse_contents (contents >>= String.trim) in
+    let id = Api.parse_contents (contents <$> String.trim) in
     let base = match (project, subproject) with
       | (Some p, Some s) -> Paths.(rewind root file +/+ up +/+ up +/+ p +/+ "latest" +/+ api +/+ s)
       | (Some p, None) -> Paths.(rewind root file +/+ up +/+ up +/+ p +/+ "latest" +/+ api)
@@ -68,8 +68,8 @@ let init () = Extensions.(
       ~defaults:[None; None; None; Some "latest"]
       manual_link;
     [None; Some "type"; Some "code"] |> List.iter (fun p ->
-        let name = "a_api" ^ (p >>= (fun p -> "_" ^ p) |? "") in
-        let prefix = p >>= (fun p -> p ^ "_") in
+        let name = "a_api" ^ (p <$> (fun p -> "_" ^ p) |? "") in
+        let prefix = p <$> (fun p -> p ^ "_") in
         register name
           ["project"; "subproject"; "text"; "version"]
           ~defaults:[None; None; None; Some "latest"]
