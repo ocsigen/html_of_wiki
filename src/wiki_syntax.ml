@@ -238,7 +238,19 @@ let link_kind bi addr =
   | p :: rest ->
     let page = String.concat ":" rest in (* the page may contain ':' *)
     begin match p with
-      | "href" -> Absolute page
+      | "href" ->
+        let menu_page = Global.using_menu_file (fun mf ->
+            let {Global.root; manual; api} = Global.options () in
+            let file = Global.current_file () in
+            let is_manual = Pxu.(is_inside_dir (root +/+ manual) file) in
+            let is_api = Pxu.(is_inside_dir (root +/+ api) file) in
+            match mf with
+            | Manual _ when is_manual -> page
+            | Api _ when is_api -> page
+            | Manual _ when is_api -> Pxu.(rewind root file +/+ manual +/+ page)
+            | _ (* api when is_manual *) -> Pxu.(rewind root file +/+ api +/+ page))
+        in
+        Absolute (let open Utils.Operators in menu_page |? page)
       | "site" ->
         let file = Global.current_file () in
         let root = Global.root () in

@@ -20,6 +20,7 @@ let realpath = function
 let rec path_eql p p' = match (p, p') with
   | (".", ".") | ("/", "/") -> true
   | (".", _) | (_, ".") | ("/", _) | (_, "/") -> false
+  | (_, _) when Filename.(basename p <> basename p') -> false
   | (_, _) -> path_eql (Filename.dirname p) (Filename.dirname p')
 
 let rewind dir file =
@@ -30,6 +31,10 @@ let rewind dir file =
     | p -> Filename.concat ".." @@ rew @@ Filename.dirname p
   in
   file |> realpath |> Filename.dirname |> rew
+
+let is_inside_dir dir file = match rewind dir file with
+  | _ -> true
+  | exception Failure _ -> false
 
 let rec remove_prefixl l l' = match (l, l') with
   | (l, []) | ([], l) -> l

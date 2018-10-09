@@ -21,6 +21,9 @@ val path_eql : string -> string -> bool
     Example: [rewind "foo/" "foo/bar/f.txt"] => "../../" *)
 val rewind : string -> string -> string
 
+(** [is_inside_dir dir file] returns whether [file] is located inside [dir]. *)
+val is_inside_dir : string -> string -> bool
+
 (** [remove_prefixl l l'] returns the l or l' with the prefix l' or l
     removed. *)
 val remove_prefixl : 'a list -> 'a list -> 'a list

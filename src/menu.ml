@@ -20,26 +20,30 @@ let doctree _ args _ =
     |> (Wiki_syntax.xml_of_wiki
           (Wiki_syntax.cast_wp Wiki_syntax.menu_parser)
           bi)
-    |> Lwt_main.run
+    |> Lwt_main.run (* FIXME remove me *)
   in
-  let compile_manual = compile Wiki_widgets_interface.{
-      bi_page = Document.(Project {page = Manual "";
-                                   project = "";
-                                   version = Version.Dev});
+  let bi_of_menu_file mf =
+    let bi_page = Global.(match mf with
+        | Manual _ -> Document.(Project {page = Manual ""; project = ""; version = Version.Dev})
+        | Api _ -> Document.(Project {page = Api {subproject = ""; file = ""};
+                                      project = "";
+                                      version = Version.Dev}))
+    in
+    Wiki_widgets_interface.{
+      bi_page;
       bi_sectioning = true;
       bi_add_link = ignore;
       bi_content = Lwt.return [];
       bi_title = ""}
   in
-  let compile_api = compile Wiki_widgets_interface.{
-      bi_page = Document.(Project {page = Api { subproject = ""; file = ""};
-                                   project = "";
-                                   version = Version.Dev});
-      bi_sectioning = true;
-      bi_add_link = ignore;
-      bi_content = Lwt.return [];
-      bi_title = ""}
+  let compile_with_menu_file mf =
+    let f = Global.(match mf with Manual f | Api f -> f) in
+    let bi = bi_of_menu_file mf in
+    Global.(with_menu_file mf (fun () -> compile bi f))
   in
+  let compile_manual f = compile_with_menu_file (Global.Manual f) in
+  let compile_api f = compile_with_menu_file (Global.Api f) in
+
   let menus = Lwt.return (compile_manual pman_menu
                           :: List.map compile_api papi_menus) in
   `Flow5 (let%lwt r = Lwt.map List.concat menus in

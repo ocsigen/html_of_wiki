@@ -22,6 +22,9 @@ let zipk f g k = f (fun fk -> g (fun gk -> k fk gk))
 let check_errors =
   List.iter (fun (err, b) -> if Lazy.force b then () else failwith err)
 
+let is_some = function Some _ -> true | None -> false
+let is_none = function Some _ -> false | None -> true
+
 let trim char string =
   let rem_first s = String.sub s 1 (String.length s - 1) in
   let rec trim = function

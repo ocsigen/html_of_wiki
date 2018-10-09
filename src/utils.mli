@@ -24,6 +24,12 @@ val zipk : (('a -> 'b) -> 'c) -> (('d -> 'e) -> 'b) -> ('a -> 'd -> 'e) -> 'c
     [Failure msg] with the [msg] of the first [exp] to return [false], if any. *)
 val check_errors : (string * bool lazy_t) list -> unit
 
+(** [is_some x] returns whether [x] is [Some y]. *)
+val is_some : 'a option -> bool
+
+(** [is_none x] returns whether [x] is [None]. *)
+val is_none : 'a option -> bool
+
 (** [trim c s] returns [s] with the trailing occurences of [c] removed. *)
 val trim : char -> string -> string
 
