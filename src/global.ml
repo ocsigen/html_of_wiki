@@ -19,6 +19,26 @@ let using_current_file k = match !ref_current_file with
 let current_file () = using_current_file Utils.id
 
 
+
+type menu_file = Manual of string | Api of string
+let ref_menu_file : menu_file option ref = ref None
+
+let with_menu_file mf k =
+  ignore (!ref_menu_file
+          >>= (function Manual s | Api s -> Some s)
+          >>= (fun s -> failwith @@ "menu_file " ^ s ^ "already set. Abort."));
+  ref_menu_file := Some mf;
+  let r = k () in
+  ref_menu_file := None;
+  r
+
+let using_menu_file k = !ref_menu_file <$> k
+let menu_file () = !ref_menu_file
+let manual_menu_file () = !ref_menu_file >>= function Manual s -> Some s | _ -> None
+let api_menu_file () = !ref_menu_file >>= function Api s -> Some s | _ -> None
+
+
+
 type cli_options = {
   files: string list;
   print: bool;
@@ -40,7 +60,7 @@ let with_options opts k =
 
 let using_options k = match !ref_options with
   | Some options -> k options
-  | None -> failwith "Cli.options isn't properly intialized."
+  | None -> failwith "Global.options isn't properly intialized."
 
 let options () = using_options Utils.id
 

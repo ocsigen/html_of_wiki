@@ -97,13 +97,14 @@ let main {Global.print; outfile; root; manual; api; images; assets; files} =
   let api = relative_to_root api in
   let images = relative_to_root images in
   let assets = relative_to_root assets in
-  Global.with_options {print; outfile; root; manual; api; images; assets; files}
+  let opts = {Global.print; outfile; root; manual; api; images; assets; files} in
+  Global.with_options opts
     (fun () ->
        ((match (outfile, print) with
            | (Some file, _) -> Some (open_out file)
            | (None, true) -> Some stdout
            | _ -> None)
-        |> process_file @@ Global.options ()
+        |> process_file opts
         |> List.iter) @@ files)
 
 let () = Cli.run main

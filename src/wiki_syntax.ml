@@ -226,28 +226,47 @@ let wiki_kind prot page =
       let wiki = extract_wiki_name wiki in
       let file = Global.current_file () in
       let root = Global.root () in
-      Absolute (Paths.(path_of_list [rewind root file; ".."; ".."; wiki; page]))
+      Absolute (Paths.(rewind root file +/+ up +/+ up +/+ wiki +/+ page))
 
 let this_wiki_kind prot page =
   let file = Global.current_file () in
   let root = Global.root () in
-  Absolute (Paths.(path_of_list [rewind root file; page]))
+  Absolute (Paths.(rewind root file +/+ page))
 
 let link_kind bi addr =
   match deabbrev_address addr |> String.split_on_char ':' with
   | p :: rest ->
     let page = String.concat ":" rest in (* the page may contain ':' *)
     begin match p with
-      | "href" -> Absolute page
+      | "href" ->
+        let menu_page = Global.using_menu_file (fun mf ->
+            let {Global.root; manual; api} = Global.options () in
+            let file = Global.current_file () in
+            let is_manual = Pxu.(is_inside_dir (root +/+ manual) file) in
+            let is_api = Pxu.(is_inside_dir (root +/+ api) file) in
+            match mf with
+            | Manual _ when is_manual -> page
+            | Api _ when is_api -> page
+            | Manual _ when is_api -> Pxu.(rewind root file +/+ manual +/+ page)
+            | _ (* api when is_manual *) -> Pxu.(rewind root file +/+ api +/+ page))
+        in
+        Absolute (let open Utils.Operators in menu_page |? page)
       | "site" ->
         let file = Global.current_file () in
         let root = Global.root () in
-        Absolute Paths.(path_of_list [rewind root file; ".."; ".."; (Utils.trim '/' page)])
+        Absolute Paths.(rewind root file +/+ up +/+ up +/+ (Utils.trim '/' page))
       | p when starts_with "wiki(" p -> wiki_kind p page
       | p when starts_with "wiki" p -> this_wiki_kind p page
       | _ -> failwith @@ "unknown prototype: '" ^ p ^ "'"
     end
   | _ -> failwith @@ "ill formed link: '" ^ addr ^ "'"
+
+let href_of_link_kind bi addr fragment =
+  match link_kind bi addr with
+  | Absolute a as h ->
+    let open Utils.Operators in
+    fragment <$> (fun f -> Absolute Paths.(a +/+ ("#" ^ f))) |? h
+  | _ -> assert false
 
 (** **)
 
@@ -963,13 +982,7 @@ let make_href bi addr fragment =
     bi.bi_add_link document;
     addr
 
-let menu_make_href bi c fragment =
-  match link_kind bi c with
-  | Absolute a as h ->
-    let open Utils.Operators in
-    fragment >>= (fun f -> Absolute (Paths.path_of_list [a; "#" ^ f]))
-                 |? h
-  | _ -> assert false
+let menu_make_href = href_of_link_kind
 
 (*******************************************)
 (* Type information for predefined parser. *)
@@ -1095,12 +1108,12 @@ module FlowBuilder = struct
                   (* NOTE address is always Some x for now but one could add
                   another case to the matching above in which the original
                   address is to be used. *)
-                  address >>= (fun a -> Absolute a) |? addr)
+                  address <$> (fun a -> Absolute a) |? addr)
                  |> uri_of_href
                  |> Html.a_href
                  |> (fun x -> x :: a))
         (let open Utils.Operators in
-         text >>= (fun t -> [Html.pcdata t]) |? c)
+         text >>= (fun t -> Some [Html.pcdata t]) |? c)
       :> Html_types.phrasing Html.elt)]
 
   let a_elem_flow attribs addr c =
@@ -1108,13 +1121,7 @@ module FlowBuilder = struct
     Lwt_list.map_s (fun x -> x) c >|= List.flatten >|= fun c ->
       [Html.a ~a:(Html.a_href (uri_of_href addr) :: a) c]
 
-  let make_href bi c fragment =
-    match link_kind bi c with
-    | Absolute a as h ->
-      let open Utils.Operators in
-      fragment >>= (fun f -> Absolute (Paths.path_of_list [a; "#" ^ f]))
-                   |? h
-    | _ -> assert false
+  let make_href = href_of_link_kind
 
   let string_of_href = uri_of_href
 

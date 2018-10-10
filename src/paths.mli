@@ -1,7 +1,8 @@
-val parent : string
-val current : string
 val up : string
 val here : string
+
+(** Operator for [Filename.concat]. *)
+val (+/+) : string -> string -> string
 
 (** Concatenates the paths together in one single path *)
 val path_of_list : string list -> string
@@ -19,6 +20,9 @@ val path_eql : string -> string -> bool
     from file's directory to dir directory.
     Example: [rewind "foo/" "foo/bar/f.txt"] => "../../" *)
 val rewind : string -> string -> string
+
+(** [is_inside_dir dir file] returns whether [file] is located inside [dir]. *)
+val is_inside_dir : string -> string -> bool
 
 (** [remove_prefixl l l'] returns the l or l' with the prefix l' or l
     removed. *)

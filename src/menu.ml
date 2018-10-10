@@ -1,13 +1,13 @@
 open Tyxml
 open Tyxml.Html
+open Utils.Operators
 
 let doctree _ args _ =
   let attrs = Wiki_syntax.parse_common_attribs args in
   let {Global.root; manual; api} = Global.options () in
-  let proot = [root] in (* root is an absolute path *)
-  let pman = proot @ [manual] in
-  let pman_menu = Paths.path_of_list (pman @ ["menu.wiki"]) in
-  let papi_menus = Utils.find_files "menu.wiki" @@ Paths.path_of_list (proot @ [api]) in
+  let pman = root +/+ manual in
+  let pman_menu = pman +/+ "menu.wiki" in
+  let papi_menus = Utils.find_files "menu.wiki" @@ root +/+ api in
 
   let menu_exc_msg =
     Printf.sprintf "missing required file %s for doctree" pman_menu
@@ -20,26 +20,30 @@ let doctree _ args _ =
     |> (Wiki_syntax.xml_of_wiki
           (Wiki_syntax.cast_wp Wiki_syntax.menu_parser)
           bi)
-    |> Lwt_main.run
+    |> Lwt_main.run (* FIXME remove me *)
   in
-  let compile_manual = compile Wiki_widgets_interface.{
-      bi_page = Document.(Project {page = Manual "";
-                                   project = "";
-                                   version = Version.Dev});
+  let bi_of_menu_file mf =
+    let bi_page = Global.(match mf with
+        | Manual _ -> Document.(Project {page = Manual ""; project = ""; version = Version.Dev})
+        | Api _ -> Document.(Project {page = Api {subproject = ""; file = ""};
+                                      project = "";
+                                      version = Version.Dev}))
+    in
+    Wiki_widgets_interface.{
+      bi_page;
       bi_sectioning = true;
       bi_add_link = ignore;
       bi_content = Lwt.return [];
       bi_title = ""}
   in
-  let compile_api = compile Wiki_widgets_interface.{
-      bi_page = Document.(Project {page = Api { subproject = ""; file = ""};
-                                   project = "";
-                                   version = Version.Dev});
-      bi_sectioning = true;
-      bi_add_link = ignore;
-      bi_content = Lwt.return [];
-      bi_title = ""}
+  let compile_with_menu_file mf =
+    let f = Global.(match mf with Manual f | Api f -> f) in
+    let bi = bi_of_menu_file mf in
+    Global.(with_menu_file mf (fun () -> compile bi f))
   in
+  let compile_manual f = compile_with_menu_file (Global.Manual f) in
+  let compile_api f = compile_with_menu_file (Global.Api f) in
+
   let menus = Lwt.return (compile_manual pman_menu
                           :: List.map compile_api papi_menus) in
   `Flow5 (let%lwt r = Lwt.map List.concat menus in
@@ -49,13 +53,12 @@ let docversion bi args contents =
   let attrs = Wiki_syntax.parse_common_attribs args in
   let file = Global.current_file () in
   let root = Global.root () in
-  let versions_dir = Paths.path_of_list [root; ".."] in
-  let versions = versions_dir
+  let versions = Global.project_dir ()
                  |> Utils.a'_sorted_dir_files
                  |> List.filter Paths.is_visible_dir
   in
   let links = versions |> List.map (fun v ->
-      let dst = Paths.(path_of_list [rewind root file; ".."; v; "index.html"]) in
+      let dst = Paths.(rewind root file +/+ up +/+ v +/+ "index.html") in
       option ~a:[a_value dst] (pcdata v))
   in
   `Flow5 (Lwt.return [pcdata "Version ";

@@ -1,10 +1,16 @@
 (** Defines general purpose operators. *)
 module Operators : sig
-  (** Bind operator for Maybe monad *)
-  val (>>=) : 'a option -> ('a -> 'b) -> 'b option
+  (** Bind operator for the Maybe monad *)
+  val (>>=) : 'a option -> ('a -> 'b option) -> 'b option
+
+  (** Map operator for the Maybe monad *)
+  val (<$>) : 'a option -> ('a -> 'b) -> 'b option
 
   (** Elvis operator *)
   val (|?) : 'a option -> 'a -> 'a
+
+  (** Path concatenation operator. See module [Pxu]. *)
+  val (+/+) : string -> string -> string
 end
 
 (** The identity function. *)
@@ -17,6 +23,12 @@ val zipk : (('a -> 'b) -> 'c) -> (('d -> 'e) -> 'b) -> ('a -> 'd -> 'e) -> 'c
 (** [check_errors [(msg, exp); ...]] evaluates in order each [exp] and raises
     [Failure msg] with the [msg] of the first [exp] to return [false], if any. *)
 val check_errors : (string * bool lazy_t) list -> unit
+
+(** [is_some x] returns whether [x] is [Some y]. *)
+val is_some : 'a option -> bool
+
+(** [is_none x] returns whether [x] is [None]. *)
+val is_none : 'a option -> bool
 
 (** [trim c s] returns [s] with the trailing occurences of [c] removed. *)
 val trim : char -> string -> string

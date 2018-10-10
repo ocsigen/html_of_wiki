@@ -1,8 +1,7 @@
-let parent = ".."
-let current = "."
-let up = parent
-let here = current
+let up = ".."
+let here = "."
 
+let (+/+) = Filename.concat
 
 let path_of_list = List.fold_left Filename.concat ""
 
@@ -21,6 +20,7 @@ let realpath = function
 let rec path_eql p p' = match (p, p') with
   | (".", ".") | ("/", "/") -> true
   | (".", _) | (_, ".") | ("/", _) | (_, "/") -> false
+  | (_, _) when Filename.(basename p <> basename p') -> false
   | (_, _) -> path_eql (Filename.dirname p) (Filename.dirname p')
 
 let rewind dir file =
@@ -32,6 +32,10 @@ let rewind dir file =
   in
   file |> realpath |> Filename.dirname |> rew
 
+let is_inside_dir dir file = match rewind dir file with
+  | _ -> true
+  | exception Failure _ -> false
+
 let rec remove_prefixl l l' = match (l, l') with
   | (l, []) | ([], l) -> l
   | (x :: l, y :: l') when x = y -> remove_prefixl l l'
@@ -39,7 +43,6 @@ let rec remove_prefixl l l' = match (l, l') with
 
 let path_rm_prefix prefix p = (* works the other way round ;) *)
   remove_prefixl (list_of_path prefix) (list_of_path p) |> path_of_list
-
 
 let is_visible = function "" -> false | f -> f.[0] <> '.'
 let is_visible_dir d = Sys.is_directory d && is_visible d
