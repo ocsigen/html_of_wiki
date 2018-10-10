@@ -25,6 +25,7 @@ type cli_options = {
   files: string list;
   print: bool;
   outfile: string option;
+  suffix: string;
   root: string;
   manual: string;
   api: string;
@@ -50,6 +51,8 @@ val api    : unit -> string
 val images : unit -> string
 (** Returns [(options ()).assets]. *)
 val assets : unit -> string
+(** Returns [(options ()).suffix]. *)
+val suffix : unit -> string
 
 (** Alias for [root ()]. *)
 val version_dir : unit -> string

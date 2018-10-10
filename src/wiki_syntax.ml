@@ -242,13 +242,13 @@ let link_kind bi addr =
         let menu_page = Global.using_menu_file (fun mf ->
             let {Global.root; manual; api} = Global.options () in
             let file = Global.current_file () in
-            let is_manual = Pxu.(is_inside_dir (root +/+ manual) file) in
-            let is_api = Pxu.(is_inside_dir (root +/+ api) file) in
+            let is_manual = Paths.(is_inside_dir (root +/+ manual) file) in
+            let is_api = Paths.(is_inside_dir (root +/+ api) file) in
             match mf with
             | Manual _ when is_manual -> page
             | Api _ when is_api -> page
-            | Manual _ when is_api -> Pxu.(rewind root file +/+ manual +/+ page)
-            | _ (* api when is_manual *) -> Pxu.(rewind root file +/+ api +/+ page))
+            | Manual _ when is_api -> Paths.(rewind root file +/+ manual +/+ page)
+            | _ (* api when is_manual *) -> Paths.(rewind root file +/+ api +/+ page))
         in
         Absolute (let open Utils.Operators in menu_page |? page)
       | "site" ->
@@ -1100,7 +1100,7 @@ module FlowBuilder = struct
       | Absolute "" -> Some "", Some "."
       | Absolute a when Utils.uri_absolute a -> Some a, None
       | Absolute a when ends_with "/" a -> Some a, None
-      | Absolute a -> Some (a ^ suffix), None
+      | Absolute a -> Some (a ^ Global.suffix ()), None
       | _ -> assert false
     in
     Lwt_list.map_s (fun x -> x) c >|= List.flatten >|= fun c ->

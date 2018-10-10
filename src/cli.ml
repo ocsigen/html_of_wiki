@@ -38,6 +38,11 @@ let assets_cmd =
   Cmdliner.Arg.(value & opt string cwd & info ["assets"]
                   ~docv:"DIR" ~doc)
 
+let local_cmd =
+  let doc = "Appends `.html' at the end of each link redirection
+to make local navigation using file:// URLs possible." in
+  Cmdliner.Arg.(value & flag & info ["l"; "local"] ~doc)
+
 let info_cmd = Cmdliner.(
     let doc = "Converts a wikicreole file into an HTML file." in
     let man = [
@@ -98,8 +103,9 @@ manual directory and the api directory."
     Term.info "ohow" ~version:"v0.0.0" ~doc ~exits:Term.default_exits ~man)
 
 
-let register_options k print outfile root manual api images assets files =
-  let opts = {Global.print; outfile; root; manual; api; images; assets; files} in
+let register_options k print outfile root manual api images assets local files =
+  let suffix = if local then ".html" else "" in
+  let opts = {Global.print; outfile; suffix; root; manual; api; images; assets; files} in
   Global.with_options opts (fun () -> k opts)
 
 let run main =
@@ -112,6 +118,7 @@ let run main =
       $ api_cmd
       $ img_cmd
       $ assets_cmd
+      $ local_cmd
       $ file_cmd)
   in
   Cmdliner.Term.(exit @@ eval (ohow_cmd, info_cmd))
