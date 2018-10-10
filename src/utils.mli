@@ -9,7 +9,7 @@ module Operators : sig
   (** Elvis operator *)
   val (|?) : 'a option -> 'a -> 'a
 
-  (** Path concatenation operator. See module [Pxu]. *)
+  (** Path concatenation operator. See module [Paths]. *)
   val (+/+) : string -> string -> string
 end
 

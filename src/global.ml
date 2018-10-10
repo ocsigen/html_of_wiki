@@ -43,6 +43,7 @@ type cli_options = {
   files: string list;
   print: bool;
   outfile: string option;
+  suffix: string;
   root: string;
   manual: string;
   api: string;
@@ -69,6 +70,7 @@ let manual () = (options ()).manual
 let api () = (options ()).api
 let images () = (options ()).images
 let assets () = (options ()).assets
+let suffix () = (options ()).suffix
 
 (* Preserve absolute path *)
 let version_dir = root

@@ -2,7 +2,7 @@ open Utils.Operators
 open Tyxml
 
 let a_link_of_uri ?fragment ?suffix uri contents =
-  let uri = uri ^ (suffix |? "") ^ (fragment <$> (fun f -> "#" ^ f) |? "") in
+  let uri = uri ^ (suffix |? Global.suffix ()) ^ (fragment <$> (fun f -> "#" ^ f) |? "") in
   Html.a ~a:[Html.a_href uri] [Html.pcdata (contents |? uri)]
 
 let manual_link contents = function
@@ -11,9 +11,9 @@ let manual_link contents = function
     let {Global.root; manual} = Global.options () in
     let uri = match (project, chapter) with
       | (Some p, Some c) -> Paths.(rewind root file (* inside this version dir *)
-                                 +/+ ".." (* inside project dir *)
-                                 +/+ ".." (* inside all projects dir *)
-                                 +/+ p +/+ version +/+ manual +/+ c)
+                                   +/+ ".." (* inside project dir *)
+                                   +/+ ".." (* inside all projects dir *)
+                                   +/+ p +/+ version +/+ manual +/+ c)
       | (Some p, None) -> Paths.(rewind root file +/+ up +/+ up +/+ p +/+ version +/+ "index")
       | (None, Some c) -> Paths.(rewind root file +/+ manual +/+ c)
       | (None, None) -> failwith "a_manual: no project nor chapter arg found"
@@ -22,7 +22,7 @@ let manual_link contents = function
       | Some fragment -> a_link_of_uri ~fragment
       | None -> a_link_of_uri ?fragment:None
     in
-    Lwt.return [link ~suffix:".html" uri contents]
+    Lwt.return [link uri contents]
   | _ -> assert false
 
 let api_link prefix contents = function
@@ -39,7 +39,7 @@ let api_link prefix contents = function
     let uri = Filename.concat base @@ Api.path_of_id ?prefix id in
     let fragment = Api.fragment_of_id id in
     let body = text |? (Api.string_of_id ~spacer:"." id) in
-    Lwt.return [a_link_of_uri ?fragment ~suffix:".html" uri (Some body)]
+    Lwt.return [a_link_of_uri ?fragment uri (Some body)]
   | _ -> assert false
 
 let img_link contents = function
@@ -57,7 +57,7 @@ let file_link contents = function
     let file = Global.current_file () in
     let {Global.root; assets} = Global.options () in
     let uri = Paths.(rewind root file +/+ assets +/+ src) in
-    Lwt.return [a_link_of_uri uri (Some (contents |? Filename.basename uri))]
+    Lwt.return [a_link_of_uri ?suffix:None uri (Some (contents |? Filename.basename uri))]
   | [None] -> failwith "a_file: no src argument error"
   | _ -> assert false
 
