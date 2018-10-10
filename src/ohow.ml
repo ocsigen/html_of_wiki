@@ -36,8 +36,20 @@ let build_page content =
     | Some s -> s
     | None -> ""
   in
+  let stylesheets = ["bootstrap_custom.css"; "style.css"; "syntax.css"] |> List.map (fun f -> "https://ocsigen.github.io/css/" ^ f) in
+  let scripts = ["https://cdnjs.cloudflare.com/ajax/libs/prism/1.9.0/components/prism-core.min.js";
+                 "https://cdnjs.cloudflare.com/ajax/libs/prism/1.9.0/components/prism-ocaml.min.js";
+                 "https://cdnjs.cloudflare.com/ajax/libs/prism/1.9.0/components/prism-clike.min.js";
+                 "https://cdnjs.cloudflare.com/ajax/libs/prism/1.9.0/components/prism-reason.min.js";
+                 "https://cdnjs.cloudflare.com/ajax/libs/prism/1.9.0/components/prism-javascript.min.js";
+                 "https://ocsigen.github.io/js/client.js";
+                 "https://ocsigen.github.io/js/viewport_ie10_hack.js"]
+  in
   Tyxml.Html.(html
-                (head (title (pcdata ti)) [])
+                (head (title (pcdata ti))
+                   ([meta ~a:[a_charset "utf8"] ()]
+                    @ (List.map (fun href -> link ~rel:[`Stylesheet] ~href ()) stylesheets)
+                    @ (List.map (fun src -> script ~a:[a_src src] (pcdata "")) scripts)))
                 (body content))
 
 let pprint oc html =
@@ -62,12 +74,10 @@ let get_output_channel output_channel file = match output_channel with
   | None -> open_out @@ infer_output_file file
 
 
-let process_file {Cli.root; manual; api; images; assets} output_channel file =
+let process_file {Global.root; manual; api; images; assets} output_channel file =
   Global.with_current_file file (fun () ->
       get_output_channel output_channel file |> ohow file)
 
-let check_errors : (string * bool lazy_t) list -> unit =
-  List.iter (fun (err, b) -> if Lazy.force b then () else failwith err)
 
 let init_extensions () =
   Wiki_ext.init ();
@@ -77,23 +87,23 @@ let init_extensions () =
   Only.init ();
   Site_ocsimore.init ()
 
-let main {Cli.print; outfile; root; manual; api; images; assets; files} =
-  check_errors [("Some input files doesn't exist...",
-                 lazy (List.for_all Sys.file_exists files))];
+let main {Global.print; outfile; root; manual; api; images; assets; files} =
+  Utils.check_errors [("Some input files doesn't exist...",
+                       lazy (List.for_all Sys.file_exists files))];
   init_extensions ();
-  let root = Utils.realpath root in
-  let relative_to_root p = Utils.path_rm_prefix root @@ Utils.realpath p in
+  let root = Paths.realpath root in
+  let relative_to_root p = Paths.path_rm_prefix root @@ Paths.realpath p in
   let manual = relative_to_root manual in
   let api = relative_to_root api in
   let images = relative_to_root images in
   let assets = relative_to_root assets in
-  Cli.with_options {print; outfile; root; manual; api; images; assets; files}
+  Global.with_options {print; outfile; root; manual; api; images; assets; files}
     (fun () ->
        ((match (outfile, print) with
            | (Some file, _) -> Some (open_out file)
            | (None, true) -> Some stdout
            | _ -> None)
-        |> process_file @@ Cli.options ()
+        |> process_file @@ Global.options ()
         |> List.iter) @@ files)
 
 let () = Cli.run main

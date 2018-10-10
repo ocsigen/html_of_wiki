@@ -225,13 +225,13 @@ let wiki_kind prot page =
     | wiki ->
       let wiki = extract_wiki_name wiki in
       let file = Global.current_file () in
-      let {Cli.root} = Cli.options () in
-      Absolute (Utils.(path_of_list [rewind root file; ".."; ".."; wiki; page]))
+      let root = Global.root () in
+      Absolute (Paths.(path_of_list [rewind root file; ".."; ".."; wiki; page]))
 
 let this_wiki_kind prot page =
   let file = Global.current_file () in
-  let {Cli.root} = Cli.options () in
-  Absolute (Utils.(path_of_list [rewind root file; page]))
+  let root = Global.root () in
+  Absolute (Paths.(path_of_list [rewind root file; page]))
 
 let link_kind bi addr =
   match deabbrev_address addr |> String.split_on_char ':' with
@@ -241,8 +241,8 @@ let link_kind bi addr =
       | "href" -> Absolute page
       | "site" ->
         let file = Global.current_file () in
-        let {Cli.root} = Cli.options () in
-        Absolute Utils.(path_of_list [rewind root file; ".."; ".."; (trim '/' page)])
+        let root = Global.root () in
+        Absolute Paths.(path_of_list [rewind root file; ".."; ".."; (Utils.trim '/' page)])
       | p when starts_with "wiki(" p -> wiki_kind p page
       | p when starts_with "wiki" p -> this_wiki_kind p page
       | _ -> failwith @@ "unknown prototype: '" ^ p ^ "'"
@@ -963,25 +963,13 @@ let make_href bi addr fragment =
     bi.bi_add_link document;
     addr
 
-let menu_make_href bi c _ =
-  let project, version = Projects.get_implicit_project bi in
-  let document =
-    match bi.bi_page with
-    | Document.(Project { page = Api _ }) ->
-      if String.contains c '/'
-      then
-        let subproject, file = Ocsimore_lib.String.sep '/' c in
-        Document.(Project {page = Api {subproject; file}; project; version})
-      else
-        Document.(Project { page = Api {subproject = ""; file = c}
-                          ; project
-                          ; version})
-    | _ ->
-      Document.(Project {page = Manual c; project; version})
-  in
-  bi.bi_add_link document;
-  Document {document; fragment = None}
-
+let menu_make_href bi c fragment =
+  match link_kind bi c with
+  | Absolute a as h ->
+    let open Utils.Operators in
+    fragment >>= (fun f -> Absolute (Paths.path_of_list [a; "#" ^ f]))
+                 |? h
+  | _ -> assert false
 
 (*******************************************)
 (* Type information for predefined parser. *)
@@ -1095,14 +1083,22 @@ module FlowBuilder = struct
       (c : Html_types.phrasing_without_interactive Html.elt list Lwt.t list) =
     let a = parse_common_attribs ~classes:["ocsimore_phrasing_link"] attribs in
     let suffix = ".html" in
-    let addr, text = match addr with
-      | Absolute "" -> "", Some "."
-      | Absolute a when Utils.uri_absolute a -> a, None
-      | Absolute a -> a ^ suffix, None
+    let address, text = match addr with
+      | Absolute "" -> Some "", Some "."
+      | Absolute a when Utils.uri_absolute a -> Some a, None
+      | Absolute a when ends_with "/" a -> Some a, None
+      | Absolute a -> Some (a ^ suffix), None
       | _ -> assert false
     in
     Lwt_list.map_s (fun x -> x) c >|= List.flatten >|= fun c ->
-    [(Html.a ~a:(Html.a_href (uri_of_href @@ Absolute addr) :: a)
+    [(Html.a ~a:((let open Utils.Operators in
+                  (* NOTE address is always Some x for now but one could add
+                  another case to the matching above in which the original
+                  address is to be used. *)
+                  address >>= (fun a -> Absolute a) |? addr)
+                 |> uri_of_href
+                 |> Html.a_href
+                 |> (fun x -> x :: a))
         (let open Utils.Operators in
          text >>= (fun t -> [Html.pcdata t]) |? c)
       :> Html_types.phrasing Html.elt)]
@@ -1116,7 +1112,7 @@ module FlowBuilder = struct
     match link_kind bi c with
     | Absolute a as h ->
       let open Utils.Operators in
-      fragment >>= (fun f -> Absolute (Utils.path_of_list [a; "#" ^ f]))
+      fragment >>= (fun f -> Absolute (Paths.path_of_list [a; "#" ^ f]))
                    |? h
     | _ -> assert false
 

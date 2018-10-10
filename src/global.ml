@@ -17,3 +17,40 @@ let using_current_file k = match !ref_current_file with
   | None -> failwith "Links.using_current_file: current_file is not set."
 
 let current_file () = using_current_file Utils.id
+
+
+type cli_options = {
+  files: string list;
+  print: bool;
+  outfile: string option;
+  root: string;
+  manual: string;
+  api: string;
+  images: string;
+  assets: string;
+}
+let ref_options : cli_options option ref = ref None
+
+let with_options opts k =
+  let old = !ref_options in
+  ref_options := Some opts;
+  let r = k () in
+  ref_options := old;
+  r
+
+let using_options k = match !ref_options with
+  | Some options -> k options
+  | None -> failwith "Cli.options isn't properly intialized."
+
+let options () = using_options Utils.id
+
+let root () = (options ()).root
+let manual () = (options ()).manual
+let api () = (options ()).api
+let images () = (options ()).images
+let assets () = (options ()).assets
+
+(* Preserve absolute path *)
+let version_dir = root
+let project_dir () = version_dir () |> Filename.dirname
+let all_projects_dir () = project_dir () |> Filename.dirname
