@@ -35,7 +35,7 @@ let rec find_files name = function
   | file when Filename.basename file = name -> [file]
   | dir when Sys.is_directory dir ->
     dir_files dir
-    |> List.map (fun f -> Pxu.path_of_list [dir; f])
+    |> List.map (fun f -> Paths.path_of_list [dir; f])
     |> List.map (find_files name)
     |> List.concat
   | _ -> []
