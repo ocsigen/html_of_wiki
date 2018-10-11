@@ -1095,7 +1095,6 @@ module FlowBuilder = struct
       attribs addr
       (c : Html_types.phrasing_without_interactive Html.elt list Lwt.t list) =
     let a = parse_common_attribs ~classes:["ocsimore_phrasing_link"] attribs in
-    let suffix = ".html" in
     let address, text = match addr with
       | Absolute "" -> Some "", Some "."
       | Absolute a when Utils.uri_absolute a -> Some a, None
