@@ -36,3 +36,7 @@ val is_visible : string -> bool
 
 (** [is_visible_dir d] returns whether [d] is a visible directory (unix only). *)
 val is_visible_dir : string -> bool
+
+(** [concat_uri_suffix s u] concatenates [u] with [s] if [u] doesn't ends
+    with a ['/']. Raises [Failure] when [u] is [""]. *)
+val concat_uri_suffix : string -> string -> string
