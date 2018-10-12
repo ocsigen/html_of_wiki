@@ -12,8 +12,8 @@ let manual_link contents = function
     let {Global.root; manual} = Global.options () in
     let uri = match (project, chapter) with
       | (Some p, Some c) -> Paths.(rewind root file (* inside this version dir *)
-                                   +/+ ".." (* inside project dir *)
-                                   +/+ ".." (* inside all projects dir *)
+                                   +/+ up (* inside project dir *)
+                                   +/+ up (* inside all projects dir *)
                                    +/+ p +/+ version +/+ manual +/+ c)
       | (Some p, None) -> Paths.(rewind root file +/+ up +/+ up +/+ p +/+ version +/+ "index")
       | (None, Some c) -> Paths.(rewind root file +/+ manual +/+ c)
@@ -31,11 +31,12 @@ let api_link prefix contents = function
     let file = Global.current_file () in
     let {Global.root; api} = Global.options () in
     let id = Api.parse_contents (contents <$> String.trim) in
-    let base = match (project, subproject) with
-      | (Some p, Some s) -> Paths.(rewind root file +/+ up +/+ up +/+ p +/+ "latest" +/+ api +/+ s)
-      | (Some p, None) -> Paths.(rewind root file +/+ up +/+ up +/+ p +/+ "latest" +/+ api)
-      | (None, Some s) -> Paths.(rewind root file +/+ api +/+ s)
-      | (None, None) -> (Paths.rewind root file) +/+ api
+    let dsp = (Global.options ()).default_subproject in
+    let base = match (project, subproject, dsp) with
+      | (Some p, Some s, _) -> Paths.(rewind root file +/+ up +/+ up +/+ p +/+ version +/+ api +/+ s)
+      | (Some p, None, _) -> Paths.(rewind root file +/+ up +/+ up +/+ p +/+ version +/+ api)
+      | (None, Some s, _) | (None, None, Some s) -> Paths.(rewind root file +/+ api +/+ s)
+      | (None, None, None) -> (Paths.rewind root file) +/+ api
     in
     let uri = Filename.concat base @@ Api.path_of_id ?prefix id in
     let fragment = Api.fragment_of_id id in
