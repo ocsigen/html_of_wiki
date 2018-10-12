@@ -246,7 +246,7 @@ let link_kind bi addr =
             let is_api = Paths.(is_inside_dir (root +/+ api) file) in
             match mf with
             | Manual _ when is_manual -> page
-            | Api _ when is_api -> page
+            | Api _ when is_api -> Paths.(rewind root file +/+ api +/+ page)
             | Manual _ when is_api -> Paths.(rewind root file +/+ manual +/+ page)
             | _ (* api when is_manual *) -> Paths.(rewind root file +/+ api +/+ page))
         in
