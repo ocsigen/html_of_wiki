@@ -28,6 +28,12 @@ let api_cmd =
   Cmdliner.Arg.(value & opt string cwd & info ["api"]
                   ~docv:"DIR" ~doc)
 
+let default_subproject_cmd =
+  let doc = "Mirrors the effect of the \"default_subproject\" feature in
+Ocsiforge's old config.js for compatibility reasons. Do not use it otherwise!" in
+  Cmdliner.Arg.(value & opt (some string) None & info ["default-subproject"]
+                  ~docv:"NAME" ~doc)
+
 let img_cmd =
   let doc = "Use the given image directory path." in
   Cmdliner.Arg.(value & opt string cwd & info ["images"]
@@ -103,9 +109,9 @@ manual directory and the api directory."
     Term.info "ohow" ~version:"v0.0.0" ~doc ~exits:Term.default_exits ~man)
 
 
-let register_options k print outfile root manual api images assets local files =
+let register_options k print outfile root manual api default_subproject images assets local files =
   let suffix = if local then ".html" else "" in
-  let opts = {Global.print; outfile; suffix; root; manual; api; images; assets; files} in
+  let opts = {Global.print; outfile; suffix; root; manual; api; default_subproject; images; assets; files} in
   Global.with_options opts (fun () -> k opts)
 
 let run main =
@@ -116,6 +122,7 @@ let run main =
       $ root_cmd
       $ manual_cmd
       $ api_cmd
+      $ default_subproject_cmd
       $ img_cmd
       $ assets_cmd
       $ local_cmd

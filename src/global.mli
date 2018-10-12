@@ -29,6 +29,7 @@ type cli_options = {
   root: string;
   manual: string;
   api: string;
+  default_subproject: string option;
   images: string;
   assets: string;
 }

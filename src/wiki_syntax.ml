@@ -246,7 +246,7 @@ let link_kind bi addr =
             let is_api = Paths.(is_inside_dir (root +/+ api) file) in
             match mf with
             | Manual _ when is_manual -> page
-            | Api _ when is_api -> page
+            | Api _ when is_api -> Paths.(rewind root file +/+ api +/+ page)
             | Manual _ when is_api -> Paths.(rewind root file +/+ manual +/+ page)
             | _ (* api when is_manual *) -> Paths.(rewind root file +/+ api +/+ page))
         in
@@ -1095,7 +1095,6 @@ module FlowBuilder = struct
       attribs addr
       (c : Html_types.phrasing_without_interactive Html.elt list Lwt.t list) =
     let a = parse_common_attribs ~classes:["ocsimore_phrasing_link"] attribs in
-    let suffix = ".html" in
     let address, text = match addr with
       | Absolute "" -> Some "", Some "."
       | Absolute a when Utils.uri_absolute a -> Some a, None

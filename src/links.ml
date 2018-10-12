@@ -1,8 +1,9 @@
 open Utils.Operators
 open Tyxml
 
-let a_link_of_uri ?fragment ?suffix uri contents =
-  let uri = uri ^ (suffix |? Global.suffix ()) ^ (fragment <$> (fun f -> "#" ^ f) |? "") in
+let a_link_of_uri ?fragment suffix uri contents =
+  let uri = suffix <$> (fun s -> Paths.concat_uri_suffix s uri) |? uri in
+  let uri = uri ^ (fragment <$> (fun f -> "#" ^ f) |? "") in
   Html.a ~a:[Html.a_href uri] [Html.pcdata (contents |? uri)]
 
 let manual_link contents = function
@@ -11,8 +12,8 @@ let manual_link contents = function
     let {Global.root; manual} = Global.options () in
     let uri = match (project, chapter) with
       | (Some p, Some c) -> Paths.(rewind root file (* inside this version dir *)
-                                   +/+ ".." (* inside project dir *)
-                                   +/+ ".." (* inside all projects dir *)
+                                   +/+ up (* inside project dir *)
+                                   +/+ up (* inside all projects dir *)
                                    +/+ p +/+ version +/+ manual +/+ c)
       | (Some p, None) -> Paths.(rewind root file +/+ up +/+ up +/+ p +/+ version +/+ "index")
       | (None, Some c) -> Paths.(rewind root file +/+ manual +/+ c)
@@ -22,7 +23,7 @@ let manual_link contents = function
       | Some fragment -> a_link_of_uri ~fragment
       | None -> a_link_of_uri ?fragment:None
     in
-    Lwt.return [link uri contents]
+    Lwt.return [link (Some (Global.suffix ())) uri contents]
   | _ -> assert false
 
 let api_link prefix contents = function
@@ -30,16 +31,17 @@ let api_link prefix contents = function
     let file = Global.current_file () in
     let {Global.root; api} = Global.options () in
     let id = Api.parse_contents (contents <$> String.trim) in
-    let base = match (project, subproject) with
-      | (Some p, Some s) -> Paths.(rewind root file +/+ up +/+ up +/+ p +/+ "latest" +/+ api +/+ s)
-      | (Some p, None) -> Paths.(rewind root file +/+ up +/+ up +/+ p +/+ "latest" +/+ api)
-      | (None, Some s) -> Paths.(rewind root file +/+ api +/+ s)
-      | (None, None) -> (Paths.rewind root file) +/+ api
+    let dsp = (Global.options ()).default_subproject in
+    let base = match (project, subproject, dsp) with
+      | (Some p, Some s, _) -> Paths.(rewind root file +/+ up +/+ up +/+ p +/+ version +/+ api +/+ s)
+      | (Some p, None, _) -> Paths.(rewind root file +/+ up +/+ up +/+ p +/+ version +/+ api)
+      | (None, Some s, _) | (None, None, Some s) -> Paths.(rewind root file +/+ api +/+ s)
+      | (None, None, None) -> (Paths.rewind root file) +/+ api
     in
     let uri = Filename.concat base @@ Api.path_of_id ?prefix id in
     let fragment = Api.fragment_of_id id in
     let body = text |? (Api.string_of_id ~spacer:"." id) in
-    Lwt.return [a_link_of_uri ?fragment uri (Some body)]
+    Lwt.return [a_link_of_uri ?fragment (Some (Global.suffix ())) uri (Some body)]
   | _ -> assert false
 
 let img_link contents = function
@@ -57,7 +59,7 @@ let file_link contents = function
     let file = Global.current_file () in
     let {Global.root; assets} = Global.options () in
     let uri = Paths.(rewind root file +/+ assets +/+ src) in
-    Lwt.return [a_link_of_uri ?suffix:None uri (Some (contents |? Filename.basename uri))]
+    Lwt.return [a_link_of_uri None uri (Some (contents |? Filename.basename uri))]
   | [None] -> failwith "a_file: no src argument error"
   | _ -> assert false
 
