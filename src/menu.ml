@@ -16,7 +16,7 @@ let doctree _ args _ =
 
   let compile bi path =
     path
-    |> Utils.readfile
+    |> Utils.read_file
     |> (Wiki_syntax.xml_of_wiki
           (Wiki_syntax.cast_wp Wiki_syntax.menu_parser)
           bi)

@@ -50,6 +50,7 @@ type cli_options = {
   default_subproject: string option;
   images: string;
   assets: string;
+  csw: string list;
 }
 let ref_options : cli_options option ref = ref None
 

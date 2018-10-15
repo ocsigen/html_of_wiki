@@ -55,17 +55,20 @@ let uri_absolute =
   Re.Pcre.pmatch ~rex
 
 
-let read_in_channel ic =
-  let rec readall () lines =
+let read_channel_lines ic =
+  let rec readall lines =
     try
       let line = input_line ic in
-      readall () (line :: lines)
+      readall (line :: lines)
     with End_of_file -> List.rev lines
   in
-  String.concat "\n" @@ readall () []
+  readall []
 
-let readfile file =
+let read_file_lines file =
   let ic = open_in file in
-  let result = read_in_channel ic in
+  let lines = read_channel_lines ic in
   close_in ic;
-  result
+  lines
+
+let read_in_channel ic = read_channel_lines ic |> String.concat "\n"
+let read_file file = read_file_lines file |> String.concat "\n"

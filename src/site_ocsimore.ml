@@ -128,41 +128,37 @@ let do_paragraph bi args xml =
 (*****************************************************************************)
 (** Extension Client/Server-Switch *)
 
-
-let do_client_server_switch bi args _ =
-  `Flow5 (Lwt.return @@
-    let attrs = Wiki_syntax.parse_common_attribs args in
-    match bi.Wiki_widgets_interface.bi_page with
-    | Document.Site _ -> []
-    | Document.Deadlink _ -> assert false
-    | Document.Project {project; version; page} ->
-      match page with
-      | Document.Api {subproject; file} ->
-        let make_link subproject' =
-          let page = Document.Api {subproject = subproject'; file} in
-          let document = Document.Project {project; version; page} in
-          bi.Wiki_widgets_interface.bi_add_link document;
-          Html.[
-            div ~a:(a_class ["client-server-switch-wrapper"] :: attrs) [
-              div ~a:[a_class ["client-server-switch"]] [
-                span ~a:[a_class [subproject; "source"]]
-                     [pcdata ("This is "^subproject^" API")];
-                pcdata " (go to ";
-                a ~a:[a_class [subproject'; "target"];
-                      a_href @@ Document.to_uri document]
-                  [pcdata subproject'];
-                pcdata ")"
-              ]
-            ]
-          ]
-        in
-        (match subproject with
-        | "server" -> make_link "client"
-        | "client" -> make_link "server"
-        | _ -> [])
-      | _ -> []
-  )
-
+let do_client_server_switch _ args _ =
+  let open Utils.Operators in
+  let client = "client" in
+  let server = "server" in
+  let {Global.csw; root; api} = Global.options () in
+  let file = Global.current_file () in
+  let attrs = Wiki_syntax.parse_common_attribs args in
+  let is_api = Paths.(is_inside_dir (root +/+ api) file) in
+  let is_client = Paths.(is_inside_dir (root +/+ api +/+ client) file) in
+  let is_server = Paths.(is_inside_dir (root +/+ api +/+ server) file) in
+  let wiki = Filename.basename file in
+  let make_switch other =
+    let html = Filename.chop_extension wiki ^ Global.suffix () in
+    let href = Paths.(rewind (root +/+ api) file +/+ other +/+ html) in
+    Html.([div ~a:(a_class ["client-server-switch-wrapper"] :: attrs)
+             [a ~a:[a_href href;
+                    a_style "-webkit-appearance: button;-moz-appearance: button;appearance: button;text-decoration: none;color: initial;"]
+                [pcdata @@ "link to " ^ other]]])
+  in
+  let make = function
+    | [] -> []
+    | wikis when is_api && List.exists (fun s -> s = wiki) wikis ->
+      begin match is_client, is_server with
+        | true, false -> make_switch server
+        | false, true -> make_switch client
+        | false, false -> []
+        | _, _ -> assert false
+      end
+    | _ -> []
+  in
+  `Flow5 (Lwt.return (make csw))
 
 (*****************************************************************************)
 (** Extension google search *)

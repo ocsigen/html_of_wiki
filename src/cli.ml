@@ -44,6 +44,12 @@ let assets_cmd =
   Cmdliner.Arg.(value & opt string cwd & info ["assets"]
                   ~docv:"DIR" ~doc)
 
+let csw_cmd =
+  let doc = "Use the given list of wikis which must have a clientserverswitch." in
+  Cmdliner.Arg.(value & opt (some file) None &
+                info ["csw"; "clientserverswitch"; "client-server-switch"]
+                  ~docv:"FILE" ~doc)
+
 let local_cmd =
   let doc = "Appends `.html' at the end of each link redirection
 to make local navigation using file:// URLs possible." in
@@ -109,9 +115,11 @@ manual directory and the api directory."
     Term.info "ohow" ~version:"v0.0.0" ~doc ~exits:Term.default_exits ~man)
 
 
-let register_options k print outfile root manual api default_subproject images assets local files =
+let register_options k print outfile root manual api default_subproject images assets csw local files =
+  let open Utils.Operators in
   let suffix = if local then ".html" else "" in
-  let opts = {Global.print; outfile; suffix; root; manual; api; default_subproject; images; assets; files} in
+  let csw = csw <$> Utils.read_file_lines |? [] in
+  let opts = {Global.print; outfile; suffix; root; manual; api; default_subproject; images; assets; csw; files} in
   Global.with_options opts (fun () -> k opts)
 
 let run main =
@@ -125,6 +133,7 @@ let run main =
       $ default_subproject_cmd
       $ img_cmd
       $ assets_cmd
+      $ csw_cmd
       $ local_cmd
       $ file_cmd)
   in
