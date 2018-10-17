@@ -19,28 +19,54 @@
 open How_lib
 open Lwt.Infix
 open Tyxml
+open Utils.Operators
 
 (*****************************************************************************)
 (** Extension script *)
 
-let do_script bi args c =
-  `Flow5
-    (try
-      let src = List.assoc "src" args in
-      Lwt.return Html.[
-        script ~a:[ a_mime_type "text/javascript"; a_src src]
-               (Html.cdata_script "")
-      ]
-    with Not_found ->
-      let content =
-        match c with
-        | Some c -> c
-        | None -> ""
-      in
-      Lwt.return Html.[
-        script ~a:[a_mime_type "text/javascript"]
-               (cdata_script content)
-      ])
+type script_kind = Src of string | Js of string
+
+let make_script = function
+  | Src src -> Html.(script ~a:[a_mime_type "text/javascript"; a_src src]
+                       (cdata_script ""))
+  | Js js -> Html.(script ~a:[a_mime_type "text/javascript"]
+                     (cdata_script js))
+
+let process_script args c = match List.assoc "src" args with
+  | exception Not_found -> Js (c |? "")
+  | src when Utils.is_none c -> Src src
+  | _ -> failwith "script: both src and content are provided"
+
+let do_script _ args c = `Flow5 ([process_script args c |> make_script] |> Lwt.return)
+
+let head_scripts : script_kind list ref = ref []
+
+let do_head_script _ args c =
+  let script = process_script args c in
+  head_scripts := script :: !head_scripts;
+  `Flow5 (Lwt.return [])
+
+
+(*****************************************************************************)
+(** Extension css *)
+
+type css_kind = Href of string | Css of string
+
+let make_css = function
+  | Href href -> Html.(link ~rel:[`Stylesheet] ~href ())
+  | Css css -> Html.(style [pcdata css])
+
+let process_css args c = match List.assoc "href" args with
+  | exception Not_found -> Css (c |? "")
+  | href when Utils.is_none c -> Href href
+  | _ -> failwith "css: both href and content are provided"
+
+let css_links : css_kind list ref = ref []
+
+let do_head_css _ args c =
+  let css = process_css args c in
+  css_links := css :: !css_links;
+  `Flow5 (Lwt.return [])
 
 
 (*****************************************************************************)
@@ -176,6 +202,10 @@ let do_google_search _ _ _ =
 let init () =
   Wiki_syntax.register_simple_flow_extension
     ~name:"script" ~reduced:false do_script;
+  Wiki_syntax.register_simple_flow_extension
+    ~name:"head-script" ~reduced:false do_head_script;
+  Wiki_syntax.register_simple_flow_extension
+    ~name:"head-css" ~reduced:false do_head_css;
   Wiki_syntax.register_wiki_flow_extension ~reduced:false
     ~name:"wip" { Wiki_syntax.fpp = do_wip };
   Wiki_syntax.register_wiki_phrasing_extension ~reduced:false

@@ -36,20 +36,11 @@ let build_page content =
     | Some s -> s
     | None -> ""
   in
-  let stylesheets = ["bootstrap_custom.css"; "style.css"; "syntax.css"] |> List.map (fun f -> "https://ocsigen.github.io/css/" ^ f) in
-  let scripts = ["https://cdnjs.cloudflare.com/ajax/libs/prism/1.9.0/components/prism-core.min.js";
-                 "https://cdnjs.cloudflare.com/ajax/libs/prism/1.9.0/components/prism-ocaml.min.js";
-                 "https://cdnjs.cloudflare.com/ajax/libs/prism/1.9.0/components/prism-clike.min.js";
-                 "https://cdnjs.cloudflare.com/ajax/libs/prism/1.9.0/components/prism-reason.min.js";
-                 "https://cdnjs.cloudflare.com/ajax/libs/prism/1.9.0/components/prism-javascript.min.js";
-                 "https://ocsigen.github.io/js/client.js";
-                 "https://ocsigen.github.io/js/viewport_ie10_hack.js"]
-  in
   Tyxml.Html.(html
                 (head (title (pcdata ti))
                    ([meta ~a:[a_charset "utf8"] ()]
-                    @ (List.map (fun href -> link ~rel:[`Stylesheet] ~href ()) stylesheets)
-                    @ (List.map (fun src -> script ~a:[a_src src] (pcdata "")) scripts)))
+                    @ (Site_ocsimore.(List.map make_css @@ List.rev !css_links))
+                    @ (Site_ocsimore.(List.map make_script @@ List.rev !head_scripts))))
                 (body content))
 
 let pprint oc html =
