@@ -65,8 +65,10 @@ let ohow file oc =
   file
   |> Utils.read_file
   |> Wiki_syntax.compile
-  |> build_page
-  |> pprint oc;
+  |> (fun c ->
+      if (Global.options ()).headless
+      then List.iter (pprint oc) c
+      else pprint oc (build_page c));
   close_out oc
 
 let get_output_channel output_channel file = match output_channel with
@@ -87,7 +89,7 @@ let init_extensions () =
   Only.init ();
   Site_ocsimore.init ()
 
-let main {Global.print; outfile; suffix; root; manual; api; default_subproject; images; assets; csw; files} =
+let main {Global.print; headless; outfile; suffix; root; manual; api; default_subproject; images; assets; csw; files} =
   Utils.check_errors [("Some input files doesn't exist...",
                        lazy (List.for_all Sys.file_exists files))];
   init_extensions ();
@@ -97,7 +99,7 @@ let main {Global.print; outfile; suffix; root; manual; api; default_subproject; 
   let api = relative_to_root api in
   let images = relative_to_root images in
   let assets = relative_to_root assets in
-  let opts = {Global.print; outfile; suffix; root; manual; api; default_subproject; images; assets; csw; files} in
+  let opts = {Global.print; headless; outfile; suffix; root; manual; api; default_subproject; images; assets; csw; files} in
   Global.with_options opts
     (fun () ->
        ((match (outfile, print) with

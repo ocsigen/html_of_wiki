@@ -6,6 +6,11 @@ let print_cmd =
   let doc = "Print the HTML to stdout." in
   Cmdliner.Arg.(value & flag & info ["p"; "print"] ~doc)
 
+let headless_cmd =
+  let doc = "Produces raw HTML without head tag and not inside a body tag." in
+  Cmdliner.Arg.(value & flag & info ["r"; "headless"; "hl"] ~doc)
+
+
 let outfile_cmd =
   let doc = "Writes the HTML into the given file. Always overwrites.
 Overrides $(b,--print)." in
@@ -115,17 +120,18 @@ manual directory and the api directory."
     Term.info "ohow" ~version:"v0.0.0" ~doc ~exits:Term.default_exits ~man)
 
 
-let register_options k print outfile root manual api default_subproject images assets csw local files =
+let register_options k print headless outfile root manual api default_subproject images assets csw local files =
   let open Utils.Operators in
   let suffix = if local then ".html" else "" in
   let csw = csw <$> Utils.read_file_lines |? [] in
-  let opts = {Global.print; outfile; suffix; root; manual; api; default_subproject; images; assets; csw; files} in
+  let opts = {Global.print; headless; outfile; suffix; root; manual; api; default_subproject; images; assets; csw; files} in
   Global.with_options opts (fun () -> k opts)
 
 let run main =
   let ohow_cmd = Cmdliner.Term.(
       const (register_options main)
       $ print_cmd
+      $ headless_cmd
       $ outfile_cmd
       $ root_cmd
       $ manual_cmd
