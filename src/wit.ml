@@ -9,7 +9,7 @@ let replace_content_tag tmpl content =
     None
 
 let main template =
-  let tmpl = Utils.readfile template in
+  let tmpl = Utils.read_file template in
   let wiki = Utils.read_in_channel stdin in
   match replace_content_tag tmpl wiki with
   | Some replacement -> print_string replacement

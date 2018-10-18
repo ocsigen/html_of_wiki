@@ -52,8 +52,14 @@ val find_files : string -> string -> string list
 (** [uri_absolute uri] returns whether [uri] is an absolute URI. *)
 val uri_absolute : string -> bool
 
+(** Reads and returns the lines of the given [in_channel]. *)
+val read_channel_lines : in_channel -> string list
+
 (** Reads all the content of ic and returns it as a string. *)
 val read_in_channel : in_channel -> string
 
+(** Reads and returns the lines inside the given file. *)
+val read_file_lines : string -> string list
+
 (** Read all the content of file and returns it as a string. *)
-val readfile : string -> string
+val read_file : string -> string
