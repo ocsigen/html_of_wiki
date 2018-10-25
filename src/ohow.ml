@@ -36,20 +36,11 @@ let build_page content =
     | Some s -> s
     | None -> ""
   in
-  let stylesheets = ["bootstrap_custom.css"; "style.css"; "syntax.css"] |> List.map (fun f -> "https://ocsigen.github.io/css/" ^ f) in
-  let scripts = ["https://cdnjs.cloudflare.com/ajax/libs/prism/1.9.0/components/prism-core.min.js";
-                 "https://cdnjs.cloudflare.com/ajax/libs/prism/1.9.0/components/prism-ocaml.min.js";
-                 "https://cdnjs.cloudflare.com/ajax/libs/prism/1.9.0/components/prism-clike.min.js";
-                 "https://cdnjs.cloudflare.com/ajax/libs/prism/1.9.0/components/prism-reason.min.js";
-                 "https://cdnjs.cloudflare.com/ajax/libs/prism/1.9.0/components/prism-javascript.min.js";
-                 "https://ocsigen.github.io/js/client.js";
-                 "https://ocsigen.github.io/js/viewport_ie10_hack.js"]
-  in
   Tyxml.Html.(html
                 (head (title (pcdata ti))
                    ([meta ~a:[a_charset "utf8"] ()]
-                    @ (List.map (fun href -> link ~rel:[`Stylesheet] ~href ()) stylesheets)
-                    @ (List.map (fun src -> script ~a:[a_src src] (pcdata "")) scripts)))
+                    @ (Site_ocsimore.(List.map make_css @@ List.rev !css_links))
+                    @ (Site_ocsimore.(List.map make_script @@ List.rev !head_scripts))))
                 (body content))
 
 let pprint oc html =
@@ -65,8 +56,10 @@ let ohow file oc =
   file
   |> Utils.read_file
   |> Wiki_syntax.compile
-  |> build_page
-  |> pprint oc;
+  |> (fun c ->
+      if (Global.options ()).headless
+      then List.iter (pprint oc) c
+      else pprint oc (build_page c));
   close_out oc
 
 let get_output_channel output_channel file = match output_channel with
@@ -87,7 +80,7 @@ let init_extensions () =
   Only.init ();
   Site_ocsimore.init ()
 
-let main {Global.print; outfile; suffix; root; manual; api; default_subproject; images; assets; csw; files} =
+let main {Global.print; headless; outfile; suffix; root; manual; api; default_subproject; images; assets; csw; files} =
   Utils.check_errors [("Some input files doesn't exist...",
                        lazy (List.for_all Sys.file_exists files))];
   init_extensions ();
@@ -97,7 +90,7 @@ let main {Global.print; outfile; suffix; root; manual; api; default_subproject; 
   let api = relative_to_root api in
   let images = relative_to_root images in
   let assets = relative_to_root assets in
-  let opts = {Global.print; outfile; suffix; root; manual; api; default_subproject; images; assets; csw; files} in
+  let opts = {Global.print; headless; outfile; suffix; root; manual; api; default_subproject; images; assets; csw; files} in
   Global.with_options opts
     (fun () ->
        ((match (outfile, print) with

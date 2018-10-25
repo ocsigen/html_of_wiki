@@ -42,6 +42,7 @@ let api_menu_file () = !ref_menu_file >>= function Api s -> Some s | _ -> None
 type cli_options = {
   files: string list;
   print: bool;
+  headless: bool;
   outfile: string option;
   suffix: string;
   root: string;
