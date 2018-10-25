@@ -9,7 +9,7 @@ let a_link_of_uri ?fragment suffix uri contents =
 let manual_link contents = function
   | [project; chapter; fragment; Some version] ->
     let file = Global.current_file () in
-    let {Global.root; manual} = Global.options () in
+    let root, manual = Global.(root (), the_manual ()) in
     let uri = match (project, chapter) with
       | (Some p, Some c) -> Paths.(rewind root file (* inside this version dir *)
                                    +/+ up (* inside project dir *)
@@ -29,7 +29,7 @@ let manual_link contents = function
 let api_link prefix contents = function
   | [project; subproject; text; Some version] ->
     let file = Global.current_file () in
-    let {Global.root; api} = Global.options () in
+    let root, api = Global.(root (), the_api ()) in
     let id = Api.parse_contents (contents <$> String.trim) in
     let dsp = (Global.options ()).default_subproject in
     let base = match (project, subproject, dsp) with
@@ -47,7 +47,7 @@ let api_link prefix contents = function
 let img_link contents = function
   | [Some src] ->
     let file = Global.current_file () in
-    let {Global.root; images} = Global.options () in
+    let root, images = Global.(root (), the_images ()) in
     let uri = Paths.(rewind root file +/+ images +/+ src) in
     let alt = Filename.basename src in
     Lwt.return [Html.img ~src:uri ~alt ()]
@@ -57,7 +57,7 @@ let img_link contents = function
 let file_link contents = function
   | [Some src] ->
     let file = Global.current_file () in
-    let {Global.root; assets} = Global.options () in
+    let root, assets = Global.(root (), the_assets ()) in
     let uri = Paths.(rewind root file +/+ assets +/+ src) in
     Lwt.return [a_link_of_uri None uri (Some (contents |? Filename.basename uri))]
   | [None] -> failwith "a_file: no src argument error"

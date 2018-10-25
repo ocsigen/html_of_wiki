@@ -46,11 +46,11 @@ type cli_options = {
   outfile: string option;
   suffix: string;
   root: string;
-  manual: string;
-  api: string;
+  manual: string option;
+  api: string option;
   default_subproject: string option;
-  images: string;
-  assets: string;
+  images: string option;
+  assets: string option;
   csw: string list;
 }
 let ref_options : cli_options option ref = ref None
@@ -67,15 +67,23 @@ let using_options k = match !ref_options with
   | None -> failwith "Global.options isn't properly intialized."
 
 let options () = using_options Utils.id
-
-let root () = (options ()).root
-let manual () = (options ()).manual
-let api () = (options ()).api
-let images () = (options ()).images
-let assets () = (options ()).assets
 let suffix () = (options ()).suffix
 
+let the_manual () = match (options ()).manual with
+  | Some s -> s
+  | None -> failwith "no manual given"
+let the_api ()    = match (options ()).api with
+  | Some s -> s
+  | None -> failwith "no api given"
+let the_images () = match (options ()).images with
+  | Some s -> s
+  | None -> failwith "no images given"
+let the_assets () = match (options ()).assets with
+  | Some s -> s
+  | None -> failwith "no assets given"
+
 (* Preserve absolute path *)
+let root () = (options ()).root
 let version_dir = root
 let project_dir () = version_dir () |> Filename.dirname
 let all_projects_dir () = project_dir () |> Filename.dirname

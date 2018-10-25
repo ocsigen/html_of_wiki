@@ -5,14 +5,14 @@ open Utils.Operators
 let doctree _ args _ =
   let attrs = Wiki_syntax.parse_common_attribs args in
   let {Global.root; manual; api} = Global.options () in
-  let pman = root +/+ manual in
-  let pman_menu = pman +/+ "menu.wiki" in
-  let papi_menus = Utils.find_files "menu.wiki" @@ root +/+ api in
-
-  let menu_exc_msg =
-    Printf.sprintf "missing required file %s for doctree" pman_menu
+  let find_menus p =
+    try p >>= (fun p -> Some (root +/+ p))
+              <$> Utils.find_files "menu.wiki"
+              |? []
+    with Sys_error _ -> []
   in
-  Utils.check_errors [(menu_exc_msg, lazy (Sys.file_exists pman_menu))];
+  let pman_menus = find_menus manual in
+  let papi_menus = find_menus api in
 
   let compile bi path =
     path
@@ -44,8 +44,8 @@ let doctree _ args _ =
   let compile_manual f = compile_with_menu_file (Global.Manual f) in
   let compile_api f = compile_with_menu_file (Global.Api f) in
 
-  let menus = Lwt.return (compile_manual pman_menu
-                          :: List.map compile_api papi_menus) in
+  let menus = Lwt.return (List.map compile_manual pman_menus
+                          @ List.map compile_api papi_menus) in
   `Flow5 (let%lwt r = Lwt.map List.concat menus in
           Lwt.return [nav ~a:(a_class ["how-doctree"] :: attrs) r])
 

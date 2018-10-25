@@ -17,20 +17,19 @@ Overrides $(b,--print)." in
   Cmdliner.Arg.(value & opt (some string) None & info ["o"; "output"]
                   ~docv:"FILE" ~doc)
 
-let cwd = Sys.getcwd ()
 let root_cmd =
   let doc = "Use the given root directory." in
-  Cmdliner.Arg.(value & opt string cwd & info ["root"]
+  Cmdliner.Arg.(value & opt string (Unix.getcwd ()) & info ["root"]
                   ~docv:"DIR" ~doc)
 
 let manual_cmd =
   let doc = "Use the given manual path." in
-  Cmdliner.Arg.(value & opt string cwd & info ["manual"]
+  Cmdliner.Arg.(value & opt (some string) None & info ["manual"]
                   ~docv:"DIR" ~doc)
 
 let api_cmd =
   let doc = "Use the given api path." in
-  Cmdliner.Arg.(value & opt string cwd & info ["api"]
+  Cmdliner.Arg.(value & opt (some string) None & info ["api"]
                   ~docv:"DIR" ~doc)
 
 let default_subproject_cmd =
@@ -41,12 +40,12 @@ Ocsiforge's old config.js for compatibility reasons. Do not use it otherwise!" i
 
 let img_cmd =
   let doc = "Use the given image directory path." in
-  Cmdliner.Arg.(value & opt string cwd & info ["images"]
+  Cmdliner.Arg.(value & opt (some string) None & info ["images"]
                   ~docv:"DIR" ~doc)
 
 let assets_cmd =
   let doc = "Use the given assets directory path." in
-  Cmdliner.Arg.(value & opt string cwd & info ["assets"]
+  Cmdliner.Arg.(value & opt (some string) None & info ["assets"]
                   ~docv:"DIR" ~doc)
 
 let csw_cmd =

@@ -240,10 +240,18 @@ let link_kind bi addr =
     begin match p with
       | "href" ->
         let menu_page = Global.using_menu_file (fun mf ->
+            let open Utils.Operators in
             let {Global.root; manual; api} = Global.options () in
             let file = Global.current_file () in
-            let is_manual = Paths.(is_inside_dir (root +/+ manual) file) in
-            let is_api = Paths.(is_inside_dir (root +/+ api) file) in
+            let is_manual = manual
+                            <$> (fun m -> Paths.(is_inside_dir (root +/+ m) file))
+                            |? false
+            in
+            let is_api = api
+                         <$> (fun a -> Paths.(is_inside_dir (root +/+ a) file))
+                         |? false
+            in
+            let manual, api = manual |? "", api |? "" in
             match mf with
             | Manual _ when is_manual -> page
             | Api _ when is_api -> Paths.(rewind root file +/+ api +/+ page)
