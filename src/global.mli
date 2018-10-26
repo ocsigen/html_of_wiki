@@ -28,11 +28,11 @@ type cli_options = {
   outfile: string option;
   suffix: string;
   root: string;
-  manual: string;
-  api: string;
+  manual: string option;
+  api: string option;
   default_subproject: string option;
-  images: string;
-  assets: string;
+  images: string option;
+  assets: string option;
   csw: string list;
 }
 
@@ -44,19 +44,20 @@ val using_options : (cli_options -> 'a) -> 'a
 (** Returns the more recently set [cli_options]. *)
 val options : unit -> cli_options
 
-(** Returns [(options ()).root]. *)
-val root   : unit -> string
-(** Returns [(options ()).manual]. *)
-val manual : unit -> string
-(** Returns [(options ()).api]. *)
-val api    : unit -> string
-(** Returns [(options ()).images]. *)
-val images : unit -> string
-(** Returns [(options ()).assets]. *)
-val assets : unit -> string
 (** Returns [(options ()).suffix]. *)
 val suffix : unit -> string
 
+(** Returns the value of [(options ()).manual] is any, or raises [Failure]. *)
+val the_manual : unit -> string
+(** Returns the value of [(options ()).api] is any, or raises [Failure]. *)
+val the_api    : unit -> string
+(** Returns the value of [(options ()).images] is any, or raises [Failure]. *)
+val the_images : unit -> string
+(** Returns the value of [(options ()).assets] is any, or raises [Failure]. *)
+val the_assets : unit -> string
+
+(** Returns [(options ()).root]. *)
+val root : unit -> string
 (** Alias for [root ()]. *)
 val version_dir : unit -> string
 (** Returns the absolute path to the project directory

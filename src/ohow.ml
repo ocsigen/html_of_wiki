@@ -85,11 +85,14 @@ let main {Global.print; headless; outfile; suffix; root; manual; api; default_su
                        lazy (List.for_all Sys.file_exists files))];
   init_extensions ();
   let root = Paths.realpath root in
-  let relative_to_root p = Paths.path_rm_prefix root @@ Paths.realpath p in
-  let manual = relative_to_root manual in
-  let api = relative_to_root api in
-  let images = relative_to_root images in
-  let assets = relative_to_root assets in
+  let relative_to_root p =
+    try Paths.path_rm_prefix root @@ Paths.realpath p
+    with Failure _ -> p
+  in
+  let manual = manual <$> relative_to_root in
+  let api = api <$> relative_to_root in
+  let images = images <$> relative_to_root in
+  let assets = assets <$> relative_to_root in
   let opts = {Global.print; headless; outfile; suffix; root; manual; api; default_subproject; images; assets; csw; files} in
   Global.with_options opts
     (fun () ->
