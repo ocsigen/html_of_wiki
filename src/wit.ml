@@ -4,7 +4,7 @@ let replace_content_tag tmpl content =
   let regexp = Str.regexp "<<content>>" in
   try
     ignore @@ Str.search_forward regexp tmpl 0;
-    Some (Str.replace_first regexp content tmpl)
+    Some (Str.substitute_first regexp (fun _ -> content) tmpl)
   with Not_found ->
     None
 
