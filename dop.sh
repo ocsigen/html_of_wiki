@@ -239,7 +239,7 @@ csw_collect() {
     find $1 -name '*.wiki' -exec basename {} \; | sort
 }
 csw() {
-    comm -12 <(csw_collect $root/$client) <(csw_collect $root/$server)
+    comm -12 <(csw_collect $wikidir/$client) <(csw_collect $wikidir/$server)
 }
 
 call_ohow() {
@@ -256,7 +256,7 @@ call_ohow() {
         csw > $cswtmp
     fi
     if $csw
-    then $ohow $opts --csw $csw $1
+    then $ohow $opts --csw <(csw) $1
     else $ohow $opts $1
     fi
 }
