@@ -195,8 +195,8 @@ let do_google_search _ _ _ =
   `Flow5
     (Lwt.return Html.[
       form ~a:[a_id "search"] [
-        input ~a:[a_name "q"; a_id "q"; a_placeholder "search ..."] ();
-        button [pcdata "Search"]
+        input ~a:[a_name "q"; a_id "q"; a_placeholder "Search using Google"] ();
+        button [pcdata "GO"]
       ]
     ])
 
