@@ -252,10 +252,6 @@ call_ohow() {
     [ -n "$default_subp" ] && opts="$opts --default-subproject $default_subp"
     [ -n "$docversions" ] && opts="$opts --docversions $docversions"
 
-    if ! [ -f "$cswtmp" ]; then
-        cswtmp=$(mktemp)
-        csw > $cswtmp
-    fi
     if $csw
     then $ohow $opts --csw <(csw) $1
     else $ohow $opts $1
@@ -392,4 +388,6 @@ docversions=$(safe_read_file "$docversions")
 cp -r $wikidir $root
 inline_templates
 compile
-[ -f "$cswtmp" ] && rm "$cswtmp" || true
+if $menu && ! $keep_wikis; then
+   find $root -name menu.wiki -exec rm {} \;
+fi
