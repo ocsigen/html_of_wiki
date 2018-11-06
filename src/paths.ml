@@ -51,3 +51,14 @@ let concat_uri_suffix suffix = function
   | "" -> failwith "concat_uri_suffix: empty uri"
   | uri when uri.[String.length uri - 1] = '/' -> uri
   | uri -> uri ^ suffix
+
+let apply_path =
+  let rec loop n path = match Filename.basename path with
+    | "/" -> "/"
+    | "." when path = "" || path = "." -> ""
+    | "" | "." -> loop n (Filename.dirname path)
+    | ".." -> loop (n + 1) (Filename.dirname path)
+    | _ when n > 0 -> loop (n - 1) (Filename.dirname path)
+    | b -> loop n (Filename.dirname path) +/+ b
+  in
+  loop 0

@@ -40,3 +40,7 @@ val is_visible_dir : string -> bool
 (** [concat_uri_suffix s u] concatenates [u] with [s] if [u] doesn't ends
     with a ['/']. Raises [Failure] when [u] is [""]. *)
 val concat_uri_suffix : string -> string -> string
+
+(** [apply_path p] returns the path [p] without [..]s and [.]s.
+    Example: [apply_path "a//../b/.//./c/.." = "b"] *)
+val apply_path : string -> string
