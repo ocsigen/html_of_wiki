@@ -196,7 +196,12 @@ let do_google_search _ args _ =
     | Some i -> i
     | None -> failwith "googlesearch: must provide an \"icon\" path to use"
   in
-  Html.[form ~a:[a_id "googlesearch"]
+  let domain = match Ocsimore_lib.get_opt args "domain" with
+    | Some d -> d
+    | None -> failwith "googlesearch: must provide an \"domain\""
+  in
+  Html.[form ~a:[a_id "googlesearch";
+                 a_action "https://google.com/search"]
           [input ~a:[a_name "q";
                      a_id "gsearch-box";
                      a_placeholder "Search using Google"]
@@ -204,7 +209,8 @@ let do_google_search _ args _ =
            label ~a:[a_label_for "gsearch-box"]
              [img ~src:image ~alt:"" ~a:[a_id "gsearch-icon"] ()];
            input ~a:[a_input_type `Submit;
-                     a_id "gsearch-submit"]
+                     a_id "gsearch-submit";
+                     a_onclick @@ "document.getElementById('gsearch-box').value += ' site:" ^ domain ^ "';"]
              ()]]
   |> (fun x -> `Flow5 (Lwt.return x))
 
