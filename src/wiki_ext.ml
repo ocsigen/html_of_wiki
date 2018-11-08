@@ -105,16 +105,21 @@ let do_drawer wp bi args c =
 
 let do_when_project _ _ args c =
   let open Utils.Operators in
-  let project = match Ocsimore_lib.get_opt args "project" with
-    | Some p -> p
-    | None -> failwith "when_project: required argument \"project\" missing"
+  let fail e = failwith @@ "when_project: " ^ e in
+  let opts = Extensions.get_opts ["when"; "unless"] args in
+  let project, predicate = match opts with
+    | [Some p; None] -> p, (=)
+    | [None; Some p] -> p, (<>)
+    | [None; None] -> fail "required arguments missing: \"when\" or \"unless\""
+    | [Some _; Some _] -> fail "mutually incompatible arguments provided: \"when\", \"unless\""
+    | _ -> fail "unexpected argument list provided"
   in
   let root = Global.root () in
   let current = Paths.(root +/+ up
                        |> apply_path
                        |> Filename.basename)
   in
-  if project = current
+  if predicate project current
   then `Flow5 (Lwt.return (c <$> Wiki_syntax.compile |? []))
   else `Flow5 (Lwt.return [])
 
