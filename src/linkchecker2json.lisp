@@ -5,7 +5,6 @@
         string)))
 
 (defun read-error (fin)
-  (read-line fin)
   (let ((line (read-line fin)))
     (when (string= line "Statistics:")
       (return-from read-error nil))
@@ -23,11 +22,20 @@
             :real (rlrv 2)
             :error (progn (read-line fin) (rlrv 1))))))
 
-(defun read-errors (fin)
-  (let ((err (read-error fin)))
-    (if err
-        (cons err (read-errors fin))
-        '())))
+(defun read-errors (fin &key error-recovery-p)
+  (if error-recovery-p
+      (handler-case (loop :until (string= (read-line fin) ""))
+        (end-of-file () (return-from read-errors '())))
+      (read-line fin))
+  (let ((err (handler-case (read-error fin)
+               (end-of-file () 'continue))))
+    (cond
+      ((eql err 'continue)
+       (read-errors fin :error-recovery-p t))
+      ((and (listp err) (not (null err)))
+       (cons err (read-errors fin)))
+      (t
+       '()))))
 
 (defun group (key list &key (test #'eql))
   (let ((h (make-hash-table :test test)))
