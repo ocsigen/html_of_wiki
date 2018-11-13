@@ -201,15 +201,28 @@ let do_client_server_switch _ args _ = match (Global.options ()).api with
 (*****************************************************************************)
 (** Extension google search *)
 
-let do_google_search _ _ _ =
-  `Flow5
-    (Lwt.return Html.[
-      form ~a:[a_id "search"] [
-        input ~a:[a_name "q"; a_id "q"; a_placeholder "search ..."] ();
-        button [pcdata "Search"]
-      ]
-    ])
-
+let do_google_search _ args _ =
+  let image = match Ocsimore_lib.get_opt args "icon" with
+    | Some i -> i
+    | None -> failwith "googlesearch: must provide an \"icon\" path to use"
+  in
+  let domain = match Ocsimore_lib.get_opt args "domain" with
+    | Some d -> d
+    | None -> failwith "googlesearch: must provide an \"domain\""
+  in
+  Html.[form ~a:[a_id "googlesearch";
+                 a_action "https://google.com/search"]
+          [input ~a:[a_name "q";
+                     a_id "gsearch-box";
+                     a_placeholder "Search using Google"]
+             ();
+           label ~a:[a_label_for "gsearch-box"]
+             [img ~src:image ~alt:"" ~a:[a_id "gsearch-icon"] ()];
+           input ~a:[a_input_type `Submit;
+                     a_id "gsearch-submit";
+                     a_onclick @@ "document.getElementById('gsearch-box').value += ' site:" ^ domain ^ "';"]
+             ()]]
+  |> (fun x -> `Flow5 (Lwt.return x))
 
 let init () =
   Wiki_syntax.register_simple_flow_extension
