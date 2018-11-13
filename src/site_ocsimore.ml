@@ -167,21 +167,31 @@ let do_client_server_switch _ args _ = match (Global.options ()).api with
     let is_client = Paths.(is_inside_dir (root +/+ api +/+ client) file) in
     let is_server = Paths.(is_inside_dir (root +/+ api +/+ server) file) in
     let wiki = Filename.basename file in
-    let make_switch other =
-      let html = Filename.chop_extension wiki ^ Global.suffix () in
-      let href = Paths.(rewind (root +/+ api) file +/+ other +/+ html) in
-      Html.([div ~a:(a_class ["client-server-switch-wrapper"] :: attrs)
-               [a ~a:[a_href href;
-                      a_style "-webkit-appearance: button;-moz-appearance: button;appearance: button;text-decoration: none;color: initial;"]
-                  [pcdata @@ "link to " ^ other]]])
+    let make_switch = function
+      | None -> []
+      | Some other ->
+        let html = Filename.chop_extension wiki ^ Global.suffix () in
+        let href = Paths.(rewind (root +/+ api) file +/+ other +/+ html) in
+        let checked = if other = server then [Html.a_checked ()] else [] in
+        let onchange = "location = '" ^ href ^ "';" in
+        Html.([label ~a:(a_class ["csw-switch"] :: attrs)
+                 [input ~a:([a_input_type `Checkbox;
+                             a_onchange onchange]
+                            @ checked)
+                    ();
+                  span ~a:[a_class ["csw-slider"; "csw-slider-style-round"]] [];
+                  span ~a:[a_class ["csw-slider-no"]]
+                    [pcdata "Server version"];
+                  span ~a:[a_class ["csw-slider-yes"]]
+                    [pcdata "Client version"]]])
     in
     let make = function
       | [] -> []
       | wikis when is_api && List.exists (fun s -> s = wiki) wikis ->
         begin match is_client, is_server with
-          | true, false -> make_switch server
-          | false, true -> make_switch client
-          | false, false -> []
+          | true, false -> make_switch @@ Some server
+          | false, true -> make_switch @@ Some client
+          | false, false -> make_switch None
           | _, _ -> assert false
         end
       | _ -> []
