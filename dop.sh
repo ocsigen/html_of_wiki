@@ -239,7 +239,7 @@ csw_collect() {
     find $1 -name '*.wiki' -exec basename {} \; | sort
 }
 csw() {
-    comm -12 <(csw_collect $root/$client) <(csw_collect $root/$server)
+    comm -12 <(csw_collect $wikidir/$client) <(csw_collect $wikidir/$server)
 }
 
 call_ohow() {
@@ -250,13 +250,10 @@ call_ohow() {
     [ -n "$assets" ] && opts="$opts --assets $assets"
     [ -n "$images" ] && opts="$opts --images $images"
     [ -n "$default_subp" ] && opts="$opts --default-subproject $default_subp"
+    [ -n "$docversions" ] && opts="$opts --docversions $docversions"
 
-    if ! [ -f "$cswtmp" ]; then
-        cswtmp=$(mktemp)
-        csw > $cswtmp
-    fi
     if $csw
-    then $ohow $opts --csw $csw $1
+    then $ohow $opts --csw <(csw) $1
     else $ohow $opts $1
     fi
 }
@@ -335,7 +332,8 @@ keep_wikis=false
 show_inferred=false
 show_used=false
 no_run=false
-while getopts hr:c:t:vflkiusn opt; do
+docversions=
+while getopts hr:c:t:vflkiusnd: opt; do
     case "$opt" in
         r) root="$OPTARG";;
         c) config="$OPTARG";;
@@ -347,6 +345,7 @@ while getopts hr:c:t:vflkiusn opt; do
         i) show_inferred=true;;
         u) show_used=true;;
         n) no_run=true;;
+        d) docversions="$OPTARG";;
         h) usage $EXIT_SUCCESS;;
         *) usage;;
     esac
@@ -363,13 +362,16 @@ $show_inferred && {
     echo Inferred configuration:
     show_config; echo
 }
-[ -n "$config" ] && {
-    # Read the config once and store it in a file since it may be a process substitution.
-    tmp=$(mktemp)
-    cat $config > $tmp
-    config=$tmp
-    read_config
+safe_read_file() {
+    [ -n "$1" ] && {
+        tmp=$(mktemp)
+        cat $1 > $tmp
+        echo $tmp
+    }
 }
+# Read the config once and store it in a file since it may be a process substitution.
+config=$(safe_read_file "$config")
+read_config
 check_config || {
     echo Configuration errors happened. Aborting. >&2
     exit $EXIT_CONFIG
@@ -382,7 +384,10 @@ $show_used && {
 $no_run && exit $EXIT_SUCCESS
 
 ### Compilation
+docversions=$(safe_read_file "$docversions")
 cp -r $wikidir $root
 inline_templates
 compile
-[ -f "$cswtmp" ] && rm "$cswtmp" || true
+if $menu && ! $keep_wikis; then
+   find $root -name menu.wiki -exec rm {} \;
+fi

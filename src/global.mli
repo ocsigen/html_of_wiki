@@ -34,6 +34,7 @@ type cli_options = {
   images: string option;
   assets: string option;
   csw: string list;
+  docversions: string list;
 }
 
 (** [with_options opts k] sets the [options] fo [opts] and calls [k ()].

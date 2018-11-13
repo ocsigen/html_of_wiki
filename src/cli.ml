@@ -54,6 +54,12 @@ let csw_cmd =
                 info ["csw"; "clientserverswitch"; "client-server-switch"]
                   ~docv:"FILE" ~doc)
 
+let docversions_cmd =
+  let doc = "Use the given list of versions to figure inside the docversion widget." in
+  Cmdliner.Arg.(value & opt (some file) None &
+                info ["dv"; "docversion"; "docversions"]
+                  ~docv:"FILE" ~doc)
+
 let local_cmd =
   let doc = "Appends `.html' at the end of each link redirection
 to make local navigation using file:// URLs possible." in
@@ -119,11 +125,14 @@ manual directory and the api directory."
     Term.info "ohow" ~version:"v0.0.0" ~doc ~exits:Term.default_exits ~man)
 
 
-let register_options k print headless outfile root manual api default_subproject images assets csw local files =
+let register_options k print headless outfile root manual api default_subproject images assets csw docversions local files =
   let open Utils.Operators in
   let suffix = if local then ".html" else "" in
   let csw = csw <$> Utils.read_file_lines |? [] in
-  let opts = {Global.print; headless; outfile; suffix; root; manual; api; default_subproject; images; assets; csw; files} in
+  let docversions = docversions <$> Utils.read_file_lines |? [] in
+  let opts = {Global.print; headless; outfile; suffix; root;
+              manual; api; default_subproject; images; assets;
+              csw; docversions; files} in
   Global.with_options opts (fun () -> k opts)
 
 let run main =
@@ -139,6 +148,7 @@ let run main =
       $ img_cmd
       $ assets_cmd
       $ csw_cmd
+      $ docversions_cmd
       $ local_cmd
       $ file_cmd)
   in

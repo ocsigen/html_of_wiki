@@ -52,17 +52,14 @@ let doctree _ args _ =
 let docversion bi args contents =
   let attrs = Wiki_syntax.parse_common_attribs args in
   let file = Global.current_file () in
-  let root = Global.root () in
-  let versions = Global.project_dir ()
-                 |> Utils.a'_sorted_dir_files
-                 |> List.filter Paths.is_visible_dir
-  in
-  let links = versions |> List.map (fun v ->
+  let {Global.root; docversions} = Global.options () in
+  let links = docversions |> List.map (fun v ->
       let dst = Paths.(rewind root file +/+ up +/+ v +/+ "index.html") in
-      option ~a:[a_value dst] (pcdata v))
+      let selected = if (Filename.basename root) = v then Some (a_selected ())  else None in
+      option ~a:(a_value dst :: (selected <$> (fun s -> [s]) |? [])) (pcdata v))
   in
   `Flow5 (Lwt.return [pcdata "Version ";
-                      select ~a:(a_class [ "how-versions" ]
+                      select ~a:(a_class ["how-versions"]
                                  :: a_onchange "location = this.value;"
                                  :: attrs)
                         links])

@@ -52,6 +52,7 @@ type cli_options = {
   images: string option;
   assets: string option;
   csw: string list;
+  docversions: string list;
 }
 let ref_options : cli_options option ref = ref None
 
