@@ -43,6 +43,7 @@ type cli_options = {
   files: string list;
   print: bool;
   headless: bool;
+  local: bool;
   outfile: string option;
   suffix: string;
   root: string;

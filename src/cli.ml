@@ -132,7 +132,7 @@ let register_options k print headless outfile root manual api default_subproject
   let docversions = docversions <$> Utils.read_file_lines |? [] in
   let opts = {Global.print; headless; outfile; suffix; root;
               manual; api; default_subproject; images; assets;
-              csw; docversions; files} in
+              csw; docversions; local; files} in
   Global.with_options opts (fun () -> k opts)
 
 let run main =

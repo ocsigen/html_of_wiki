@@ -123,6 +123,17 @@ let do_when_project _ _ args c =
   then `Flow5 (Lwt.return (c <$> Wiki_syntax.compile |? []))
   else `Flow5 (Lwt.return [])
 
+let do_when_local _ _ _ c =
+  let open Utils.Operators in
+  `Flow5 (Lwt.return (if (Global.options ()).local
+                      then c <$> Wiki_syntax.compile |? []
+                      else []))
+
+let do_unless_local _ _ _ c =
+  let open Utils.Operators in
+  `Flow5 (Lwt.return (if not (Global.options ()).local
+                      then c <$> Wiki_syntax.compile |? []
+                      else []))
 
 let init () =
   Wiki_syntax.register_raw_wiki_extension ~name:"outline"
@@ -143,4 +154,12 @@ let init () =
   Wiki_syntax.register_raw_wiki_extension ~name:"when-project"
     ~wp:Wiki_syntax.wikicreole_parser
     ~wp_rec:Wiki_syntax.wikicreole_parser
-    do_when_project
+    do_when_project;
+  Wiki_syntax.register_raw_wiki_extension ~name:"when-local"
+    ~wp:Wiki_syntax.wikicreole_parser
+    ~wp_rec:Wiki_syntax.wikicreole_parser
+    do_when_local;
+  Wiki_syntax.register_raw_wiki_extension ~name:"unless-local"
+    ~wp:Wiki_syntax.wikicreole_parser
+    ~wp_rec:Wiki_syntax.wikicreole_parser
+    do_unless_local
