@@ -11,6 +11,9 @@ module Operators : sig
 
   (** Path concatenation operator. See module [Paths]. *)
   val (+/+) : string -> string -> string
+
+  (** [s ^* n] equals to [s ^ s ^ ... ^ s], [n] times. *)
+  val (^*) : string -> int -> string
 end
 
 (** The identity function. *)
@@ -30,8 +33,20 @@ val is_some : 'a option -> bool
 (** [is_none x] returns whether [x] is [None]. *)
 val is_none : 'a option -> bool
 
+val optionify : ('a -> 'b) -> ('a -> 'b option)
+
+val not_foundify : ('a -> 'b option) -> ('a -> 'b)
+
+val trim_n : int -> string -> string
+
 (** [trim c s] returns [s] with the trailing occurences of [c] removed. *)
 val trim : char -> string -> string
+
+val starts_with : string -> string -> bool
+
+val ends_with : string -> string -> bool
+
+val sprint_two_cols : ?prefix:string -> ?sep:string -> (string * string) list -> string
 
 (** [sorted_dir_files sort dir] returns the list of the files inside [dir]
     sorted using the given [sort] function. *)

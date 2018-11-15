@@ -12,6 +12,11 @@ module Operators = struct
     | None -> default
 
   let (+/+) p q = Paths.(p +/+ q)
+
+  let rec (^*) s = function
+    | 0 -> ""
+    | n when n > 0 -> s ^ (s ^* (n - 1))
+    | _ -> failwith "string multiplication operator: negative operand"
 end
 
 
@@ -25,14 +30,46 @@ let check_errors =
 let is_some = function Some _ -> true | None -> false
 let is_none = function Some _ -> false | None -> true
 
+let optionify f = fun x -> match f x with
+  | exception Not_found -> None
+  | x -> Some x
+let not_foundify f = fun x -> match f x with
+  | Some x -> x
+  | None -> raise Not_found
+
+
+let trim_n n string = match String.length string with
+  | len when len <= n -> ""
+  | len -> String.sub string n (len - n)
+
 let trim char string =
-  let rem_first s = String.sub s 1 (String.length s - 1) in
+  let rem_first = trim_n 1 in
   let rec trim = function
     | "" -> ""
     | s when s.[0] = char -> trim @@ rem_first s
     | s -> s
   in
   trim string
+
+let starts_with prefix s =
+  let p = String.length prefix in
+  String.length s >= p && String.sub s 0 p = prefix
+let ends_with suffix s =
+  let l = String.length suffix in
+  String.length s >= l && String.sub s (String.length s - l) l = suffix
+
+let sprint_two_cols ?(prefix = "") ?(sep = "\t ") cols =
+  let max_len = cols
+                |> List.map (fun (fstcol, _) -> String.length fstcol)
+                |> List.fold_left max 0
+  in
+  cols
+  |> List.map (fun (c, c') ->
+      Printf.sprintf "%s%s%s\t %s"
+        prefix c
+        Operators.(" " ^* (max_len - String.length c)) c')
+  |> String.concat "\n"
+
 
 
 let sorted_dir_files sort dir = Sys.readdir dir |> Array.to_list |> sort
