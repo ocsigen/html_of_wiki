@@ -82,7 +82,7 @@ let init_extensions () =
 
 let main {Global.print; headless; outfile; suffix; root;
           manual; api; default_subproject; images; assets;
-          csw; docversions; files} =
+          csw; docversions; local; files} =
   Utils.check_errors [("Some input files doesn't exist...",
                        lazy (List.for_all Sys.file_exists files))];
   init_extensions ();
@@ -97,7 +97,7 @@ let main {Global.print; headless; outfile; suffix; root;
   let assets = assets <$> relative_to_root in
   let opts = {Global.print; headless; outfile; suffix; root;
               manual; api; default_subproject; images; assets;
-              csw; docversions; files} in
+              csw; docversions; local; files} in
   Global.with_options opts
     (fun () ->
        ((match (outfile, print) with
