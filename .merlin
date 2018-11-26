@@ -10,3 +10,4 @@ PKG fileutils
 PKG uri
 PKG js_of_ocaml.ppx
 PKG reason
+PKG yaml

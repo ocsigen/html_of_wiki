@@ -1,3 +1,4 @@
+(* GENERAL UTILITIES *)
 module Operators = struct
   let (>>=) x f = match x with
     | Some x -> f x
@@ -17,16 +18,50 @@ module Operators = struct
     | 0 -> ""
     | n when n > 0 -> s ^ (s ^* (n - 1))
     | _ -> failwith "string multiplication operator: negative operand"
-end
 
+  let (@<) l l' = List.for_all (fun x -> List.mem x l') l
+
+  let (@-) l l' = List.filter (fun x -> not @@ List.mem x l') l
+end
 
 let id x = x
 
+let constantly x = fun _ -> x
+
 let zipk f g k = f (fun fk -> g (fun gk -> k fk gk))
+
+
+(* LIST UTILIIES *)
+type ('a, 'b) alist = ('a * 'b) list
+
+let rec zip l l' = match l, l' with
+  | [], _ | _, [] -> []
+  | x :: l, x' :: l' -> (x, x') :: zip l l'
+
+let rec unzip = function
+  | [] -> [], []
+  | (x, y) :: ps ->
+    let xs, ys = unzip ps in
+    x :: xs, y :: ys
+
+let group_alists l l' = List.map (fun (k, v) -> match List.assoc_opt k l' with
+    | Some v' -> [(k, (v, v'))]
+    | None -> []) l |> List.concat
+
+let alist_of_values kofv = List.map (fun v -> (kofv v, v))
 
 let check_errors =
   List.iter (fun (err, b) -> if Lazy.force b then () else failwith err)
 
+
+(* HASHTBL UTILITIES *)
+let alist_of_hashtbl h =
+  let al = ref [] in
+  Hashtbl.iter (fun k v -> al := (k, v) :: !al) h;
+  !al
+
+
+(* OPTION UTILITIES *)
 let is_some = function Some _ -> true | None -> false
 let is_none = function Some _ -> false | None -> true
 
@@ -38,6 +73,7 @@ let not_foundify f = fun x -> match f x with
   | None -> raise Not_found
 
 
+(* STRING UTILITIES *)
 let trim_n n string = match String.length string with
   | len when len <= n -> ""
   | len -> String.sub string n (len - n)
@@ -58,6 +94,31 @@ let ends_with suffix s =
   let l = String.length suffix in
   String.length s >= l && String.sub s (String.length s - l) l = suffix
 
+let rec flip_repr = function
+  | [] | [] :: _ -> []
+  | rows ->
+    let col = List.map (function [] -> assert false | x :: _ -> x) rows in
+    let rest = List.map (function [] -> assert false | _ :: xs -> xs) rows in
+    col :: flip_repr rest
+
+let sprint_n_cols ?(prefix = "") ?(sep = "\t ") = function
+  | [] -> ""
+  | rows ->
+    let n_cols = List.length (List.nth rows 0) in
+    assert (rows |> List.map List.length |> List.for_all (fun x -> x = n_cols));
+    let maxes = rows
+                |> flip_repr
+                |> List.map (List.fold_left (fun n s -> max n (String.length s)) 0)
+    in
+    rows
+    |> List.map (fun cols ->
+        zip cols maxes
+        |> List.map (fun (c, n) -> c ^ Operators.(" " ^* (n - String.length c)))
+        |> String.concat sep
+        |> fun s -> prefix ^ s)
+    |> String.concat "\n"
+
+
 let sprint_two_cols ?(prefix = "") ?(sep = "\t ") cols =
   let max_len = cols
                 |> List.map (fun (fstcol, _) -> String.length fstcol)
@@ -70,8 +131,17 @@ let sprint_two_cols ?(prefix = "") ?(sep = "\t ") cols =
         Operators.(" " ^* (max_len - String.length c)) c')
   |> String.concat "\n"
 
+let sprint_three_cols ?(prefix = "") ?(sep = "\t ") rows =
+  rows
+  |> List.map (fun (c, c', c'') -> [c; c'; c''])
+  |> sprint_n_cols ~prefix ~sep
+
+let uri_absolute =
+  let rex = Re.Pcre.regexp "^(http|https|file|localhost:\\d+)://" in
+  Re.Pcre.pmatch ~rex
 
 
+(* FILE UTILITIES *)
 let sorted_dir_files sort dir = Sys.readdir dir |> Array.to_list |> sort
 let dir_files = sorted_dir_files id
 let a'_sorted_dir_files = sorted_dir_files (List.sort compare)
@@ -85,12 +155,6 @@ let rec find_files name = function
     |> List.map (find_files name)
     |> List.concat
   | _ -> []
-
-
-let uri_absolute =
-  let rex = Re.Pcre.regexp "^(http|https|file|localhost:\\d+)://" in
-  Re.Pcre.pmatch ~rex
-
 
 let read_channel_lines ic =
   let rec readall lines =

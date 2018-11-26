@@ -14,18 +14,36 @@ module Operators : sig
 
   (** [s ^* n] equals to [s ^ s ^ ... ^ s], [n] times. *)
   val (^*) : string -> int -> string
+
+  val (@<) : 'a list -> 'a list -> bool
+
+  val (@-) : 'a list -> 'a list -> 'a list
 end
 
 (** The identity function. *)
 val id : 'a -> 'a
 
+val constantly : 'a -> 'b -> 'a
+
+type ('a, 'b) alist = ('a * 'b) list
+
 (** Continuation argument zipper.
     [f (fun a -> g (fun b -> ...))] = [zipk f g (fun a b -> ...)] *)
 val zipk : (('a -> 'b) -> 'c) -> (('d -> 'e) -> 'b) -> ('a -> 'd -> 'e) -> 'c
 
+val zip : 'a list -> 'b list -> ('a * 'b) list
+
+val unzip : ('a * 'b) list -> 'a list * 'b list
+
+val group_alists : ('a, 'b) alist -> ('a, 'c) alist -> ('a, ('b * 'c)) alist
+
+val alist_of_values : ('b -> 'a) -> 'b list -> ('a, 'b) alist
+
 (** [check_errors [(msg, exp); ...]] evaluates in order each [exp] and raises
     [Failure msg] with the [msg] of the first [exp] to return [false], if any. *)
 val check_errors : (string * bool lazy_t) list -> unit
+
+val alist_of_hashtbl : ('a, 'b) Hashtbl.t -> ('a * 'b) list
 
 (** [is_some x] returns whether [x] is [Some y]. *)
 val is_some : 'a option -> bool
@@ -47,6 +65,8 @@ val starts_with : string -> string -> bool
 val ends_with : string -> string -> bool
 
 val sprint_two_cols : ?prefix:string -> ?sep:string -> (string * string) list -> string
+
+val sprint_three_cols : ?prefix:string -> ?sep:string -> (string * string * string) list -> string
 
 (** [sorted_dir_files sort dir] returns the list of the files inside [dir]
     sorted using the given [sort] function. *)
