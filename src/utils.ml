@@ -119,17 +119,10 @@ let sprint_n_cols ?(prefix = "") ?(sep = "\t ") = function
     |> String.concat "\n"
 
 
-let sprint_two_cols ?(prefix = "") ?(sep = "\t ") cols =
-  let max_len = cols
-                |> List.map (fun (fstcol, _) -> String.length fstcol)
-                |> List.fold_left max 0
-  in
-  cols
-  |> List.map (fun (c, c') ->
-      Printf.sprintf "%s%s%s\t %s"
-        prefix c
-        Operators.(" " ^* (max_len - String.length c)) c')
-  |> String.concat "\n"
+let sprint_two_cols ?(prefix = "") ?(sep = "\t ") rows =
+  rows
+  |> List.map (fun (c, c') -> [c; c'])
+  |> sprint_n_cols ~prefix ~sep
 
 let sprint_three_cols ?(prefix = "") ?(sep = "\t ") rows =
   rows
