@@ -49,12 +49,23 @@ let doctree _ args _ =
   `Flow5 (let%lwt r = Lwt.map List.concat menus in
           Lwt.return [nav ~a:(a_class ["how-doctree"] :: attrs) r])
 
+let path_from_versions_dir file =
+  let {Global.root} = Global.options () in
+  file
+  |> Paths.realpath
+  |> Paths.path_rm_prefix root
+
 let docversion bi args contents =
   let attrs = Wiki_syntax.parse_common_attribs args in
   let file = Global.current_file () in
-  let {Global.root; docversions} = Global.options () in
+  let {Global.root; docversions; suffix} = Global.options () in
+  let current_wiki_path =
+    path_from_versions_dir file
+    |> Filename.chop_extension
+    |> (fun p -> p ^ suffix)
+  in
   let links = docversions |> List.map (fun v ->
-      let dst = Paths.(rewind root file +/+ up +/+ v +/+ "index.html") in
+      let dst = Paths.(rewind root file +/+ up +/+ v +/+ current_wiki_path) in
       let selected = if (Filename.basename root) = v then Some (a_selected ())  else None in
       option ~a:(a_value dst :: (selected <$> (fun s -> [s]) |? [])) (pcdata v))
   in
