@@ -55,7 +55,10 @@ let infer_output_file file = (infer_wiki_name file) ^ ".html"
 let ohow file oc =
   file
   |> Utils.read_file
-  |> Wiki_syntax.compile
+  |> (fun wiki -> match (Global.options ()).template with
+      | Some template ->
+        Utils.read_file template |> Wiki_syntax.compile_with_content wiki
+      | None -> Wiki_syntax.compile wiki)
   |> (fun c ->
       if (Global.options ()).headless
       then List.iter (pprint oc) c
@@ -82,7 +85,7 @@ let init_extensions () =
 
 let main {Global.print; headless; outfile; suffix; root;
           manual; api; default_subproject; images; assets;
-          csw; docversions; local; files} =
+          template; csw; docversions; local; files} =
   Utils.check_errors [("Some input files doesn't exist...",
                        lazy (List.for_all Sys.file_exists files))];
   init_extensions ();
@@ -97,7 +100,7 @@ let main {Global.print; headless; outfile; suffix; root;
   let assets = assets <$> relative_to_root in
   let opts = {Global.print; headless; outfile; suffix; root;
               manual; api; default_subproject; images; assets;
-              csw; docversions; local; files} in
+              template; csw; docversions; local; files} in
   Global.with_options opts
     (fun () ->
        ((match (outfile, print) with

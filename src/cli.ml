@@ -48,6 +48,12 @@ let assets_cmd =
   Cmdliner.Arg.(value & opt (some string) None & info ["assets"]
                   ~docv:"DIR" ~doc)
 
+let template_cmd =
+  let doc = "Use the given template." in
+  Cmdliner.Arg.(value & opt (some file) None &
+                info ["t"; "template"]
+                  ~docv:"FILE" ~doc)
+
 let csw_cmd =
   let doc = "Use the given list of wikis which must have a clientserverswitch." in
   Cmdliner.Arg.(value & opt (some file) None &
@@ -125,14 +131,14 @@ manual directory and the api directory."
     Term.info "ohow" ~version:"v0.0.0" ~doc ~exits:Term.default_exits ~man)
 
 
-let register_options k print headless outfile root manual api default_subproject images assets csw docversions local files =
+let register_options k print headless outfile root manual api default_subproject images assets template csw docversions local files =
   let open Utils.Operators in
   let suffix = if local then ".html" else "" in
   let csw = csw <$> Utils.read_file_lines |? [] in
   let docversions = docversions <$> Utils.read_file_lines |? [] in
   let opts = {Global.print; headless; outfile; suffix; root;
               manual; api; default_subproject; images; assets;
-              csw; docversions; local; files} in
+              template; csw; docversions; local; files} in
   Global.with_options opts (fun () -> k opts)
 
 let run main =
@@ -147,6 +153,7 @@ let run main =
       $ default_subproject_cmd
       $ img_cmd
       $ assets_cmd
+      $ template_cmd
       $ csw_cmd
       $ docversions_cmd
       $ local_cmd

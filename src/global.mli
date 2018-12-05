@@ -34,6 +34,7 @@ type cli_options = {
   default_subproject: string option;
   images: string option;
   assets: string option;
+  template: string option;
   csw: string list;
   docversions: string list;
 }
