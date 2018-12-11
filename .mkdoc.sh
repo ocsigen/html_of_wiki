@@ -22,6 +22,7 @@ cat >$f <<EOF
     "manual": "manual",
     "assets": "manual/files",
     "images": "manual/files"
+
 }
 EOF
 DEBUG=t quickdop -f doc _doc -t json -c $f -viu
