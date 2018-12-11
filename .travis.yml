@@ -3,6 +3,9 @@ language: c
 env:
     - OCAML_VERSION=4.06
 
+install:
+    - true
+
 script:
     - ./.mkdoc.sh
 
