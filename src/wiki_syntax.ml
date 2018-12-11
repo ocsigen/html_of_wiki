@@ -143,20 +143,20 @@ let descr_builder l = Lwt_list.map_s ddt_builder l
 type href = Wiki_syntax_types.href
 
 let uri_of_href = function
-  | Absolute s -> Html.uri_of_string s
+  | Absolute s -> s
   | Document {document; fragment} -> Document.to_uri ?fragment document
 
 let link_regexp =
-  Re_pcre.regexp "([a-z|A-Z-1-9]+)(\\((.*)\\))?:(.*)"
-let wiki_title_regexp = Re_pcre.regexp "\"([a-z|A-Z_][a-zA-Z_0-9-]*)\""
-let wiki_id_regexp = Re_pcre.regexp "([0-9]+)"
+  Re.Pcre.regexp "([a-z|A-Z-1-9]+)(\\((.*)\\))?:(.*)"
+let wiki_title_regexp = Re.Pcre.regexp "\"([a-z|A-Z_][a-zA-Z_0-9-]*)\""
+let wiki_id_regexp = Re.Pcre.regexp "([0-9]+)"
 let prototype_group = 1
 let wiki_id_parentheses_group = 2 (* with ()... *)
 let wiki_id_group = 3
 let page_group = 4
 
 let replace_regexp_group ~str ~result ~group ~replacement =
-  let open Re_pcre in
+  let open Re.Pcre in
   let before =
     String.sub str 0 (Re.Group.start result group)
   in
@@ -184,85 +184,7 @@ let list_suffix ~prefix list =
   in
   aux (prefix, list)
 
-let normalize_link =
-  let module Result = struct
-    let success_replace' s = Lwt.return (Some s)
-    let success_replace fmt = Printf.ksprintf success_replace' fmt
-    let failure_malformed_link' pos desugar_param msg =
-      Wiki_syntax_types.(desugar_param.dc_warnings <- (pos, "Malformed link: "^msg) :: desugar_param.dc_warnings);
-      Lwt.return None
-    let failure_malformed_link pos desugar_param fmt = Printf.ksprintf (failure_malformed_link' pos desugar_param) fmt
-    let no_replacement = Lwt.return None
-  end in
-  fun pos addr fragment desugar_param ->
-    let open Re_pcre in
-    match exec ~rex:link_regexp addr with
-      | g when get_substring g prototype_group = "wiki" ->
-          let wiki = get_substring g wiki_id_group in
-          begin match exec ~rex:wiki_id_regexp wiki with
-            | result -> (* [[wiki(ix):path]] => [[wiki("title"):path]] *)
-                let id = get_substring result 1 in
-                begin try%lwt
-                  let project = Projects.of_id (int_of_string id) in
-                  let wiki_name = "\"" ^ project ^ "\"" in
-                  let replacement =
-                    replace_regexp_group ~str:addr ~result ~group:wiki_id_group ~replacement:wiki_name
-                  in
-                  Result.success_replace' replacement
-                with Not_found ->
-                  Result.failure_malformed_link pos desugar_param "no wiki %s" id
-                end
-            | exception Not_found -> Result.no_replacement
-          end
-      | _ -> (* [addr] is no [link_regexp] *)
-          (*
-          let replacement_addr =
-            let page_wiki_name = desugar_param.dc_page_wiki in
-            *)
-            if String.length addr = 0 then (* [[]] => [[wiki(name):a/b/c]] *)
-              failwith "self-link?"
-              (* FIXME #anchor seems to be the only case. *)
-              (*
-              Result.success_replace "wiki(%s):%s"
-                page_wiki_name
-                (* FIXME why concat? where is it split? *)
-                  desugar_param.dc_page_path
-                Option.(
-                  desugar_param.dc_page_path |>
-                  map (String.concat "/") |>
-                  default_to "" |>
-                  force
-                )
-              *)
-            else
-              failwith "please tell me where this is used... if it is."
-              (*
-              match path_or_link with
-                | `Path path -> (* [[xyz]] => [[wiki(25):a/b/xyz]] et al. *)
-                    begin try
-                      let page_wiki, page_path =
-                        let wiki_page_for_path_option path =
-                          try Some (Wiki_self_services.get_wiki_page_for_path path)
-                          with Not_found -> None
-                        in
-                        match wiki_page_for_path_option path, wiki_page_for_path_option ("" :: path) with
-                          | Some ((_, page_path) as page), Some ((_, page_path') as page') ->
-                              if List.(length page_path < length page_path') then page else page'
-                          | Some page, None | None, Some page -> page
-                          | None, None -> raise Not_found
-                      in
-                      Result.success_replace "wiki(%s):%s"
-                        (Wiki_types.string_of_wiki page_wiki)
-                        (Url.string_of_url_path ~encode:false page_path)
-                    with Not_found -> (* No wiki page at [path] *)
-                      Result.success_replace "site:%s" (Url.string_of_url_path ~encode:false path)
-                    end
-                | `Link res -> res
-          in
-          let append_fragment addr = addr ^ get_map_option ~default:"" ~f:((^) "#") fragment in
-          replacement_addr >|= Option.map append_fragment
-      | _ -> Result.no_replacement
-          *)
+let normalize_link _ _ _ _ = Lwt.return None
 
 let starts_with prefix s =
   let p = String.length prefix in
@@ -272,83 +194,87 @@ let ends_with suffix s =
   let l = String.length suffix in
   String.length s >= l && String.sub s (String.length s - l) l = suffix
 
+
+let rec deabbrev_address = function
+  (* [[]], [[#anchor]] *)
+  | "" -> "href:"
+  | anchor when starts_with "#" anchor -> (deabbrev_address "") ^ anchor
+  (* [[/some/path]] *)
+  | abs when starts_with "/" abs -> "site:" ^ abs
+  (* Already valid links *)
+  | ok when starts_with "href:" ok -> ok
+  | ok when starts_with "site:" ok -> ok
+  | ok when starts_with "wiki:" ok -> ok
+  | ok when Re.Pcre.(pmatch ~rex:(regexp "^wiki\\(.*\\):") ok) -> ok
+  (* href: [[sub/page]] [[https://internet.com]] *)
+  | href -> "href:" ^ href
+
+let wiki_kind prot page =
+  let is_number = Re.Pcre.(pmatch ~rex:(regexp "^\\d+$")) in
+  let extract_wiki_name quoted_wiki =
+    match Re.Pcre.(exec ~rex:(regexp "^\"([a-zA-Z0-9_-]+)\"$") quoted_wiki) with
+    | exception Not_found -> failwith @@ "invalid wiki name: " ^ quoted_wiki
+    | groups -> Re.Pcre.get_substring groups 1
+  in
+  let rex = Re.Pcre.regexp "^wiki\\((.*)\\)$" in
+  match Re.Pcre.exec ~rex prot with
+  | exception Not_found -> failwith @@ "ill formed wiki prototype: " ^ prot
+  | groups ->
+    match Re.Pcre.get_substring groups 1 with
+    | id when is_number id -> failwith "ids not supported anymore"
+    | wiki ->
+      let wiki = extract_wiki_name wiki in
+      let file = Global.current_file () in
+      let root = Global.root () in
+      Absolute (Paths.(rewind root file +/+ up +/+ up +/+ wiki +/+ page))
+
+let this_wiki_kind prot page =
+  let file = Global.current_file () in
+  let root = Global.root () in
+  Absolute (Paths.(rewind root file +/+ page))
+
 let link_kind bi addr =
-  let open Re_pcre in
-  match exec ~rex:link_regexp addr with
-    | exception Not_found ->
-        failwith (Printf.sprintf "Not a valid link: %S" addr);
-    | result ->
-        let page = get_substring result page_group in
-        match get_substring result prototype_group with
-        | "href" ->
-            Absolute page
-        | "site" ->
-            (* TODO parse this and convert links? *)
-            begin match Re_pcre.exec ~rex:(Re_pcre.regexp "\\.\\.") page with
-            | exception Not_found ->
-              let page =
-                if page.[0] = '/' then
-                  String.sub page 1 (String.length page - 1)
-                else
-                  page
-              in
-              Document {document = Document.Site page; fragment = None}
-            | _ ->
-              failwith "links may not contain .."
-            end
-        | "wiki" ->
-            let project, version =
-              match get_substring result wiki_id_group with
-              | exception Not_found ->
-                Projects.get_implicit_project bi
-              | wiki ->
-                match exec ~rex:wiki_id_regexp wiki with
-                | exception Not_found ->
-                  begin match exec ~rex:wiki_title_regexp wiki with
-                  | exception Not_found ->
-                    failwith (Printf.sprintf "Not a valid wiki: %S" wiki)
-                  | result -> (* [[wiki("name"):path]] *)
-                    let wiki = get_substring result 1 in
-                    wiki, (Projects.get wiki).Projects.latest
-                  end
-                | result -> (* [[wiki(ix):path]] *)
-                  let id = int_of_string (get_substring result 1) in
-                  let project = Projects.of_id id in
-                  project, (Projects.get project).Projects.latest
+  match deabbrev_address addr |> String.split_on_char ':' with
+  | p :: rest ->
+    let page = String.concat ":" rest in (* the page may contain ':' *)
+    begin match p with
+      | "href" ->
+        let menu_page = Global.using_menu_file (fun mf ->
+            let open Utils.Operators in
+            let {Global.root; manual; api} = Global.options () in
+            let file = Global.current_file () in
+            let is_manual = manual
+                            <$> (fun m -> Paths.(is_inside_dir (root +/+ m) file))
+                            |? false
             in
-            if page = "install" then
-              Absolute ("https://github.com/ocsigen/" ^ project)
-            else
-              let page =
-                if page = "" then
-                  let def =
-                    (Projects.get project).Projects.manual_main |>
-                    How_lib.Option.default_to "intro"
-                  in
-                  Document.Manual def
-                else if starts_with "manual/" page then
-                  Document.Manual (String.sub page 7 (String.length page - 7))
-                else if starts_with "files/" page then
-                  let f = String.sub page 6 (String.length page - 6) in
-                  if f.[String.length f - 1] = '/' then
-                    Document.Static (f, `Folder)
-                  else if ends_with "/index.html" f then
-                    let folder = String.sub f 0 (String.length f - 11) in
-                    Document.Static (folder, `Folder)
-                  else
-                    Document.Static (f, `File)
-                else
-                  Document.Manual page
-              in
-              let document = Document.Project {page; version; project} in
-              Document {document; fragment = None}
-        | "http" | "https" ->
-            Absolute addr
-        |  s ->
-            (* FIXME menu *)
-            print_endline @@ "unhandled link kind for " ^ s ^ " in " ^
-              (Document.to_output (bi.Wiki_widgets_interface.bi_page));
-            Absolute addr
+            let is_api = api
+                         <$> (fun a -> Paths.(is_inside_dir (root +/+ a) file))
+                         |? false
+            in
+            let manual, api = manual |? "", api |? "" in
+            match mf with
+            | Manual _ when is_manual -> page
+            | Api _ when is_api -> Paths.(rewind root file +/+ api +/+ page)
+            | Manual _ when is_api -> Paths.(rewind root file +/+ manual +/+ page)
+            | _ (* api when is_manual *) -> Paths.(rewind root file +/+ api +/+ page))
+        in
+        Absolute (let open Utils.Operators in menu_page |? page)
+      | "site" ->
+        let file = Global.current_file () in
+        let root = Global.root () in
+        Absolute Paths.(rewind root file +/+ up +/+ up +/+ (Utils.trim '/' page))
+      | p when starts_with "wiki(" p -> wiki_kind p page
+      | p when starts_with "wiki" p -> this_wiki_kind p page
+      | _ -> failwith @@ "unknown prototype: '" ^ p ^ "'"
+    end
+  | _ -> failwith @@ "ill formed link: '" ^ addr ^ "'"
+
+let href_of_link_kind bi addr fragment =
+  match link_kind bi addr with
+  | Absolute a as h ->
+    let open Utils.Operators in
+    fragment <$> (fun f -> Absolute Paths.(a +/+ ("#" ^ f))) |? h
+  | _ -> assert false
 
 (** **)
 
@@ -1064,25 +990,7 @@ let make_href bi addr fragment =
     bi.bi_add_link document;
     addr
 
-let menu_make_href bi c _ =
-  let project, version = Projects.get_implicit_project bi in
-  let document =
-    match bi.bi_page with
-    | Document.(Project { page = Api _ }) ->
-      if String.contains c '/'
-      then
-        let subproject, file = Ocsimore_lib.String.sep '/' c in
-        Document.(Project {page = Api {subproject; file}; project; version})
-      else
-        Document.(Project { page = Api {subproject = ""; file = c}
-                          ; project
-                          ; version})
-    | _ ->
-      Document.(Project {page = Manual c; project; version})
-  in
-  bi.bi_add_link document;
-  Document {document; fragment = None}
-
+let menu_make_href = href_of_link_kind
 
 (*******************************************)
 (* Type information for predefined parser. *)
@@ -1195,22 +1103,32 @@ module FlowBuilder = struct
       attribs addr
       (c : Html_types.phrasing_without_interactive Html.elt list Lwt.t list) =
     let a = parse_common_attribs ~classes:["ocsimore_phrasing_link"] attribs in
+    let address, text = match addr with
+      | Absolute "" -> Some "", Some "."
+      | Absolute a when Utils.uri_absolute a -> Some a, None
+      | Absolute a when ends_with "/" a -> Some a, None
+      | Absolute a -> Some (a ^ Global.suffix ()), None
+      | _ -> assert false
+    in
     Lwt_list.map_s (fun x -> x) c >|= List.flatten >|= fun c ->
-      [(Html.a ~a:(Html.a_href (uri_of_href addr) :: a) c
-        :> Html_types.phrasing Html.elt)]
+    [(Html.a ~a:((let open Utils.Operators in
+                  (* NOTE address is always Some x for now but one could add
+                  another case to the matching above in which the original
+                  address is to be used. *)
+                  address <$> (fun a -> Absolute a) |? addr)
+                 |> uri_of_href
+                 |> Html.a_href
+                 |> (fun x -> x :: a))
+        (let open Utils.Operators in
+         text >>= (fun t -> Some [Html.pcdata t]) |? c)
+      :> Html_types.phrasing Html.elt)]
 
   let a_elem_flow attribs addr c =
     let a = parse_common_attribs ~classes:["ocsimore_flow_link"] attribs in
     Lwt_list.map_s (fun x -> x) c >|= List.flatten >|= fun c ->
       [Html.a ~a:(Html.a_href (uri_of_href addr) :: a) c]
 
-  let make_href bi c fragment =
-    let add_link = bi.Wiki_widgets_interface.bi_add_link in
-    try
-      make_href bi (link_kind bi c) fragment
-    with e ->
-      add_link (Document.Deadlink e);
-      Absolute c
+  let make_href = href_of_link_kind
 
   let string_of_href = uri_of_href
 
@@ -2273,3 +2191,19 @@ let () =
     `Phrasing_without_interactive (Lwt.return [Html.pcdata bi.bi_title])
   in
   register_simple_phrasing_extension ~name:"title" f_title
+
+
+let compile_with_content content_text text =
+  let par = cast_wp wikicreole_parser in
+  let bi_with_content c =
+    Wiki_widgets_interface.{bi_page = Site "";
+                            bi_sectioning = false;
+                            bi_add_link = ignore;
+                            bi_content = c;
+                            bi_title = "";}
+  in
+  let c = xml_of_wiki par (bi_with_content @@ Lwt.return []) content_text in
+  xml_of_wiki par (bi_with_content c) text
+  |> Lwt_main.run
+
+let compile text = compile_with_content "" text

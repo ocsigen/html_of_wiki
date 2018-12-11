@@ -19,28 +19,54 @@
 open How_lib
 open Lwt.Infix
 open Tyxml
+open Utils.Operators
 
 (*****************************************************************************)
 (** Extension script *)
 
-let do_script bi args c =
-  `Flow5
-    (try
-      let src = List.assoc "src" args in
-      Lwt.return Html.[
-        script ~a:[ a_mime_type "text/javascript"; a_src src]
-               (Html.cdata_script "")
-      ]
-    with Not_found ->
-      let content =
-        match c with
-        | Some c -> c
-        | None -> ""
-      in
-      Lwt.return Html.[
-        script ~a:[a_mime_type "text/javascript"]
-               (cdata_script content)
-      ])
+type script_kind = Src of string | Js of string
+
+let make_script = function
+  | Src src -> Html.(script ~a:[a_mime_type "text/javascript"; a_src src]
+                       (cdata_script ""))
+  | Js js -> Html.(script ~a:[a_mime_type "text/javascript"]
+                     (cdata_script js))
+
+let process_script args c = match List.assoc "src" args with
+  | exception Not_found -> Js (c |? "")
+  | src when Utils.is_none c -> Src src
+  | _ -> failwith "script: both src and content are provided"
+
+let do_script _ args c = `Flow5 ([process_script args c |> make_script] |> Lwt.return)
+
+let head_scripts : script_kind list ref = ref []
+
+let do_head_script _ args c =
+  let script = process_script args c in
+  head_scripts := script :: !head_scripts;
+  `Flow5 (Lwt.return [])
+
+
+(*****************************************************************************)
+(** Extension css *)
+
+type css_kind = Href of string | Css of string
+
+let make_css = function
+  | Href href -> Html.(link ~rel:[`Stylesheet] ~href ())
+  | Css css -> Html.(style [pcdata css])
+
+let process_css args c = match List.assoc "href" args with
+  | exception Not_found -> Css (c |? "")
+  | href when Utils.is_none c -> Href href
+  | _ -> failwith "css: both href and content are provided"
+
+let css_links : css_kind list ref = ref []
+
+let do_head_css _ args c =
+  let css = process_css args c in
+  css_links := css :: !css_links;
+  `Flow5 (Lwt.return [])
 
 
 (*****************************************************************************)
@@ -128,58 +154,83 @@ let do_paragraph bi args xml =
 (*****************************************************************************)
 (** Extension Client/Server-Switch *)
 
-
-let do_client_server_switch bi args _ =
-  `Flow5 (Lwt.return @@
+let do_client_server_switch _ args _ = match (Global.options ()).api with
+  | None -> `Flow5 (Lwt.return [])
+  | Some api ->
+    let open Utils.Operators in
+    let client = "client" in
+    let server = "server" in
+    let {Global.csw; root} = Global.options () in
+    let file = Global.current_file () in
     let attrs = Wiki_syntax.parse_common_attribs args in
-    match bi.Wiki_widgets_interface.bi_page with
-    | Document.Site _ -> []
-    | Document.Deadlink _ -> assert false
-    | Document.Project {project; version; page} ->
-      match page with
-      | Document.Api {subproject; file} ->
-        let make_link subproject' =
-          let page = Document.Api {subproject = subproject'; file} in
-          let document = Document.Project {project; version; page} in
-          bi.Wiki_widgets_interface.bi_add_link document;
-          Html.[
-            div ~a:(a_class ["client-server-switch-wrapper"] :: attrs) [
-              div ~a:[a_class ["client-server-switch"]] [
-                span ~a:[a_class [subproject; "source"]]
-                     [pcdata ("This is "^subproject^" API")];
-                pcdata " (go to ";
-                a ~a:[a_class [subproject'; "target"];
-                      a_href @@ Document.to_uri document]
-                  [pcdata subproject'];
-                pcdata ")"
-              ]
-            ]
-          ]
-        in
-        (match subproject with
-        | "server" -> make_link "client"
-        | "client" -> make_link "server"
-        | _ -> [])
+    let is_api = Paths.(is_inside_dir (root +/+ api) file) in
+    let is_client = Paths.(is_inside_dir (root +/+ api +/+ client) file) in
+    let is_server = Paths.(is_inside_dir (root +/+ api +/+ server) file) in
+    let wiki = Filename.basename file in
+    let make_switch = function
+      | None -> []
+      | Some other ->
+        let html = Filename.chop_extension wiki ^ Global.suffix () in
+        let href = Paths.(rewind (root +/+ api) file +/+ other +/+ html) in
+        let checked = if other = server then [Html.a_checked ()] else [] in
+        let onchange = "location = '" ^ href ^ "';" in
+        Html.([label ~a:(a_class ["csw-switch"] :: attrs)
+                 [input ~a:([a_input_type `Checkbox;
+                             a_onchange onchange]
+                            @ checked)
+                    ();
+                  span ~a:[a_class ["csw-slider"; "csw-slider-style-round"]] [];
+                  span ~a:[a_class ["csw-slider-no"]]
+                    [pcdata "Server version"];
+                  span ~a:[a_class ["csw-slider-yes"]]
+                    [pcdata "Client version"]]])
+    in
+    let make = function
+      | [] -> []
+      | wikis when is_api && List.exists (fun s -> s = wiki) wikis ->
+        begin match is_client, is_server with
+          | true, false -> make_switch @@ Some server
+          | false, true -> make_switch @@ Some client
+          | false, false -> make_switch None
+          | _, _ -> assert false
+        end
       | _ -> []
-  )
-
+    in
+    `Flow5 (Lwt.return (make csw))
 
 (*****************************************************************************)
 (** Extension google search *)
 
-let do_google_search _ _ _ =
-  `Flow5
-    (Lwt.return Html.[
-      form ~a:[a_id "search"] [
-        input ~a:[a_name "q"; a_id "q"; a_placeholder "search ..."] ();
-        button [pcdata "Search"]
-      ]
-    ])
-
+let do_google_search _ args _ =
+  let image = match Ocsimore_lib.get_opt args "icon" with
+    | Some i -> i
+    | None -> failwith "googlesearch: must provide an \"icon\" path to use"
+  in
+  let domain = match Ocsimore_lib.get_opt args "domain" with
+    | Some d -> d
+    | None -> failwith "googlesearch: must provide an \"domain\""
+  in
+  Html.[form ~a:[a_id "googlesearch";
+                 a_action "https://google.com/search"]
+          [input ~a:[a_name "q";
+                     a_id "gsearch-box";
+                     a_placeholder "Search using Google"]
+             ();
+           label ~a:[a_label_for "gsearch-box"]
+             [img ~src:image ~alt:"" ~a:[a_id "gsearch-icon"] ()];
+           input ~a:[a_input_type `Submit;
+                     a_id "gsearch-submit";
+                     a_onclick @@ "document.getElementById('gsearch-box').value += ' site:" ^ domain ^ "';"]
+             ()]]
+  |> (fun x -> `Flow5 (Lwt.return x))
 
 let init () =
   Wiki_syntax.register_simple_flow_extension
     ~name:"script" ~reduced:false do_script;
+  Wiki_syntax.register_simple_flow_extension
+    ~name:"head-script" ~reduced:false do_head_script;
+  Wiki_syntax.register_simple_flow_extension
+    ~name:"head-css" ~reduced:false do_head_css;
   Wiki_syntax.register_wiki_flow_extension ~reduced:false
     ~name:"wip" { Wiki_syntax.fpp = do_wip };
   Wiki_syntax.register_wiki_phrasing_extension ~reduced:false

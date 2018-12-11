@@ -432,3 +432,12 @@ val parse_common_attribs :
 (** The class to use to denote the fact that the content comes
     from the specified wikibox *)
 val class_wikibox: wikibox -> string
+
+
+(** Compiles a wikicreole string and returns its Tyxml structure. *)
+val compile : string -> Html_types.flow5 Tyxml.Html.elt list
+
+(** [compile_with_content content wiki] first compiles [content] and then
+    compiles [wiki] with the result of [content]'s compilation to be
+    used by the [<<content>>] extension. *)
+val compile_with_content : string -> string -> Html_types.flow5 Tyxml.Html.elt list

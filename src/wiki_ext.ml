@@ -103,6 +103,38 @@ let do_drawer wp bi args c =
      in
      Lwt.return [ elt ])
 
+let do_when_project _ _ args c =
+  let open Utils.Operators in
+  let fail e = failwith @@ "when_project: " ^ e in
+  let opts = Extensions.get_opts ["when"; "unless"] args in
+  let project, predicate = match opts with
+    | [Some p; None] -> p, (=)
+    | [None; Some p] -> p, (<>)
+    | [None; None] -> fail "required arguments missing: \"when\" or \"unless\""
+    | [Some _; Some _] -> fail "mutually incompatible arguments provided: \"when\", \"unless\""
+    | _ -> fail "unexpected argument list provided"
+  in
+  let root = Global.root () in
+  let current = Paths.(root +/+ up
+                       |> apply_path
+                       |> Filename.basename)
+  in
+  if predicate project current
+  then `Flow5 (Lwt.return (c <$> Wiki_syntax.compile |? []))
+  else `Flow5 (Lwt.return [])
+
+let do_when_local _ _ _ c =
+  let open Utils.Operators in
+  `Flow5 (Lwt.return (if (Global.options ()).local
+                      then c <$> Wiki_syntax.compile |? []
+                      else []))
+
+let do_unless_local _ _ _ c =
+  let open Utils.Operators in
+  `Flow5 (Lwt.return (if not (Global.options ()).local
+                      then c <$> Wiki_syntax.compile |? []
+                      else []))
+
 let init () =
   Wiki_syntax.register_raw_wiki_extension ~name:"outline"
     ~wp:Wiki_syntax.wikicreole_parser
@@ -118,4 +150,16 @@ let init () =
   Wiki_syntax.register_raw_wiki_extension ~name:"drawer"
     ~wp:Wiki_syntax.wikicreole_parser
     ~wp_rec:Wiki_syntax.wikicreole_parser
-    do_drawer
+    do_drawer;
+  Wiki_syntax.register_raw_wiki_extension ~name:"when-project"
+    ~wp:Wiki_syntax.wikicreole_parser
+    ~wp_rec:Wiki_syntax.wikicreole_parser
+    do_when_project;
+  Wiki_syntax.register_raw_wiki_extension ~name:"when-local"
+    ~wp:Wiki_syntax.wikicreole_parser
+    ~wp_rec:Wiki_syntax.wikicreole_parser
+    do_when_local;
+  Wiki_syntax.register_raw_wiki_extension ~name:"unless-local"
+    ~wp:Wiki_syntax.wikicreole_parser
+    ~wp_rec:Wiki_syntax.wikicreole_parser
+    do_unless_local

@@ -1,102 +1,79 @@
 open Tyxml
 open Tyxml.Html
+open Utils.Operators
 
-let doctree bi args contents =
+let doctree _ args _ =
   let attrs = Wiki_syntax.parse_common_attribs args in
-  let project, version = Projects.get_implicit_project bi in
-  let manual_file =
-    Document.(Project {page = Manual "menu"; version; project})
+  let {Global.root; manual; api} = Global.options () in
+  let find_menus p =
+    try p >>= (fun p -> Some (root +/+ p))
+              <$> Utils.find_files "menu.wiki"
+              |? []
+    with Sys_error _ -> []
   in
-  let api_files =
-    (List.assoc version (Projects.get project).Projects.versions |> fun v ->
-     let file = "menu" in
-     if v = []
-     then (* no sub project *)
-       [ Document.(Project { page = Api { subproject = ""; file };
-                             version;
-                             project }) ]
-     else
-       List.map (fun subproject ->
-           Document.(Project { page = Api { subproject; file };
-                               version;
-                               project })
-         ) v
-    )
+  let pman_menus = find_menus manual in
+  let papi_menus = find_menus api in
+
+  let compile bi path =
+    path
+    |> Utils.read_file
+    |> (Wiki_syntax.xml_of_wiki
+          (Wiki_syntax.cast_wp Wiki_syntax.menu_parser)
+          bi)
+    |> Lwt_main.run (* FIXME remove me *)
   in
-  let api_bi = Wiki_widgets_interface.{
-      bi_page = Document.(Project { page = Api { subproject = ""; file = ""}
-                                  ; project; version});
-      bi_sectioning = true;
-      bi_add_link = bi.bi_add_link;
-      bi_content = Lwt.return [];
-      bi_title = "";
-  }
-  in
-  let manual_bi = Wiki_widgets_interface.{
-      bi_page = Document.(Project {page = Manual ""; project; version});
-      bi_sectioning = true;
-      bi_add_link = bi.bi_add_link;
-      bi_content = Lwt.return [];
-      bi_title = "";
-  }
-  in
-  let try_read f = try Document.read f with _ -> "" in
-  let menus =
-    api_files |>
-    List.map try_read |>
-    Lwt_list.map_p @@
-      Wiki_syntax.xml_of_wiki
-        (Wiki_syntax.cast_wp Wiki_syntax.menu_parser)
-        api_bi
-  in
-  let menus =
-    let%lwt menus = menus in
-    let%lwt m = Wiki_syntax.xml_of_wiki
-        (Wiki_syntax.cast_wp Wiki_syntax.menu_parser)
-        manual_bi
-        (try_read manual_file)
+  let bi_of_menu_file mf =
+    let bi_page = Global.(match mf with
+        | Manual _ -> Document.(Project {page = Manual ""; project = ""; version = Version.Dev})
+        | Api _ -> Document.(Project {page = Api {subproject = ""; file = ""};
+                                      project = "";
+                                      version = Version.Dev}))
     in
-    Lwt.return (m :: menus)
+    Wiki_widgets_interface.{
+      bi_page;
+      bi_sectioning = true;
+      bi_add_link = ignore;
+      bi_content = Lwt.return [];
+      bi_title = ""}
   in
-  `Flow5 (
-    let%lwt r = Lwt.map
-        List.concat
-        (menus :> Html_types.flow5 Tyxml_html.elt list list Lwt.t)
-    in
-    Lwt.return [ nav ~a:( a_class [ "how-doctree" ] :: attrs) r ]
-  )
+  let compile_with_menu_file mf =
+    let f = Global.(match mf with Manual f | Api f -> f) in
+    let bi = bi_of_menu_file mf in
+    Global.(with_menu_file mf (fun () -> compile bi f))
+  in
+  let compile_manual f = compile_with_menu_file (Global.Manual f) in
+  let compile_api f = compile_with_menu_file (Global.Api f) in
+
+  let menus = Lwt.return (List.map compile_manual pman_menus
+                          @ List.map compile_api papi_menus) in
+  `Flow5 (let%lwt r = Lwt.map List.concat menus in
+          Lwt.return [nav ~a:(a_class ["how-doctree"] :: attrs) r])
+
+let path_from_versions_dir file =
+  let {Global.root} = Global.options () in
+  file
+  |> Paths.realpath
+  |> Paths.path_rm_prefix root
 
 let docversion bi args contents =
   let attrs = Wiki_syntax.parse_common_attribs args in
-  let project, cur_version = Projects.get_implicit_project bi in
-  let versions_links =
-    (Projects.get project).Projects.versions |>
-    List.map (fun (version, _) ->
-        if version = cur_version
-        then
-          option ~a:[ a_selected () ] (pcdata (Version.to_string version))
-        else
-          option
-            ~a:[ a_value
-                   Document.(to_uri
-                               (match bi.Wiki_widgets_interface.bi_page with
-                                | Project p ->
-                                  Project { page = p.page
-                                          ; version
-                                          ; project = p.project }
-                                | _ ->
-                                  Project { page = Manual ""
-                                          ; version
-                                          ; project })) ]
-            (pcdata (Version.to_string version)))
+  let file = Global.current_file () in
+  let {Global.root; docversions; suffix} = Global.options () in
+  let current_wiki_path =
+    path_from_versions_dir file
+    |> Filename.chop_extension
+    |> (fun p -> p ^ suffix)
   in
-  `Flow5 (
-    Lwt.return @@
-    [ pcdata "Version "
-    ; select ~a:( a_class [ "how-versions" ] ::
-                  a_onchange "location = this.value;" :: attrs) versions_links ]
-  )
-
+  let links = docversions |> List.map (fun v ->
+      let dst = Paths.(rewind root file +/+ up +/+ v +/+ current_wiki_path) in
+      let selected = if (Filename.basename root) = v then Some (a_selected ())  else None in
+      option ~a:(a_value dst :: (selected <$> (fun s -> [s]) |? [])) (pcdata v))
+  in
+  `Flow5 (Lwt.return [pcdata "Version ";
+                      select ~a:(a_class ["how-versions"]
+                                 :: a_onchange "location = this.value;"
+                                 :: attrs)
+                        links])
 
 let init () =
   Wiki_syntax.register_interactive_simple_flow_extension

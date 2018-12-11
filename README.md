@@ -54,3 +54,22 @@ and then copied into directory `ocsigen.github.io`
 of repository `ocsigen.org-data`.
 The generated html files are in repository `ocsigen.github.io`
 (branch `master`).
+
+# One HTML of wiki (``ohow``)
+It is a CLI tool that takes a single wikicréole file and converts it into HTML.
+
+## Intallation
+```shell
+make ohow
+```
+
+## Usage
+```shell
+./ohow.byte file.wiki
+```
+produces ``file.html``.
+
+## Help!
+```shell
+./ohow.byte --help
+```
