@@ -251,6 +251,7 @@ call_ohow() {
     [ -n "$images" ] && opts="$opts --images $images"
     [ -n "$default_subp" ] && opts="$opts --default-subproject $default_subp"
     [ -n "$docversions" ] && opts="$opts --docversions $docversions"
+    [ -n "$templates" ] && opts="$opts --template $templates"
 
     if $csw
     then $ohow $opts --csw <(csw) $1
@@ -278,22 +279,6 @@ normalize_templates() {
                      else echo Could not find template $t. Aborting.; exit $EXIT_CONFIG
                      fi
                  done <<< "$templates"`"
-}
-
-inline_template() {
-    local f=$(mktemp)
-    $wit $1 < $2 > $f && cat $f > $2 || return 1
-    rm $f
-}
-inline_templates() {
-    $verbose && echo -n "Template inlining "
-    normalize_templates
-    while read -r t; do
-        while read -r wiki; do
-            inline_template "$t" $wiki
-        done <<< $(find_wikis)
-    done <<< "$templates"
-    $verbose && echo [OK] || true
 }
 
 compile() {
@@ -386,7 +371,6 @@ $no_run && exit $EXIT_SUCCESS
 ### Compilation
 docversions=$(safe_read_file "$docversions")
 cp -r $wikidir $root
-inline_templates
 compile
 if $menu && ! $keep_wikis; then
    find $root -name menu.wiki -exec rm {} \;

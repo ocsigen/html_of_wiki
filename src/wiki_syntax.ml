@@ -2193,14 +2193,17 @@ let () =
   register_simple_phrasing_extension ~name:"title" f_title
 
 
-let compile text =
+let compile_with_content content_text text =
   let par = cast_wp wikicreole_parser in
-  let bi = Wiki_widgets_interface.{
-      bi_page = Site "";
-      bi_sectioning = false;
-      bi_add_link = ignore;
-      bi_content = Lwt.return [];
-      bi_title = "";
-    }
+  let bi_with_content c =
+    Wiki_widgets_interface.{bi_page = Site "";
+                            bi_sectioning = false;
+                            bi_add_link = ignore;
+                            bi_content = c;
+                            bi_title = "";}
   in
-  Lwt_main.run @@ xml_of_wiki par bi text
+  let c = xml_of_wiki par (bi_with_content @@ Lwt.return []) content_text in
+  xml_of_wiki par (bi_with_content c) text
+  |> Lwt_main.run
+
+let compile text = compile_with_content "" text
