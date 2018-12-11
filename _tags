@@ -1,6 +1,7 @@
 true: bin_annot, annot
 true: package(lwt.unix)
-true: package(lwt.ppx)
+true: package(lwt_ppx)
+true: package(lwt_log)
 true: package(re.pcre)
 true: package(tyxml)
 true: package(cmdliner)

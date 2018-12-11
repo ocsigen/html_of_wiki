@@ -1,5 +1,6 @@
 bin: [
-  "_build/src/html_of_wiki.byte" {"how"}
-  "clone.sh" {"how-clone"}
-  "push.sh" {"how-push"}
+  "_build/src/ohow.byte" {"ohow"}
+  "_build/src/wit.byte" {"wit"}
+  "dop.sh" {"dop"}
+  "quickdop.sh" {"quickdop"}
 ]
