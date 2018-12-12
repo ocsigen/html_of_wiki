@@ -17,6 +17,10 @@ Overrides $(b,--print)." in
   Cmdliner.Arg.(value & opt (some string) None & info ["o"; "output"]
                   ~docv:"FILE" ~doc)
 
+let project_cmd =
+  let doc = "The name of the project. Only useful for <<when-project>>." in
+  Cmdliner.Arg.(value & opt (some string) None & info ["project"] ~docv:"NAME" ~doc)
+
 let root_cmd =
   let doc = "Use the given root directory." in
   Cmdliner.Arg.(value & opt string (Unix.getcwd ()) & info ["root"]
@@ -131,12 +135,12 @@ manual directory and the api directory."
     Term.info "ohow" ~version:"v0.0.0" ~doc ~exits:Term.default_exits ~man)
 
 
-let register_options k print headless outfile root manual api default_subproject images assets template csw docversions local files =
+let register_options k print headless outfile project root manual api default_subproject images assets template csw docversions local files =
   let open Utils.Operators in
   let suffix = if local then ".html" else "" in
   let csw = csw <$> Utils.read_file_lines |? [] in
   let docversions = docversions <$> Utils.read_file_lines |? [] in
-  let opts = {Global.print; headless; outfile; suffix; root;
+  let opts = {Global.print; headless; outfile; suffix; project; root;
               manual; api; default_subproject; images; assets;
               template; csw; docversions; local; files} in
   Global.with_options opts (fun () -> k opts)
@@ -147,6 +151,7 @@ let run main =
       $ print_cmd
       $ headless_cmd
       $ outfile_cmd
+      $ project_cmd
       $ root_cmd
       $ manual_cmd
       $ api_cmd

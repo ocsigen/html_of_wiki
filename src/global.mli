@@ -28,6 +28,7 @@ type cli_options = {
   local: bool;
   outfile: string option;
   suffix: string;
+  project: string option;
   root: string;
   manual: string option;
   api: string option;

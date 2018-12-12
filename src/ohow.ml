@@ -83,7 +83,7 @@ let init_extensions () =
   Only.init ();
   Site_ocsimore.init ()
 
-let main {Global.print; headless; outfile; suffix; root;
+let main {Global.print; headless; outfile; suffix; project; root;
           manual; api; default_subproject; images; assets;
           template; csw; docversions; local; files} =
   Utils.check_errors [("Some input files doesn't exist...",
@@ -98,7 +98,7 @@ let main {Global.print; headless; outfile; suffix; root;
   let api = api <$> relative_to_root in
   let images = images <$> relative_to_root in
   let assets = assets <$> relative_to_root in
-  let opts = {Global.print; headless; outfile; suffix; root;
+  let opts = {Global.print; headless; outfile; suffix; project; root;
               manual; api; default_subproject; images; assets;
               template; csw; docversions; local; files} in
   Global.with_options opts
