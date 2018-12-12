@@ -31,3 +31,5 @@ cat >$f <<EOF
 }
 EOF
 DEBUG=t quickdop -f doc _doc -t json -c $f -viu
+
+mv tmp _doc
