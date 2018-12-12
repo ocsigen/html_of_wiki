@@ -16,6 +16,7 @@ opam pin add -y html_of_wiki html_of_wiki
 f=$(mktemp)
 cat >$f <<EOF
 {
+    "project": "html_of_wiki",
     "api": "api",
     "menu": true,
     "templates": ["tmp/template.wiki"],
