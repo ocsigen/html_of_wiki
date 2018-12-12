@@ -114,14 +114,11 @@ let do_when_project _ _ args c =
     | [Some _; Some _] -> fail "mutually incompatible arguments provided: \"when\", \"unless\""
     | _ -> fail "unexpected argument list provided"
   in
-  let root = Global.root () in
-  let current = Paths.(root +/+ up
-                       |> apply_path
-                       |> Filename.basename)
-  in
+  (Global.options ()).project >>= (fun current ->
   if predicate project current
-  then `Flow5 (Lwt.return (c <$> Wiki_syntax.compile |? []))
-  else `Flow5 (Lwt.return [])
+  then Some (`Flow5 (Lwt.return (c <$> Wiki_syntax.compile |? [])))
+  else None)
+                                  |? `Flow5 (Lwt.return [])
 
 let do_when_local _ _ _ c =
   let open Utils.Operators in

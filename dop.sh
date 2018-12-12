@@ -104,6 +104,7 @@ infer_templates() {
 }
 infer_config() {
     cd $wikidir
+    project=$(basename `pwd`)
     default_subp=
 
     man=$(first_that_exists -d manual manual_wiki manual_wikis man)
@@ -158,6 +159,7 @@ read_array() {
 }
 
 read_config() {
+    project=$(read_entry project $project)
     manual=$(read_entry manual $manual)
     api=$(read_entry api $api)
     assets=$(read_entry assets $assets)
@@ -213,7 +215,8 @@ show_config() {
     [ -n "$default_subp" ] && dsp="\"$default_subp\"" || dsp=null
     if $json; then
         jq . <<EOF
-{"manual": "$man", "api": "$api",
+{"project": "$project",
+"manual": "$man", "api": "$api",
 "assets": "$assets", "images": "$images",
 "default_subproject": $dsp,
 "client": "$client", "server": "$server",
@@ -222,6 +225,7 @@ show_config() {
 "templates": $(show_array "$templates")}
 EOF
     else
+        echo "project            $project"
         echo "manual             $man"
         echo "api                $api"
         echo "assets             $assets"
@@ -245,6 +249,7 @@ csw() {
 call_ohow() {
     local opts="--root $root"
     $is_local && opts="$opts --local"
+    [ -n "$project" ] && opts="$opts --project $project"
     [ -n "$man" ] && opts="$opts --manual $man"
     [ -n "$api" ] && opts="$opts --api $api"
     [ -n "$assets" ] && opts="$opts --assets $assets"
