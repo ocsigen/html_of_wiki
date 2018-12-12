@@ -37,7 +37,7 @@
 >>
 
 <<when-local  |<<googlesearch icon="https://ocsigen.org/html_of_wiki/tmp/search.svg" domain="ocsigen.org">>>>
-<<unless-local|<<googlesearch icon="/search.svg" domain="ocsigen.org">>>>
+<<unless-local|<<googlesearch icon="https://ocsigen.org/html_of_wiki/tmp/search.svg" domain="ocsigen.org">>>>
 
 <<drawer|
 *@@class="drawermainmenu"@class="drawermainmenu-home"@@[[site:/|Home]]
