@@ -36,7 +36,7 @@
 <<when-project unless="ocsigen-start"|                             [[wiki("ocsigen-start"):|Start]]>>
 >>
 
-<<when-local  |<<googlesearch icon="https://ocsigen.org/img/search.svg" domain="ocsigen.org">>>>
+<<when-local  |<<googlesearch icon="https://ocsigen.org/html_of_wiki/tmp/search.svg" domain="ocsigen.org">>>>
 <<unless-local|<<googlesearch icon="/search.svg" domain="ocsigen.org">>>>
 
 <<drawer|

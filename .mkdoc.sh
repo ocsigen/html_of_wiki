@@ -12,6 +12,11 @@ git clone https://github.com/ocsigen/html_of_wiki.git
 opam pin add -y html_of_wiki html_of_wiki
 
 # wget https://raw.githubusercontent.com/ocsigen/ocsigen.github.io/master/template.wiki 
+wget https://raw.githubusercontent.com/ocsigen/ocsigen.github.io/e6b93e987b75be99e8ef30601460f60028c615fd/css/style.css
+wget https://raw.githubusercontent.com/ocsigen/ocsigen.github.io/e6b93e987b75be99e8ef30601460f60028c615fd/img/search.svg
+mkdir tmp
+mv style.css tmp
+mv search.svg tmp
 
 f=$(mktemp)
 cat >$f <<EOF
