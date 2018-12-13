@@ -267,9 +267,9 @@ call_ohow() {
 find_wikis() {
     local exclude
     $menu && exclude="-not -name menu.wiki"
-    exclude="$exclude $(while read -r t; do
-                            echo -n "-not -path $t "
-                        done <<< "$templates")"
+    [ -n "$templates" ] && exclude="$exclude $(while read -r t; do
+                                                   echo -n "-not -path $t "
+                                               done <<< "$templates")"
     find $root -name '*.wiki' $exclude | sort
 }
 
@@ -357,11 +357,13 @@ safe_read_file() {
         tmp=$(mktemp)
         cat $1 > $tmp
         echo $tmp
-    }
+    } || echo ""
 }
 # Read the config once and store it in a file since it may be a process substitution.
-config=$(safe_read_file "$config")
-read_config
+[ -n "$config" ] && {
+    config=$(safe_read_file "$config")
+    read_config
+} || true
 check_config || {
     echo Configuration errors happened. Aborting. >&2
     exit $EXIT_CONFIG
