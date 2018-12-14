@@ -290,7 +290,7 @@ compile() {
     local ret=$EXIT_SUCCESS
     local wikis=$(find_wikis)
     echo "$wikis"
-    cat "$wikis" | while read -r wiki; do
+    echo "$wikis" | while read -r wiki; do
         $verbose && echo -n "$wiki "
         # print failures but dop continues (-e)
         if call_ohow $wiki
