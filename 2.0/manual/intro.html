@@ -50,7 +50,7 @@
 </li><li class="drawermainmenu-page"><a href="https://github.com/ocsigen" class="ocsimore_phrasing_link">Source code</a>
 </li></ul><nav class="how-doctree"></nav></nav></aside></div><p class="reasonwarning">Warning: Reason support is experimental.
 We are looking for beta-tester and contributors.
-</p><button id="reason">Switch to </button><div class="twocols"><nav class="leftcol">Version <select class="how-versions" onchange="location = this.value;"><option value=".././../2.0/manual/intro" selected="selected">2.0</option></select><nav class="how-doctree"></nav></nav><article class="rightcol"><h1> html_of_wiki</h1><p><em><span class="monospace">html_of_wiki</span> is a static website generator supporting wikicréole 1.0, designed for GitHub pages and used by the Ocsigen project for managing its online documentation at <a href="https://ocsigen.org" class="ocsimore_phrasing_link">https://ocsigen.org</a>.</em>
+</p><button id="reason">Switch to </button><div class="twocols"><nav class="leftcol">Version <select class="how-versions" onchange="location = this.value;"><option value=".././../2.0/manual/intro" selected="selected">2.0</option><option value=".././../dev/manual/intro">dev</option></select><nav class="how-doctree"></nav></nav><article class="rightcol"><h1> html_of_wiki</h1><p><em><span class="monospace">html_of_wiki</span> is a static website generator supporting wikicréole 1.0, designed for GitHub pages and used by the Ocsigen project for managing its online documentation at <a href="https://ocsigen.org" class="ocsimore_phrasing_link">https://ocsigen.org</a>.</em>
 </p><p>It is available as an opam (<a href="https://opam.ocaml.org/" class="ocsimore_phrasing_link">https://opam.ocaml.org/</a>) package.
 </p><p>The following sections describe:
 </p><ol><li> The wikicréole format
@@ -208,7 +208,7 @@ The data of this extension is automatically collected by either <a href="FIXME" 
 <a href="FIXME" class="ocsimore_phrasing_link">dop</a> uses the Unix builtin <span class="teletype">comm -12</span> to extract the files the sub-projects <span class="monospace">client</span> and <span class="monospace">server</span> have in <span class="underlined">comm</span>on.
 </p><h2> Legacy support</h2><ul><li> In previous versions of <span class="monospace">html_of_wiki</span>, projects used to have a file—<span class="monospace">config.js</span>—which declaratively described these projects. Amongst that information, a field <span class="monospace">default_subproject</span> declared the <span class="teletype">&lt;&lt;a_api*</span> <span class="monospace">subproject</span> attribute's default value. Since that file no longer exist, an option <span class="teletype">--default-subproject</span> exists but is <strong>highly deprecated</strong>.
 </li><li> That previous version also supported a special link syntax—<span class="teletype">[[wiki(id):page]]</span>—in which projects were given an ID (in <span class="monospace">config.js</span>). Considered unclear, that syntax is now <strong>deprecated</strong>, any wiki using it will <em>not</em> compile.
-</li></ul><h1> Higher level website generators</h1><p><em>one_html_of_wiki</em> works great for compiling one wiki page, but a project's documentation is often composed of many wiki pages for each version. However, <span class="monospace">ohow</span> is designed with the Unix philosophy in mind: <strong>simplicity</strong> and <strong>composability</strong>. This, it is very easy to integrate it in an existing workflow.
+</li></ul><h1> Higher level documentation generators</h1><p><em>one_html_of_wiki</em> works great for compiling one wiki page, but a project's documentation is often composed of many wiki pages for each version. However, <span class="monospace">ohow</span> is designed with the Unix philosophy in mind: <strong>simplicity</strong> and <strong>composability</strong>. This, it is very easy to integrate it in an existing workflow.
 </p><p>To make things even easier, we provide out of the box two higher level documentation generators:
 </p><ul><li> <em>doc_of_project</em> (<span class="monospace">dop</span>) — for generating a single version of a project
 </li><li> <em>quick-doc_of_project</em> (<span class="monospace">quickdop</span>) — for generating the documentation of a project with many versions
@@ -245,5 +245,34 @@ and the ones <em>not</em> present keep their inferred values. First check what <
 <span class="teletype">-n</span> option for not generating the docs and just do the inferring work).
 </p><p>The following table describes the entries recognized by <span class="monospace">dop</span>:
 </p><table><tr><th>Key name</th><th>Type</th><th><span class="monospace">ohow</span> option</th><th>Short description</th></tr><tr><td><span class="monospace">project</span></td><td>string</td><td><span class="teletype">--project</span></td><td>Project's name</td></tr><tr><td><span class="monospace">manual</span></td><td>string</td><td><span class="teletype">--manual</span></td><td>Manual directory (root-relative path)</td></tr><tr><td><span class="monospace">api</span></td><td>string</td><td><span class="teletype">--api</span></td><td>API directory (root-relative path)</td></tr><tr><td><span class="monospace">client</span></td><td>string</td><td>—</td><td>API's client directory (real path)</td></tr><tr><td><span class="monospace">server</span></td><td>string</td><td>—</td><td>API's server directory (real path)</td></tr><tr><td><span class="monospace">assets</span></td><td>string</td><td><span class="teletype">--assets</span></td><td>Assets directory (root-relative path)</td></tr><tr><td><span class="monospace">images</span></td><td>string</td><td><span class="teletype">--images</span></td><td>Images directory (root-relative path)</td></tr><tr><td><span class="monospace">csw</span></td><td>boolean</td><td><span class="teletype">--csw</span></td><td>Contains a client-server-switch?</td></tr><tr><td><span class="monospace">menu</span></td><td>boolean</td><td><span class="teletype">--doctree</span></td><td>Contains a doctree?</td></tr><tr><td><span class="monospace">templates</span></td><td>string array</td><td><span class="teletype">--template</span></td><td>List of templates</td></tr><tr><td><span class="monospace">default_subproject</span></td><td>string</td><td><span class="teletype">--default-subproject</span></td><td><em>Deprecated</em></td></tr></table><p>The <span class="monospace">templates</span> key is an array because it would be possible (thanks to <span class="monospace">wit</span>) to have several templates but this feature is not currently implemented in <span class="monospace">dop</span>. PR welcomed! ;-)
-</p><h3> Command-line interface</h3><p>TODO
-</p><h2> <span class="monospace">quickdop</span></h2><p>TODO</p></article></div></div></body></html>
+</p><h3> Command-line interface</h3><p>The command <span class="monospace">dop</span> accepts the following short options:
+</p><table><tr><th>Name      </th><th>Option </th><th>Value                   </th><th>Default value</th><th>Description</th></tr><tr><td>Config     </td><td><span class="teletype">-c</span></td><td>File                     </td><td>—</td><td>Configuration file</td></tr><tr><td>Config type</td><td><span class="teletype">-t</span></td><td><span class="teletype">json</span> or <span class="teletype">plain</span></td><td><span class="teletype">plain</span></td><td>Configuration file type (format)</td></tr><tr><td>Clean      </td><td><span class="teletype">-k</span></td><td>Flag                     </td><td>—</td><td>Do not clean wikis after compilation</td></tr><tr><td>Inferred   </td><td><span class="teletype">-i</span></td><td>Flag                     </td><td>—</td><td>Print inferred configuration</td></tr><tr><td>Used       </td><td><span class="teletype">-u</span></td><td>Flag                     </td><td>—</td><td>Print used (final) configuration</td></tr><tr><td>No run     </td><td><span class="teletype">-n</span></td><td>Flag                     </td><td>—</td><td>Dry run (no compilation)</td></tr><tr><td>Root dir   </td><td><span class="teletype">-r</span></td><td>Name                     </td><td><span class="teletype">_dop</span></td><td>Root directory (output directory)</td></tr><tr><td>Force      </td><td><span class="teletype">-f</span></td><td>Flag                     </td><td>—</td><td>Removes root dir if exists</td></tr><tr><td>Local      </td><td><span class="teletype">-l</span></td><td>Flag                     </td><td>—</td><td>Generate local links (<span class="teletype">--local</span>)</td></tr><tr><td>Docversion </td><td><span class="teletype">-d</span></td><td>File                     </td><td>—</td><td><span class="teletype">docversion</span> files (see <span class="teletype">--docversion</span> option)</td></tr><tr><td>Verbose    </td><td><span class="teletype">-v</span></td><td>Flag                     </td><td>—</td><td>Verbose</td></tr><tr><td>Help       </td><td><span class="teletype">-h</span></td><td>Flag                     </td><td>—</td><td>Show help and exit</td></tr></table><h3> Examples</h3><p>For all examples, the current directory looks like:
+</p><pre>$ tree
+.
+├── 1.0
+│   └── manual
+│       └── intro.wiki
+└── 2.0
+    ├── api
+    └── manual
+        ├── intro.wiki
+        └── other.wiki
+
+5 directories, 3 files
+</pre><h4> Minimal example</h4><pre>$ dop 2.0
+$ tree
+.
+├── 1.0
+│   └── manual
+│       └── intro.wiki
+├── 2.0
+│   ├── api
+│   └── manual
+│       ├── intro.wiki
+│       └── other.wiki
+└── _dop
+    ├── api
+    └── manual
+        ├── intro.html
+        └── other.html
+</pre><h2> <span class="monospace">quickdop</span></h2><p>TODO</p></article></div></div></body></html>
