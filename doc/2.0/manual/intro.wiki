@@ -266,7 +266,7 @@ The data of this extension is automatically collected by either [[FIXME|dop]] or
 * In previous versions of ##html_of_wiki##, projects used to have a file---##config.js##---which declaratively described these projects. Amongst that information, a field ##default_subproject## declared the {{{<<a_api*}}} ##subproject## attribute's default value. Since that file no longer exist, an option {{{--default-subproject}}} exists but is **highly deprecated**.
 * That previous version also supported a special link syntax---{{{[[wiki(id):page]]}}}---in which projects were given an ID (in ##config.js##). Considered unclear, that syntax is now **deprecated**, any wiki using it will //not// compile.
 
-= Higher level website generators
+= Higher level documentation generators
 //one_html_of_wiki// works great for compiling one wiki page, but a project's documentation is often composed of many wiki pages for each version. However, ##ohow## is designed with the Unix philosophy in mind: **simplicity** and **composability**. This, it is very easy to integrate it in an existing workflow.
 
 To make things even easier, we provide out of the box two higher level documentation generators:
@@ -336,7 +336,58 @@ The following table describes the entries recognized by ##dop##:
 The ##templates## key is an array because it would be possible (thanks to ##wit##) to have several templates but this feature is not currently implemented in ##dop##. PR welcomed! ;-)
 
 === Command-line interface
-TODO
+The command ##dop## accepts the following short options:
+
+|=Name      |=Option |=Value                   |=Default value|=Description|
+|Config     |{{{-c}}}|File                     |---|Configuration file|
+|Config type|{{{-t}}}|{{{json}}} or {{{plain}}}|{{{plain}}}|Configuration file type (format)|
+|Clean      |{{{-k}}}|Flag                     |---|Do not clean wikis after compilation|
+|Inferred   |{{{-i}}}|Flag                     |---|Print inferred configuration|
+|Used       |{{{-u}}}|Flag                     |---|Print used (final) configuration|
+|No run     |{{{-n}}}|Flag                     |---|Dry run (no compilation)|
+|Root dir   |{{{-r}}}|Name                     |{{{_dop}}}|Root directory (output directory)|
+|Force      |{{{-f}}}|Flag                     |---|Removes root dir if exists|
+|Local      |{{{-l}}}|Flag                     |---|Generate local links ({{{--local}}})|
+|Docversion |{{{-d}}}|File                     |---|{{{docversion}}} files (see {{{--docversion}}} option)|
+|Verbose    |{{{-v}}}|Flag                     |---|Verbose|
+|Help       |{{{-h}}}|Flag                     |---|Show help and exit|
+
+=== Examples
+For all examples, the current directory looks like:
+{{{
+$ tree
+.
+├── 1.0
+│   └── manual
+│       └── intro.wiki
+└── 2.0
+    ├── api
+    └── manual
+        ├── intro.wiki
+        └── other.wiki
+
+5 directories, 3 files
+}}}
+
+==== Minimal example
+{{{
+$ dop 2.0
+$ tree
+.
+├── 1.0
+│   └── manual
+│       └── intro.wiki
+├── 2.0
+│   ├── api
+│   └── manual
+│       ├── intro.wiki
+│       └── other.wiki
+└── _dop
+    ├── api
+    └── manual
+        ├── intro.html
+        └── other.html
+}}}
 
 == ##quickdop##
 TODO
