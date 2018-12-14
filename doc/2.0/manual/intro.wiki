@@ -9,7 +9,7 @@
   .manchap {color: red}
 >>
 
-= html_of_wiki
+=html_of_wiki
 //##html_of_wiki## is a static website generator supporting wikicréole 1.0, designed for GitHub pages and used by the Ocsigen project for managing its online documentation at [[https://ocsigen.org]].//
 
 It is available as an opam ([[https://opam.ocaml.org/]]) package.
@@ -24,8 +24,8 @@ The following sections describe:
 # The available extensions
 # A brief introduction to ##html_of_wiki##'s internals
 
-= The wikicréole
-== The standard
+=The wikicréole
+==The standard
 The following picture summarizes the wikicréole 1.0 format.
 
 <<a_img src="wiki.jpg"|>>
@@ -34,8 +34,8 @@ The following picture summarizes the wikicréole 1.0 format.
 * The wikicréole supported by ##html_of_wiki## uses only one {{{=}}} sign for toplevel headings.
 * There is also the tilde character {{{~}}} for not interpreting the character it prefixes.
 
-== Syntax additions
-=== Supported links syntaxes
+==Syntax additions
+===Supported links syntaxes
 The following table lists additional link syntaxes supported by the tool.
 |=Syntax                    |=Description                                |
 |{{{[[wiki("name"):page]]}}}|Link to the ##page## of the project ##name##|
@@ -50,7 +50,7 @@ The following table lists available links abbreviations.
 |{{{[[/path]]}}}  |{{{[[site:path]]}}}   |Website root-relative link|
 |{{{[[path]]}}}   |{{{[[href:path]]}}}   |Relative link             |
 
-=== Decorations
+===Decorations
 The following table lists the additional available decorations.
 |=Syntax|=Description|=Example|
 |{{{--}}}|//en-dash//|--|
@@ -61,7 +61,7 @@ The following table lists the additional available decorations.
 |{{{__text__}}}|Underline|__text__|
 |{{{/-text-/}}}|Strike-through|/-text-/|
 
-=== Definition lists
+===Definition lists
 The following code produces a definition list.
 {{{
 ;title1
@@ -75,10 +75,10 @@ The following code produces a definition list.
 ;title2
 :definition2
 
-=== Inline HTML classes
+===Inline HTML classes
 It is possible to inline some HTML classes to the following element using the syntax ##~@~@class="title"~@~@##.
 
-=== Extensions
+===Extensions
 The wikicréole supported by ##html_of_wiki## support **extensions**, that is to execute arbitrary OCaml code registered to the parser.
 More detail about this mechanism can be found in the last section of this document.
 
@@ -88,10 +88,10 @@ Here are some common, widely used by Ocsigen's documentation extensions:
 ; {{{<<a_manual }}}
 : TODO
 
-= How to use ##ohow## (one_html_of_wiki)
+=How to use ##ohow## (one_html_of_wiki)
 **one_html_of_wiki** is a CLI tool for generating a //single// HTML document from a //single// wikicréole file.
 
-== Basic usage
+==Basic usage
 {{{
 $ ohow file.wiki # generates file.html
 $ ohow -o somename.html file.wiki # generates somename.html
@@ -102,8 +102,8 @@ $ ohow --headless file.wiki # do not include HTML head nor wrapping body tag
 $ ohow --local file.wiki # generate local-navigation compatible links (REMOVE THAT FOR DEPLOYMENT)
 }}}
 
-== Advanced usage
-=== Templates
+==Advanced usage
+===Templates
 one_html_of_wiki supports the use of //templates//. A template is a classic wikicréole file which contains a (unique occurrence of) {{{<<content>>}}} somewhere. It is where the content will be inserted.
 
 Consider the following example for a deeper understanding on how to use templates:
@@ -133,7 +133,7 @@ $ ohow --template template.wiki --print page.wiki
 $
 }}}
 
-==== wiki_in_template
+====wiki_in_template
 If the template has to contain more than one {{{<<content>>}}} tag or if several templates have to be used, the integration of ##wit## to your workflow has to be considered.
 //wiki_in_template// (##wit##) is a simple CLI tool for inserting content inside templates without converting them into HTML: it only deals with wikicréole.
 
@@ -142,7 +142,7 @@ Here's an example of how to use it to insert one page inside several templates:
 $ ls
 bottom.wiki hello.wiki top.wiki
 $ cat hello.wiki
-= Hello world!
+=Hello world!
 This is the content wiki.
 $ cat top.wiki
 Template above.
@@ -153,7 +153,7 @@ Template below.
 $
 $ cat hello.wiki | wit top.wiki | wit bottom.wiki
 Template above.
-= Hello world!
+=Hello world!
 This is the content wiki.
 Template below.
 $
@@ -164,7 +164,7 @@ And an example of how to insert several pages inside one template:
 $ ls
 title.wiki text.wiki template.wiki
 $ cat title.wiki
-= Hello world!
+=Hello world!
 $ cat text.wiki
 Some text.
 $ cat template.wiki
@@ -176,7 +176,7 @@ After.
 $
 $ wit <(wit template.wiki < title.wiki) < text.wiki
 Before first.
-= Hello world!
+=Hello world!
 In between.
 Some text.
 After.
@@ -189,7 +189,7 @@ A few notes:
 * You cannot escape the string {{{<<content>>}}} or {{{<<content|>>}}} using the three curly braces syntax.
 * You cannot write a comment with the string {{{<<content>>}}} or {{{<<content|>>}}} inside.
 
-=== Link extensions
+===Link extensions
 There are several link extensions that ship with ##ohow##. They differ from the classic link syntax because they do not explicitly state where is located the resource to link. For example, {{{<<a_manual project="eliom" chapter="intro" | introduction of Eliom's docs>>}}} leads to the chapter ##intro## of the ##eliom## project //without explicitly giving the location of that page//.
 
 Here are the available extensions:
@@ -224,7 +224,7 @@ It could, in practice, look like ##../../../../eliom/latest/man/intro.
 
 html_of_wiki imposes these constraints for links because these are the constraints GitHub Pages imposes. To conclude, setting up these extensions is not as complicated as it sounds (it's roughly passing some paths to ##ohow## through command line arguments) and the benefits are huge: this way you abstract away any hierarchy between wiki pages and projects and let the compiler work out the links by itself. Thus, any structural change of your projects **will not** force you to rewrite your documentation!
 
-=== The {{{<<doctree>>}}} extension
+===The {{{<<doctree>>}}} extension
 {{{<<doctree>>}}} is an extension without parameters that inserts a menu. That menu is built by concatenating the content of all the files named ##menu.wiki## inside the //root// directory. The order is:
 # the ##menu.wiki## of the manual first, if any
 # the ##menu.wiki## files of the API, if any, alphabetically sorted by sub-project's name, if any
@@ -247,14 +247,14 @@ Here is an example of what one can put inside a ##menu.wiki## file:
 }}}
 Again, that extension requires some extra parameters---{{{--root}}}, {{{--manual}}} and {{{--api}}}---which are described above. The generated element is a {{{<nav/>}}} with {{{class="how-doctree"}}}.
 
-=== The {{{<<docversion>>}}} extension
+===The {{{<<docversion>>}}} extension
 {{{<<docversion>>}}} is an extension which inserts a dropdown list that lets the visitor select the version of the documentation to see. An example of such a widget on the left of this text.
 
 To use it, place the versions to display in a file, say ##versions.txt##, one per line, in the expected order. Then, pass that file as an argument of ##ohow## using the option {{{--docversion}}}. If {{{--root}}}'s directory name is inside ##versions.txt##, that entry will be automatically selected.
 
 The extension places a text---{{{"Version"}}}---and a {{{<select/>}}} element with {{{class="how-versions"}}}. Required options are {{{--root}}} and {{{--docversion}}}.
 
-=== The {{{<<client-server-switch>>}}} extension
+===The {{{<<client-server-switch>>}}} extension
 **__WARNING__: This extension is specific to the Ocsigen project.**
 
 To include a client/server switch, include {{{<<client-server-switch>>}}} without attributes somewhere in the template.
@@ -262,11 +262,11 @@ The data of this extension is automatically collected by either [[FIXME|dop]] or
 [[FIXME|dop]] uses the Unix builtin {{{comm -12}}} to extract the files the sub-projects ##client## and ##server## have in __comm__on.
 
 
-== Legacy support
+==Legacy support
 * In previous versions of ##html_of_wiki##, projects used to have a file---##config.js##---which declaratively described these projects. Amongst that information, a field ##default_subproject## declared the {{{<<a_api*}}} ##subproject## attribute's default value. Since that file no longer exist, an option {{{--default-subproject}}} exists but is **highly deprecated**.
 * That previous version also supported a special link syntax---{{{[[wiki(id):page]]}}}---in which projects were given an ID (in ##config.js##). Considered unclear, that syntax is now **deprecated**, any wiki using it will //not// compile.
 
-= Higher level documentation generators
+=Higher level documentation generators
 //one_html_of_wiki// works great for compiling one wiki page, but a project's documentation is often composed of many wiki pages for each version. However, ##ohow## is designed with the Unix philosophy in mind: **simplicity** and **composability**. This, it is very easy to integrate it in an existing workflow.
 
 To make things even easier, we provide out of the box two higher level documentation generators:
@@ -276,10 +276,10 @@ To make things even easier, we provide out of the box two higher level documenta
 
 These tools are described in detail in the following sections.
 
-== ##dop##
+==##dop##
 It is a wrapper on ##ohow## designed to generate the document of a single version of a project with a one-line command.
 
-=== Configuration file
+===Configuration file
 Even if all configuration data could be passed using CLI options---as ##ohow## does---it is often more convenient to have a configuration file. Two formats are accepted: //JSON// and //plain text//. Here is an example of the same configuration file, written in these two formats:
 
 config.json:
@@ -335,7 +335,7 @@ The following table describes the entries recognized by ##dop##:
 
 The ##templates## key is an array because it would be possible (thanks to ##wit##) to have several templates but this feature is not currently implemented in ##dop##. PR welcomed! ;-)
 
-=== Command-line interface
+===Command-line interface
 The command ##dop## accepts the following short options:
 
 |=Name      |=Option |=Value                   |=Default value|=Description|
@@ -352,8 +352,8 @@ The command ##dop## accepts the following short options:
 |Verbose    |{{{-v}}}|Flag                     |---|Verbose|
 |Help       |{{{-h}}}|Flag                     |---|Show help and exit|
 
-=== Examples
-For all examples, the current directory looks like:
+===Examples
+====Minimal example
 {{{
 $ tree
 .
@@ -365,12 +365,6 @@ $ tree
     └── manual
         ├── intro.wiki
         └── other.wiki
-
-5 directories, 3 files
-}}}
-
-==== Minimal example
-{{{
 $ dop 2.0
 $ tree
 .
@@ -389,5 +383,29 @@ $ tree
         └── other.html
 }}}
 
-== ##quickdop##
+====Ocsigen example
+An Ocsigen project has the following structure:
+{{{
+.
+├── doc
+│   ├── 1.0.9
+│   ├── 1.1.1
+│   ├── 1.2
+│   ├── 2.7
+│   ├── ...
+│   ├── 2.8.1
+│   ├── 2.8.2
+│   ├── 2.8.3
+│   ├── 2.8.4
+│   ├── 3.1.0
+│   └── dev
+├── ...
+├── LICENSE
+├── Makefile
+├── README.md
+├── TODO.txt
+└── VERSION
+}}}
+
+==##quickdop##
 TODO

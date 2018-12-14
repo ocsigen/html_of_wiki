@@ -288,8 +288,9 @@ normalize_templates() {
 
 compile() {
     local ret=$EXIT_SUCCESS
-    find_wikis
-    while read -r wiki; do
+    local wikis=$(find_wikis)
+    echo "$wikis"
+    cat "$wikis" | while read -r wiki; do
         $verbose && echo -n "$wiki "
         # print failures but dop continues (-e)
         if call_ohow $wiki
@@ -299,7 +300,7 @@ compile() {
             ret=$EXIT_FAILURE
         fi
         $keep_wikis || rm $wiki
-    done <<< $(find_wikis | sed 's/\s+/\n/g')
+    done
     return $ret
 }
 
