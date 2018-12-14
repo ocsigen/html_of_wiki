@@ -288,6 +288,7 @@ normalize_templates() {
 
 compile() {
     local ret=$EXIT_SUCCESS
+    find_wikis
     while read -r wiki; do
         $verbose && echo -n "$wiki "
         # print failures but dop continues (-e)
