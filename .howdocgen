@@ -31,6 +31,6 @@ cat >$f <<EOF
     "images": "manual/files"
 }
 EOF
-DEBUG=t quickdop -f doc _doc -t json -c $f -viu
+quickdop -f doc _doc -t json -c $f -viu
 
 mv tmp _doc
