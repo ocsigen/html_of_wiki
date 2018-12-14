@@ -299,7 +299,7 @@ compile() {
             ret=$EXIT_FAILURE
         fi
         $keep_wikis || rm $wiki
-    done <<< $(find_wikis | sed 's/\s*/\n/g')
+    done <<< $(find_wikis | sed 's/\s+/\n/g')
     return $ret
 }
 
