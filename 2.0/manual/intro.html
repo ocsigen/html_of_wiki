@@ -272,24 +272,16 @@ $ tree
     └── manual
         ├── intro.html
         └── other.html
-</pre><h4>Ocsigen example</h4><p>An Ocsigen project has the following structure:
-</p><pre>.
-├── doc
-│   ├── 1.0.9
-│   ├── 1.1.1
-│   ├── 1.2
-│   ├── 2.7
-│   ├── ...
-│   ├── 2.8.1
-│   ├── 2.8.2
-│   ├── 2.8.3
-│   ├── 2.8.4
-│   ├── 3.1.0
-│   └── dev
-├── ...
-├── LICENSE
-├── Makefile
-├── README.md
-├── TODO.txt
-└── VERSION
-</pre><h2><span class="monospace">quickdop</span></h2><p>TODO</p></article></div></div></body></html>
+</pre><h4>More examples</h4><p>You can look at the files called <span class="teletype">.howdocgen</span> inside the <span class="teletype">wikidoc</span> branch
+of each documented Ocsigen project for a real demonstration.
+</p><h2><span class="monospace">quickdop</span></h2><p>To make things easier for projects with multiple versions of the documentation,
+html_of_wiki provides <span class="teletype">quickdop</span>. It takes care of generating the docs for
+version found (directory name matching <span class="teletype">[0-9]+|dev</span>) and provides automatically
+a value for the <span class="teletype">--docversion</span> option.
+</p><h3>Usage</h3><pre>quickdop [-f] PROJECT OUTDIR [DOP_OPTIONS]
+</pre><dl><dt><span class="teletype">PROJECT</span>
+</dt><dd>The directory containing the versions.
+</dd><dt><span class="teletype">OUTDIR</span>
+</dt><dd>The build directory. Automatically created and replaced when the <span class="teletype">-f</span> option is provided.
+</dd><dt><span class="teletype">DOP_OPTIONS</span>
+</dt><dd>The options usually passed to <span class="teletype">dop</span>. Obviously, the options <span class="teletype">-r</span>, <span class="teletype">-d</span> and the target are provided by <span class="teletype">quickdop</span> and must not be explicitly given.</dd></dl></article></div></div></body></html>
