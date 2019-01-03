@@ -383,29 +383,25 @@ $ tree
         └── other.html
 }}}
 
-====Ocsigen example
-An Ocsigen project has the following structure:
-{{{
-.
-├── doc
-│   ├── 1.0.9
-│   ├── 1.1.1
-│   ├── 1.2
-│   ├── 2.7
-│   ├── ...
-│   ├── 2.8.1
-│   ├── 2.8.2
-│   ├── 2.8.3
-│   ├── 2.8.4
-│   ├── 3.1.0
-│   └── dev
-├── ...
-├── LICENSE
-├── Makefile
-├── README.md
-├── TODO.txt
-└── VERSION
-}}}
+====More examples
+You can look at the files called {{{.howdocgen}}} inside the {{{wikidoc}}} branch
+of each documented Ocsigen project for a real demonstration.
+
 
 ==##quickdop##
-TODO
+To make things easier for projects with multiple versions of the documentation,
+html_of_wiki provides {{{quickdop}}}. It takes care of generating the docs for
+version found (directory name matching {{{[0-9]+|dev}}}) and provides automatically
+a value for the {{{--docversion}}} option.
+
+===Usage
+{{{
+quickdop [-f] PROJECT OUTDIR [DOP_OPTIONS]
+}}}
+
+;{{{PROJECT}}}
+:The directory containing the versions.
+;{{{OUTDIR}}}
+:The build directory. Automatically created and replaced when the {{{-f}}} option is provided.
+;{{{DOP_OPTIONS}}}
+:The options usually passed to {{{dop}}}. Obviously, the options {{{-r}}}, {{{-d}}} and the target are provided by {{{quickdop}}} and must not be explicitly given.
