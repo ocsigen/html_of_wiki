@@ -57,8 +57,8 @@ The following sections describe:
 # How to use
 ## ##dop## for generating the documentation of a whole project's version, and
 ## ##quickdop## for generating the documentation of a whole project's.
-# The available extensions (TODO)
-# A brief introduction to ##html_of_wiki##'s internals (TODO)
+# The available extensions
+<<|# A brief introduction to ##html_of_wiki##'s internals (TODO)>>
 
 =The wikicréole
 ==@@id="wikistd"@@The standard
