@@ -1,4 +1,24 @@
-<html><head><title> html_of_wiki</title><meta charset="utf8"/><link rel="stylesheet" href="https://ocsigen.org/html_of_wiki/tmp/style.css"/><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.9.0/themes/prism.min.css"/><script type="text/javascript" src="https://ocsigen.org/js/client.js">
+<html><head><title>html_of_wiki</title><meta charset="utf8"/><style>
+  h1 {margin-bottom: 30px !important}
+  .monospace {font-family: monospace}
+  .linethrough {text-decoration: line-through}
+  .underlined {text-decoration: underline}
+  .rightcol {width: 80%}
+  .rewind {color: purple}
+  .manproject {color: red}
+  .mandir {color: orange}
+  .manchap {color: red}
+  .intro {
+     background-color: #F8F8F8;
+     padding: 5px 25px;
+     width: 90%;
+     margin: auto;
+     border-radius: 2.5%;
+     box-shadow: 2px 2px 2px 1px rgba(0, 0, 0, 0.2);
+     font-style: italic;
+     font-size: 14px;
+  }
+</style><link rel="stylesheet" href="https://ocsigen.org/html_of_wiki/tmp/style.css"/><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.9.0/themes/prism.min.css"/><script type="text/javascript" src="https://ocsigen.org/js/client.js">
 //<![CDATA[
 
 //]]>
@@ -39,6 +59,315 @@
 </li><li class="drawermainmenu-page"><a href=".././../../credits" class="ocsimore_phrasing_link">Who does Ocsigen?</a>
 </li><li class="drawermainmenu-page"><a href=".././../../blog" class="ocsimore_phrasing_link">Blog</a>
 </li><li class="drawermainmenu-page"><a href="https://github.com/ocsigen" class="ocsimore_phrasing_link">Source code</a>
-</li></ul><nav class="how-doctree"></nav></nav></aside></div><p class="reasonwarning">Warning: Reason support is experimental.
+</li></ul><nav class="how-doctree"><h1><span class="monospace">html_of_wiki</span></h1><h3><a href="#install" class="ocsimore_phrasing_link">Installation</a></h3><h2>The wikicréole</h2><h3><a href="#wikistd" class="ocsimore_phrasing_link">Standard</a></h3><h3><a href="#wikiadd" class="ocsimore_phrasing_link">Additions</a></h3><h2><span class="monospace">ohow</span></h2><h3><a href="#ohow" class="ocsimore_phrasing_link">Introduction</a></h3><h3>Advanced usage</h3><h4><a href="#templates" class="ocsimore_phrasing_link">Templates</a></h4><h4><a href="#linkexts" class="ocsimore_phrasing_link">Link extensions</a></h4><h4><a href="#doctree" class="ocsimore_phrasing_link"><span class="teletype">&lt;&lt;doctree&gt;&gt;</span></a></h4><h4><a href="#docversion" class="ocsimore_phrasing_link"><span class="teletype">&lt;&lt;docversion&gt;&gt;</span></a></h4><h3><a href="#legacy" class="ocsimore_phrasing_link">Legacy</a></h3><h2><span class="monospace">dop</span></h2><h3><a href="#dop" class="ocsimore_phrasing_link">Introduction</a></h3><h3><a href="#conf" class="ocsimore_phrasing_link">Configuration file</a></h3><h3><a href="#cli" class="ocsimore_phrasing_link">Command line interface</a></h3><h3><a href="#examples" class="ocsimore_phrasing_link">Examples</a></h3><h2><span class="monospace">quickdop</span></h2><h3><a href="#quickdop" class="ocsimore_phrasing_link">Introduction</a></h3><h2><a href="#ext" class="ocsimore_phrasing_link">Built-in wikicréole extensions</a></h2><h2><a href="#TODO" class="ocsimore_phrasing_link"><span class="monospace">html_of_wiki</span> internals overview (TODO)</a></h2></nav></nav></aside></div><p class="reasonwarning">Warning: Reason support is experimental.
 We are looking for beta-tester and contributors.
-</p><button id="reason">Switch to </button><div class="twocols"><nav class="leftcol">Version <select class="how-versions" onchange="location = this.value;"><option value=".././../2.0/manual/intro" selected="selected">2.0</option></select><nav class="how-doctree"></nav></nav><article class="rightcol"><h1> html_of_wiki</h1><p>Work in progress, please come back later!</p></article></div></div></body></html>
+</p><button id="reason">Switch to </button><div class="twocols"><nav class="leftcol">Version <select class="how-versions" onchange="location = this.value;"><option value=".././../2.0/manual/intro" selected="selected">2.0</option></select><nav class="how-doctree"><h1><span class="monospace">html_of_wiki</span></h1><h3><a href="#install" class="ocsimore_phrasing_link">Installation</a></h3><h2>The wikicréole</h2><h3><a href="#wikistd" class="ocsimore_phrasing_link">Standard</a></h3><h3><a href="#wikiadd" class="ocsimore_phrasing_link">Additions</a></h3><h2><span class="monospace">ohow</span></h2><h3><a href="#ohow" class="ocsimore_phrasing_link">Introduction</a></h3><h3>Advanced usage</h3><h4><a href="#templates" class="ocsimore_phrasing_link">Templates</a></h4><h4><a href="#linkexts" class="ocsimore_phrasing_link">Link extensions</a></h4><h4><a href="#doctree" class="ocsimore_phrasing_link"><span class="teletype">&lt;&lt;doctree&gt;&gt;</span></a></h4><h4><a href="#docversion" class="ocsimore_phrasing_link"><span class="teletype">&lt;&lt;docversion&gt;&gt;</span></a></h4><h3><a href="#legacy" class="ocsimore_phrasing_link">Legacy</a></h3><h2><span class="monospace">dop</span></h2><h3><a href="#dop" class="ocsimore_phrasing_link">Introduction</a></h3><h3><a href="#conf" class="ocsimore_phrasing_link">Configuration file</a></h3><h3><a href="#cli" class="ocsimore_phrasing_link">Command line interface</a></h3><h3><a href="#examples" class="ocsimore_phrasing_link">Examples</a></h3><h2><span class="monospace">quickdop</span></h2><h3><a href="#quickdop" class="ocsimore_phrasing_link">Introduction</a></h3><h2><a href="#ext" class="ocsimore_phrasing_link">Built-in wikicréole extensions</a></h2><h2><a href="#TODO" class="ocsimore_phrasing_link"><span class="monospace">html_of_wiki</span> internals overview (TODO)</a></h2></nav></nav><article class="rightcol"><h1>html_of_wiki</h1><div class="intro"><p><span class="monospace">html_of_wiki</span> is a versatile, minimalist yet powerful <strong>static website generator</strong>.
+It is designed with simplicity in mind: no special directories, almost no configuration
+and everything working out of the box. No web server required, just the compilation of
+your content to HTML and you're free to choose which static files server service fits you:
+GitHub Pages, GitLab Pages, etc.
+</p><p>It allows writing website content in a feature-rich and extensible language: the <strong>wikicréole</strong>.
+This language, thanks to its clever design, allows to write rich content as much
+expressively as with plain HTML.
+</p><p><span class="monospace">html_of_wiki</span> is part of the Ocsigen project and is used to generate its documentation—including this page!
+It has no problem dealing with large websites, it can handle several versions of several projects.
+</p><p><span class="monospace">html_of_wiki</span> is also composable, it can be integrated into a CI/CD process so you can automate
+the deployment of your website. Rebuild and deploy on each commit!</p></div><h2 id="install">Installation <a class="backref" href="#install">&#182;</a></h2><p>Clone this repository:
+</p><pre>$ git clone https://github.com/ocsigen/html_of_wiki.git
+</pre><p>then, use <span class="monospace">opam pin</span> to install it:
+</p><pre>$ opam pin add -y html_of_wiki html_of_wiki
+</pre><h2>What you will learn here</h2><p>The following sections describe:
+</p><ol><li> The wikicréole format
+</li><li> How to use <span class="monospace">ohow</span>, a wikicréole compiler to HTML
+</li><li> How to use
+<ol><li> <span class="monospace">dop</span> for generating the documentation of a whole project's version, and
+</li><li> <span class="monospace">quickdop</span> for generating the documentation of a whole project's.
+</li></ol></li><li> The available extensions
+</li></ol><h1>The wikicréole</h1><h2 id="wikistd">The standard <a class="backref" href="#wikistd">&#182;</a></h2><p>The following picture summarises the wikicréole 1.0 format.
+</p><p><span><img src=".././manual/files/wiki.jpg" alt="wiki.jpg"/></span>
+</p><p><strong>Notes</strong>:
+</p><ul><li> The wikicréole supported by <span class="monospace">html_of_wiki</span> uses only one <span class="teletype">=</span> sign for toplevel headings.
+</li><li> There is also the tilde character <span class="teletype">~</span> for not interpreting the character it prefixes.
+</li></ul><h2 id="wikiadd">Syntax additions <a class="backref" href="#wikiadd">&#182;</a></h2><h3>Supported links syntaxes</h3><p>The following table lists additional link syntaxes supported by the tool.
+</p><table><tr><th>Syntax                    </th><th>Description                                </th></tr><tr><td><span class="teletype">[[wiki(&quot;name&quot;):page]]</span></td><td>Link to the <span class="monospace">page</span> of the project <span class="monospace">name</span></td></tr><tr><td><span class="teletype">[[wiki:page]]</span>        </td><td>Link to the <span class="monospace">page</span> of the current project </td></tr><tr><td><span class="teletype">[[site:page]]</span>        </td><td>Website root-relative link                  </td></tr><tr><td><span class="teletype">[[href:path]]</span>        </td><td>Raw <span class="monospace">href</span> value                          </td></tr></table><p>The following table lists available links abbreviations.
+</p><table><tr><th>Abbreviation    </th><th>Equivalent syntax    </th><th>Description              </th></tr><tr><td><span class="teletype">[[]]</span>       </td><td><span class="teletype">[[href:.]]</span>      </td><td>Current page              </td></tr><tr><td><span class="teletype">[[#anchor]]</span></td><td><span class="teletype">[[href:#anchor]]</span></td><td>Current page with anchor  </td></tr><tr><td><span class="teletype">[[/path]]</span>  </td><td><span class="teletype">[[site:path]]</span>   </td><td>Website root-relative link</td></tr><tr><td><span class="teletype">[[path]]</span>   </td><td><span class="teletype">[[href:path]]</span>   </td><td>Relative link             </td></tr></table><h3>Decorations</h3><p>The following table lists the additional available decorations.
+</p><table><tr><th>Syntax</th><th>Description</th><th>Example</th></tr><tr><td><span class="teletype">--</span>       </td><td><em>en-dash</em>     </td><td>–</td></tr><tr><td><span class="teletype">---</span>      </td><td><em>em-dash</em>     </td><td>—</td></tr><tr><td><span class="teletype">##text##</span> </td><td>Mono-spaced font</td><td><span class="monospace">text</span></td></tr><tr><td><span class="teletype">^^super^^</span></td><td>Superscript     </td><td>text<sup>super</sup></td></tr><tr><td><span class="teletype">,,sub,,</span>  </td><td>Subscript       </td><td>text<sub>sub</sub></td></tr><tr><td><span class="teletype">__text__</span> </td><td>Underline       </td><td><span class="underlined">text</span></td></tr><tr><td><span class="teletype">/-text-/</span> </td><td>Strike-through  </td><td><span class="linethrough">text</span></td></tr></table><h3>Definition lists</h3><p>The following code produces a definition list.
+</p><pre>;title1
+:definition1
+;title2
+:definition2
+</pre><dl><dt>title1
+</dt><dd>definition1
+</dd><dt>title2
+</dt><dd>definition2
+</dd></dl><h3>Inline HTML classes</h3><p>It is possible to inline some HTML classes to the following element using the syntax <span class="monospace">@@class=&quot;title&quot;@@</span>.
+</p><h3>Extensions</h3><p>The wikicréole supported by <span class="monospace">html_of_wiki</span> support <strong>extensions</strong>, a powerful
+mechanism that allows executing arbitrary OCaml code registered to the parser.
+More detail about this mechanism can be found in the last section of this document.
+</p><p>Extensions syntax: <span class="teletype">&lt;&lt;extension attr1=&quot;val1&quot; attr2=&quot;val2&quot; ... argN=&quot;valN&quot;|content&gt;&gt;</span>
+</p><p>Here are some common, widely used by Ocsigen's documentation extensions:
+</p><dl><dt> <span class="teletype">&lt;&lt;a_manual&gt;&gt;</span>
+</dt><dd> Link to a page of the manual of a project.
+</dd><dt> <span class="teletype">&lt;&lt;span&gt;&gt;</span>
+</dt><dd> Inserts an HTML <span class="teletype">&lt;span/&gt;</span> element allowing a fine control over the DOM of the page.
+</dd><dt> <span class="teletype">&lt;&lt;doctree&gt;&gt;</span>
+</dt><dd> Displays a menu like the one on the left of this text.
+</dd></dl><h1 id="ohow">How to use <span class="monospace">ohow</span> (one_html_of_wiki) <a class="backref" href="#ohow">&#182;</a></h1><p><strong>one_html_of_wiki</strong> is a CLI tool for generating a <em>single</em> HTML document from a <em>single</em> wikicréole file.
+</p><h2>Basic usage</h2><pre>$ ohow file.wiki # generates file.html
+$ ohow -o somename.html file.wiki # generates somename.html
+$ ohow --help # shows help
+$ ohow --version # shows version
+$ ohow --print file.wiki # prints the HTML to stdout instead of writing a file
+$ ohow --headless file.wiki # do not include HTML head nor wrapping body tag
+$ ohow --local file.wiki # generate local-navigation compatible links (REMOVE THAT FOR DEPLOYMENT)
+</pre><h2>Advanced usage</h2><h3 id="templates">Templates <a class="backref" href="#templates">&#182;</a></h3><p>one_html_of_wiki supports the use of <em>templates</em>. A template is a classic wikicréole file which contains a (unique occurrence of) <span class="teletype">&lt;&lt;content&gt;&gt;</span> somewhere. It is where the content will be inserted.
+</p><p>Consider the following example for a deeper understanding on how to use templates:
+</p><pre>$ cat template.wiki
+&lt;&lt;head-css|
+    .red {color: red}
+    .blue {color: blue}
+&gt;&gt;
+@@class=&quot;red&quot;@@Before.
+&lt;&lt;div class=&quot;around&quot;|
+    &lt;&lt;content&gt;&gt;
+&gt;&gt;
+@@class=&quot;red&quot;@@After.
+$
+$ cat page.wiki
+I'm a wiki page, providing some &lt;&lt;span class=&quot;blue&quot;|**useful**&gt;&gt; content!
+$
+$ ohow --template template.wiki --print page.wiki
+&lt;html&gt;&lt;head&gt;&lt;title&gt;&lt;/title&gt;&lt;meta charset=&quot;utf8&quot;/&gt;&lt;style&gt;
+    .red {color: red}
+    .blue {color: blue}
+&lt;/style&gt;&lt;/head&gt;&lt;body&gt;&lt;p class=&quot;red&quot;&gt;Before.
+&lt;/p&gt;&lt;div class=&quot;around&quot;&gt;&lt;p&gt;I'm a wiki page, providing some
+&lt;span class=&quot;blue&quot;&gt;&lt;strong&gt;useful&lt;/strong&gt;&lt;/span&gt; content!&lt;/p&gt;&lt;/div&gt;
+&lt;p class=&quot;red&quot;&gt;After.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
+$
+</pre><h4>wiki_in_template</h4><p>If the template has to contain more than one <span class="teletype">&lt;&lt;content&gt;&gt;</span> tag or if several templates have to be used, the integration of <span class="monospace">wit</span> to your workflow has to be considered.
+<em>wiki_in_template</em> (<span class="monospace">wit</span>) is a simple CLI tool for inserting content inside templates without converting them into HTML: it only deals with wikicréole.
+</p><p>Here's an example of how to use it to insert one page inside several templates:
+</p><pre>$ ls
+bottom.wiki hello.wiki top.wiki
+$ cat hello.wiki
+=Hello world!
+This is the content wiki.
+$ cat top.wiki
+Template above.
+&lt;&lt;content&gt;&gt;
+$ cat bottom.wiki
+&lt;&lt;content&gt;&gt;
+Template below.
+$
+$ cat hello.wiki | wit top.wiki | wit bottom.wiki
+Template above.
+=Hello world!
+This is the content wiki.
+Template below.
+$
+</pre><p>And an example of how to insert several pages inside one template:
+</p><pre>$ ls
+title.wiki text.wiki template.wiki
+$ cat title.wiki
+=Hello world!
+$ cat text.wiki
+Some text.
+$ cat template.wiki
+Before first.
+&lt;&lt;content&gt;&gt;
+In between.
+&lt;&lt;content&gt;&gt;
+After.
+$
+$ wit &lt;(wit template.wiki &lt; title.wiki) &lt; text.wiki
+Before first.
+=Hello world!
+In between.
+Some text.
+After.
+$
+</pre><p>Finally, as far as <span class="monospace">wit</span> is concerned, a page is a wiki file without <span class="teletype">&lt;&lt;content&gt;&gt;</span> and a template is a wiki file with at least one occurrence of <span class="teletype">&lt;&lt;content&gt;&gt;</span>—so there's nothing wrong in saying that <span class="monospace">wit</span> can output a template.
+</p><p>A few notes:
+</p><ul><li> You cannot escape the string <span class="teletype">&lt;&lt;content&gt;&gt;</span> or <span class="teletype">&lt;&lt;content|&gt;&gt;</span> using the three curly braces syntax.
+</li><li> You cannot write a comment with the string <span class="teletype">&lt;&lt;content&gt;&gt;</span> or <span class="teletype">&lt;&lt;content|&gt;&gt;</span> inside.
+</li></ul><h3 id="linkexts">Link extensions <a class="backref" href="#linkexts">&#182;</a></h3><p>There are several link extensions that ship with <span class="monospace">ohow</span>. They differ from the classic link syntax because they do not explicitly state where is located the resource to link. For example, <span class="teletype">&lt;&lt;a_manual project=&quot;eliom&quot; chapter=&quot;intro&quot; | introduction of Eliom's docs&gt;&gt;</span> leads to the chapter <span class="monospace">intro</span> of the <span class="monospace">eliom</span> project <em>without explicitly giving the location of that page</em>.
+</p><p>Here are the available extensions:
+</p><ul><li> <span class="teletype">&lt;&lt;a_manual&gt;&gt;</span>
+</li><li> <span class="teletype">&lt;&lt;a_api&gt;&gt;</span>, <span class="teletype">&lt;&lt;a_api_type&gt;&gt;</span> and <span class="teletype">&lt;&lt;a_api_code&gt;&gt;</span>
+</li><li> <span class="teletype">&lt;&lt;a_img&gt;&gt;</span>
+</li><li> <span class="teletype">&lt;&lt;a_file&gt;&gt;</span>
+</li></ul><p>and the attributes they accept:
+</p><table><tr><th>Attribute    </th><th>Extensions                              </th><th>Description                                  </th><th>Default value   </th></tr><tr><td><span class="monospace">project</span>   </td><td>All except <span class="monospace">a_img</span> and <span class="monospace">a_file</span>      </td><td>The project of the page                       </td><td>Current project  </td></tr><tr><td><span class="monospace">chapter</span>   </td><td><span class="monospace">a_manual</span>                             </td><td>The manual chapter to link                    </td><td>None             </td></tr><tr><td><span class="monospace">subproject</span></td><td><span class="monospace">a_api</span>, <span class="monospace">a_api_type</span>, <span class="monospace">a_api_code</span></td><td>The targeted sub-project                      </td><td>None             </td></tr><tr><td><span class="monospace">text</span>      </td><td><span class="monospace">a_api</span>, <span class="monospace">a_api_type</span>, <span class="monospace">a_api_code</span></td><td>Text of the produced link                     </td><td>What's documented</td></tr><tr><td><span class="monospace">version</span>   </td><td>All except <span class="monospace">a_img</span> and <span class="monospace">a_file</span>      </td><td>The version of the project containing the page</td><td><span class="teletype">latest</span>     </td></tr><tr><td><span class="monospace">fragment</span>  </td><td>All except <span class="monospace">a_img</span> and <span class="monospace">a_file</span>      </td><td>HTML fragment                                 </td><td>None             </td></tr><tr><td><span class="monospace">src</span>       </td><td><span class="monospace">a_img</span>, <span class="monospace">a_file</span>                    </td><td>The path to the resource to link              </td><td><em>Required</em>     </td></tr></table><p>However, even if the extensions doesn't require the <em>writer</em> to explicitly give the linked resource's location, the compiler still needs to know where to find it. It is why, whenever any of these extensions is used inside a wiki document, the writer must call <span class="monospace">ohow</span> with the correct values for these options: <span class="teletype">--manual</span>, <span class="teletype">--api</span>, <span class="teletype">--images</span>, <span class="teletype">--assets</span> and <span class="teletype">--root</span> (the latter defaults to the current working directory).
+</p><p>The <em>root</em> directory is the directory containing all wiki content for a specific project's version. For example, a project <span class="monospace">proj/</span>, with two versions, <span class="monospace">1.0/</span> and <span class="monospace">2.0/</span>, each one containing the <span class="monospace">man/</span>, <span class="monospace">api/</span> and <span class="monospace">assets/</span> directories. <span class="monospace">ohow</span> must then be called with the following options (<span class="teletype">pwd = ~/user/proj/</span>):
+</p><ul><li> <span class="teletype">--root 2.0/</span>
+</li><li> <span class="teletype">--manual man/</span> — The path is relative to the <em>root</em> directory (not the current directory!). You could still have used <span class="teletype">--manual 2.0/man/</span> (the root prefix is automatically stripped away).
+</li><li> <span class="teletype">--api 2.0/api/</span> — or equivalently, <span class="teletype">--api api</span>
+</li><li> <span class="teletype">--assets assets</span>
+</li><li> (<span class="teletype">--images assets</span> — Only if you used <span class="teletype">a_img</span> and that the images are in the <span class="monospace">assets/</span> directory.)
+</li></ul><p>For inter-project links, <span class="monospace">ohow</span> <strong>supposes that every projects are inside the same directory</strong>. For example, <span class="teletype">&lt;&lt;a_manual project=&quot;eliom&quot; chapter=&quot;intro&quot;&gt;&gt;</span> will produce the following link: <span class="monospace"><span class="rewind">rewinding to the root directory</span>/../../<span class="manproject">eliom</span>/<span class="mandir">path to the manual directory given with <span class="teletype">--manual</span></span>/<span class="manchap">intro</span></span>.
+The first <span class="monospace">../</span> rewinds from the root directory into the project directory (containing all versions).
+The second <span class="monospace">../</span> rewinds inside the directory containing all the projects.
+It could, in practice, look like <span class="monospace">../../../../eliom/latest/man/intro.
+</span></p><p>html_of_wiki imposes these constraints for links because these are the constraints GitHub Pages imposes. To conclude, setting up these extensions is not as complicated as it sounds (it's roughly passing some paths to <span class="monospace">ohow</span> through command line arguments) and the benefits are huge: this way you abstract away any hierarchy between wiki pages and projects and let the compiler work out the links by itself. Thus, any structural change of your projects <strong>will not</strong> force you to rewrite your documentation!
+</p><h3 id="doctree">The <span class="teletype">&lt;&lt;doctree&gt;&gt;</span> extension <a class="backref" href="#doctree">&#182;</a></h3><p><span class="teletype">&lt;&lt;doctree&gt;&gt;</span> is an extension without parameters that inserts a menu. That menu is built by concatenating the content of all the files named <span class="monospace">menu.wiki</span> inside the <em>root</em> directory. The order is:
+</p><ol><li> the <span class="monospace">menu.wiki</span> of the manual first, if any
+</li><li> the <span class="monospace">menu.wiki</span> files of the API, if any, alphabetically sorted by sub-project's name, if any
+</li></ol><p>For example, for a project with a manual and two API sub-projects, the extension will look for the following files, in that order:
+</p><ol><li> <span class="monospace">manual/menu.wiki</span>
+</li><li> <span class="monospace">api/menu.wiki</span>
+</li><li> <span class="monospace">api/sub-project1/menu.wiki</span>
+</li><li> <span class="monospace">api/sub-project2/menu.wiki</span>
+</li></ol><p>The menu on the left of this text is generated using that extension.
+Here is an example of what one can put inside a <span class="monospace">menu.wiki</span> file:
+</p><pre>=##html_of_wiki##
+==[[#title|Introduction]]
+=The wikicréole
+==[[#wikistd|Standard]]
+==[[#wikiadd|Additions]]
+=[[#ohow|##ohow##]]
+</pre><p>Again, that extension requires some extra parameters—<span class="teletype">--root</span>, <span class="teletype">--manual</span> and <span class="teletype">--api</span>—which are described above. The generated element is a <span class="teletype">&lt;nav/&gt;</span> with <span class="teletype">class=&quot;how-doctree&quot;</span>.
+</p><h3 id="docversion">The <span class="teletype">&lt;&lt;docversion&gt;&gt;</span> extension <a class="backref" href="#docversion">&#182;</a></h3><p><span class="teletype">&lt;&lt;docversion&gt;&gt;</span> is an extension which inserts a dropdown list that lets the visitor select the version of the documentation to see. An example of such a widget on the left of this text.
+</p><p>To use it, place the versions to display in a file, say <span class="monospace">versions.txt</span>, one per line, in the expected order. Then, pass that file as an argument of <span class="monospace">ohow</span> using the option <span class="teletype">--docversion</span>. If <span class="teletype">--root</span>'s directory name is inside <span class="monospace">versions.txt</span>, that entry will be automatically selected.
+</p><p>The extension places a text—<span class="teletype">&quot;Version&quot;</span>—and a <span class="teletype">&lt;select/&gt;</span> element with <span class="teletype">class=&quot;how-versions&quot;</span>. Required options are <span class="teletype">--root</span> and <span class="teletype">--docversion</span>.
+</p><h3>The <span class="teletype">&lt;&lt;client-server-switch&gt;&gt;</span> extension</h3><p><strong><span class="underlined">WARNING</span>: This extension is specific to the Ocsigen project.</strong>
+</p><p>To include a client/server switch, include <span class="teletype">&lt;&lt;client-server-switch&gt;&gt;</span> without attributes somewhere in the template.
+The data of this extension is automatically collected by either <a href="FIXME" class="ocsimore_phrasing_link">dop</a> or <a href="FIXME" class="ocsimore_phrasing_link">quickdop</a>. At a lower level, this extension requires a parameter—<span class="teletype">--csw</span>—which expects a file. Inside must figure the name a all wiki files (with extension <span class="monospace">.wiki</span>), one per line, that should have a client/server switch.
+<a href="FIXME" class="ocsimore_phrasing_link">dop</a> uses the Unix builtin <span class="teletype">comm -12</span> to extract the files the sub-projects <span class="monospace">client</span> and <span class="monospace">server</span> have in <span class="underlined">comm</span>on.
+</p><h2 id="legacy">Legacy support <a class="backref" href="#legacy">&#182;</a></h2><ul><li> In previous versions of <span class="monospace">html_of_wiki</span>, projects used to have a file—<span class="monospace">config.js</span>—which declaratively described these projects. Amongst that information, a field <span class="monospace">default_subproject</span> declared the <span class="teletype">&lt;&lt;a_api*</span> <span class="monospace">subproject</span> attribute's default value. Since that file no longer exist, an option <span class="teletype">--default-subproject</span> exists but is <strong>highly deprecated</strong>.
+</li><li> That previous version also supported a special link syntax—<span class="teletype">[[wiki(id):page]]</span>—in which projects were given an ID (in <span class="monospace">config.js</span>). Considered unclear, that syntax is now <strong>deprecated</strong>, any wiki using it will <em>not</em> compile.
+</li></ul><h1>Higher level documentation generators</h1><p><em>one_html_of_wiki</em> works great for compiling one wiki page, but a project's documentation is often composed of many wiki pages for each version. However, <span class="monospace">ohow</span> is designed with the Unix philosophy in mind: <strong>simplicity</strong> and <strong>composability</strong>. This, it is very easy to integrate it in an existing workflow.
+</p><p>To make things even easier, we provide out of the box two higher level documentation generators:
+</p><ul><li> <em>doc_of_project</em> (<span class="monospace">dop</span>) — for generating a single version of a project
+</li><li> <em>quick-doc_of_project</em> (<span class="monospace">quickdop</span>) — for generating the documentation of a project with many versions
+</li></ul><p>These tools are described in detail in the following sections.
+</p><h2 id="dop"><span class="monospace">dop</span> <a class="backref" href="#dop">&#182;</a></h2><p>It is a wrapper on <span class="monospace">ohow</span> designed to generate the document of a single version of a project with a one-line command.
+</p><h3 id="conf">Configuration file <a class="backref" href="#conf">&#182;</a></h3><p>Even if all configuration data could be passed using CLI options—as <span class="monospace">ohow</span> does—it is often more convenient to have a configuration file. Two formats are accepted: <em>JSON</em> and <em>plain text</em>. Here is an example of the same configuration file, written in these two formats:
+</p><p>config.json:
+</p><pre>{
+  &quot;project&quot;: &quot;html_of_wiki&quot;,
+  &quot;manual&quot;: &quot;man&quot;,
+  &quot;api&quot;: &quot;api&quot;,
+  &quot;assets&quot;: &quot;files&quot;,
+  &quot;images&quot;: &quot;files/images&quot;,
+  &quot;csw&quot;: false,
+  &quot;menu&quot;: true,
+  &quot;templates&quot;: [&quot;template1.wiki&quot;, &quot;template2.wiki&quot;]
+}
+</pre><p>config.txt:
+</p><pre>project   html_of_wiki
+manual    man
+api       api
+assets    files
+images    files/images
+csw       false
+menu      true
+templates template1.wiki:template2.wiki
+</pre><p>Note that the JSON format needs <strong>jq</strong> (<a href="https://stedolan.github.io/jq/" class="ocsimore_phrasing_link">https://stedolan.github.io/jq/</a>) installed and in the <span class="monospace">PATH</span>.
+Use the plain format if <span class="monospace">jq</span> cannot be installed. It also can be useful (thanks to its minimalism) if it needs to be algorithmically generated.
+It is read by <span class="monospace">awk</span> with default settings: <span class="monospace">$0</span> should contain the key, and the other records its value. Arrays have their value separated by a colon <span class="monospace">:</span>
+(in a <span class="monospace">PATH</span>-like fashion).
+</p><p>Before reading the configuration file you provide (if any), <span class="monospace">dop</span> will try to <strong>infer it</strong> by analyzing the <em>root</em> directory. If the option <span class="teletype">-i</span> is given,
+it will print that inferred configuration (either in JSON or in plain text). Then, if a configuration file is explicitly provided, its keys replaces the inferred ones
+and the ones <em>not</em> present keep their inferred values. First check what <span class="monospace">dop</span> can infer for your organization's architecture from the doc's version its given (use the
+<span class="teletype">-n</span> option for not generating the docs and just do the inferring work).
+</p><p>The following table describes the entries recognized by <span class="monospace">dop</span>:
+</p><table><tr><th>Key name</th><th>Type</th><th><span class="monospace">ohow</span> option</th><th>Short description</th></tr><tr><td><span class="monospace">project</span></td><td>string</td><td><span class="teletype">--project</span></td><td>Project's name</td></tr><tr><td><span class="monospace">manual</span></td><td>string</td><td><span class="teletype">--manual</span></td><td>Manual directory (root-relative path)</td></tr><tr><td><span class="monospace">api</span></td><td>string</td><td><span class="teletype">--api</span></td><td>API directory (root-relative path)</td></tr><tr><td><span class="monospace">client</span></td><td>string</td><td>—</td><td>API's client directory (real path)</td></tr><tr><td><span class="monospace">server</span></td><td>string</td><td>—</td><td>API's server directory (real path)</td></tr><tr><td><span class="monospace">assets</span></td><td>string</td><td><span class="teletype">--assets</span></td><td>Assets directory (root-relative path)</td></tr><tr><td><span class="monospace">images</span></td><td>string</td><td><span class="teletype">--images</span></td><td>Images directory (root-relative path)</td></tr><tr><td><span class="monospace">csw</span></td><td>boolean</td><td><span class="teletype">--csw</span></td><td>Contains a client-server-switch?</td></tr><tr><td><span class="monospace">menu</span></td><td>boolean</td><td><span class="teletype">--doctree</span></td><td>Contains a doctree?</td></tr><tr><td><span class="monospace">templates</span></td><td>string array</td><td><span class="teletype">--template</span></td><td>List of templates</td></tr><tr><td><span class="monospace">default_subproject</span></td><td>string</td><td><span class="teletype">--default-subproject</span></td><td><em>Deprecated</em></td></tr></table><p>The <span class="monospace">templates</span> key is an array because it would be possible (thanks to <span class="monospace">wit</span>) to have several templates but this feature is not currently implemented in <span class="monospace">dop</span>. PR welcomed! ;-)
+</p><h3 id="cli">Command-line interface <a class="backref" href="#cli">&#182;</a></h3><p>The command <span class="monospace">dop</span> accepts the following short options:
+</p><table><tr><th>Name      </th><th>Option </th><th>Value                   </th><th>Default value</th><th>Description</th></tr><tr><td>Config     </td><td><span class="teletype">-c</span></td><td>File                     </td><td>—</td><td>Configuration file</td></tr><tr><td>Config type</td><td><span class="teletype">-t</span></td><td><span class="teletype">json</span> or <span class="teletype">plain</span></td><td><span class="teletype">plain</span></td><td>Configuration file type (format)</td></tr><tr><td>Clean      </td><td><span class="teletype">-k</span></td><td>Flag                     </td><td>—</td><td>Do not clean wikis after compilation</td></tr><tr><td>Inferred   </td><td><span class="teletype">-i</span></td><td>Flag                     </td><td>—</td><td>Print inferred configuration</td></tr><tr><td>Used       </td><td><span class="teletype">-u</span></td><td>Flag                     </td><td>—</td><td>Print used (final) configuration</td></tr><tr><td>No run     </td><td><span class="teletype">-n</span></td><td>Flag                     </td><td>—</td><td>Dry run (no compilation)</td></tr><tr><td>Root dir   </td><td><span class="teletype">-r</span></td><td>Name                     </td><td><span class="teletype">_dop</span></td><td>Root directory (output directory)</td></tr><tr><td>Force      </td><td><span class="teletype">-f</span></td><td>Flag                     </td><td>—</td><td>Removes root dir if exists</td></tr><tr><td>Local      </td><td><span class="teletype">-l</span></td><td>Flag                     </td><td>—</td><td>Generate local links (<span class="teletype">--local</span>)</td></tr><tr><td>Docversion </td><td><span class="teletype">-d</span></td><td>File                     </td><td>—</td><td><span class="teletype">docversion</span> files (see <span class="teletype">--docversion</span> option)</td></tr><tr><td>Verbose    </td><td><span class="teletype">-v</span></td><td>Flag                     </td><td>—</td><td>Verbose</td></tr><tr><td>Help       </td><td><span class="teletype">-h</span></td><td>Flag                     </td><td>—</td><td>Show help and exit</td></tr></table><h3 id="examples">Examples <a class="backref" href="#examples">&#182;</a></h3><h4>Minimal example</h4><pre>$ tree
+.
+├── 1.0
+│   └── manual
+│       └── intro.wiki
+└── 2.0
+    ├── api
+    └── manual
+        ├── intro.wiki
+        └── other.wiki
+$ dop 2.0
+$ tree
+.
+├── 1.0
+│   └── manual
+│       └── intro.wiki
+├── 2.0
+│   ├── api
+│   └── manual
+│       ├── intro.wiki
+│       └── other.wiki
+└── _dop
+    ├── api
+    └── manual
+        ├── intro.html
+        └── other.html
+</pre><h4>More examples</h4><p>You can look at the files called <span class="teletype">.howdocgen</span> inside the <span class="teletype">wikidoc</span> branch
+of each documented Ocsigen project for a real demonstration.
+</p><h2 id="quickdop"><span class="monospace">quickdop</span> <a class="backref" href="#quickdop">&#182;</a></h2><p>To make things easier for projects with multiple versions of the documentation,
+html_of_wiki provides <span class="teletype">quickdop</span>. It takes care of generating the docs for
+version found (directory name matching <span class="teletype">[0-9]+|dev</span>) and provides automatically
+a value for the <span class="teletype">--docversion</span> option.
+</p><h3>Usage</h3><pre>quickdop [-f] PROJECT OUTDIR [DOP_OPTIONS]
+</pre><dl><dt><span class="teletype">PROJECT</span>
+</dt><dd>The directory containing the versions.
+</dd><dt><span class="teletype">OUTDIR</span>
+</dt><dd>The build directory. Automatically created and replaced when the <span class="teletype">-f</span> option is provided.
+</dd><dt><span class="teletype">DOP_OPTIONS</span>
+</dt><dd>The options usually passed to <span class="teletype">dop</span>. Obviously, the options <span class="teletype">-r</span>, <span class="teletype">-d</span> and the target are provided by <span class="teletype">quickdop</span> and must not be explicitly given.
+</dd></dl><h1 id="ext">Built-in wikicréole extensions <a class="backref" href="#ext">&#182;</a></h1><p><span class="monospace">html_of_wiki</span> is shipped with a number of built-in,
+general purpose, wikicréole extensions. The documentation of the extensions
+<span class="teletype">doctree</span>, <span class="teletype">docversion</span>, <span class="teletype">client-server-switch</span>, <span class="teletype">a_manual</span>,
+<span class="teletype">a_api</span>, <span class="teletype">a_api_type</span>, <span class="teletype">a_api_code</span>, <span class="teletype">a_img</span> and <span class="teletype">a_file</span> can
+be found in earlier sections of this document.
+</p><p>Each extension documented below accept the attributes <span class="teletype">class</span> and <span class="teletype">id</span>
+for explicitly giving an HTML class and an HTML id to the generated code.
+</p><h2>Nameless extension</h2><p>Acts as a comment, i.e., inserts no HTML. For example: <span class="teletype">&lt;&lt;|I'm a comment: I will not appear inside the generated HTML&gt;&gt;</span>.
+</p><h2><span class="teletype">code</span> and <span class="teletype">code-inline</span></h2><dl><dt><strong>Attributes</strong>
+</dt><dd><span class="teletype">language=&quot;X&quot;</span>, <span class="teletype">translated=&quot;translated&quot;</span> (optional, for <span class="teletype">X</span> = <span class="teletype">&quot;ocaml&quot;</span> only)
+</dd><dt><strong>Description</strong>
+</dt><dd>Inserts a code block.
+</dd><dt><strong>HTML element</strong>
+</dt><dd><span class="teletype">&lt;pre class=&quot;manually-translated&quot;&gt;&lt;code class=&quot;language-X&quot;&gt;&lt;/code&gt;&lt;/pre&gt;</span> or <span class="teletype">&lt;pre&gt;&lt;code class=&quot;language-ocaml translatable&quot;&gt;&lt;/code&gt;&lt;/pre&gt;</span>
+</dd><dt><strong>Example</strong>
+</dt><dd></dd></dl><pre>&lt;&lt;code language=&quot;ocaml&quot;|int_of_string &quot;12&quot; + 3&gt;&gt;</pre><p>produces </p><pre class=""><code class="language-ocaml translatable">int_of_string &quot;12&quot; + 3</code></pre><p>The <span class="teletype">code-inline</span> extension is similar but inserts a code snippet inside the
+current paragraph and not in a block of its own.
+</p><h2><span class="teletype">div</span>, <span class="teletype">span</span>, <span class="teletype">nav</span>, <span class="teletype">pre</span></h2><p>Inserts the corresponding HTML elements.
+</p><h2><span class="teletype">googlesearch</span></h2><dl><dt><strong>Attributes</strong>
+</dt><dd><span class="teletype">domain=&quot;DOMAIN&quot;</span>, <span class="teletype">icon=&quot;ICON&quot;</span>
+</dd><dt><strong>Description</strong>
+</dt><dd>Inserts a search bar with icon <span class="teletype">ICON</span> performing a Google search restricted to the specified domain <span class="teletype">DOMAIN</span>.
+</dd><dt><strong>Tyxml element</strong>
+</dt><dd></dd></dl><pre class=""><code class="language-ocaml translatable">Html.[form ~a:[a_id &quot;googlesearch&quot;;
+                 a_action &quot;https://google.com/search&quot;]
+          [input ~a:[a_name &quot;q&quot;;
+                     a_id &quot;gsearch-box&quot;;
+                     a_placeholder &quot;Search using Google&quot;]
+             ();
+           label ~a:[a_label_for &quot;gsearch-box&quot;]
+             [img ~src:ICON ~alt:&quot;&quot; ~a:[a_id &quot;gsearch-icon&quot;] ()];
+           input ~a:[a_input_type `Submit;
+                     a_id &quot;gsearch-submit&quot;;
+                     a_onclick @@ &quot;document.getElementById('gsearch-box').value += ' site:&quot; ^ DOMAIN ^ &quot;';&quot;]
+             ()]]</code></pre><dl><dt><strong>Example</strong>
+</dt><dd></dd></dl><pre>&lt;&lt;googlesearch domain=&quot;ocsigen.org&quot; icon=&quot;search.svg&quot;&gt;&gt;</pre><h2><span class="teletype">wip</span> and <span class="teletype">wip-inline</span></h2><p>Inserts the content of extension in a <span class="teletype">&lt;div/&gt;</span> element with the class <span class="teletype">wip</span>.
+You may want to add in your CSS the following rule:
+</p><pre>.wip {display: none;}</pre><p><span class="teletype">wip-inline</span> is the inline counterpart of <span class="teletype">wip</span>.
+</p><h2><span class="teletype">when-local</span> and <span class="teletype">unless-local</span></h2><p><span class="teletype">when-local</span> inserts its content when <span class="teletype">ohow</span> (or any higher level documentation
+generator) is called with the <span class="teletype">--local</span> (or <span class="teletype">-l</span>) option. <span class="teletype">unless-local</span>
+inserts its content when not. This extension is useful for addressing complex
+resource linking.
+</p><h2><span class="teletype">when-project</span></h2><dl><dt><strong>Attributes</strong>
+</dt><dd><span class="teletype">when=&quot;P&quot;</span> or (<strong>exclusive</strong>) <span class="teletype">unless=&quot;P&quot;</span>
+</dd><dt><strong>Description</strong>
+</dt><dd>Inserts the content when (or unless) the project the wiki file belongs to is <span class="teletype">P</span> (see the configuration key <span class="monospace">project</span>).
+</dd></dl><h2><span class="teletype">script</span></h2><dl><dt><strong>Attributes</strong>
+</dt><dd><span class="teletype">src=&quot;JS_SRC&quot;</span>
+</dd><dt><strong>Description</strong>
+</dt><dd>Inserts a <span class="teletype">&lt;script&gt;</span> tag importing the given <span class="teletype">JS_SRC</span> JavaScript source file <em>inside the <span class="teletype">&lt;body&gt;</span> of the document</em>.
+</dd></dl><h2><span class="teletype">head-script</span></h2><dl><dt><strong>Attributes</strong>
+</dt><dd><span class="teletype">src=&quot;JS_SRC&quot;</span>
+</dd><dt><strong>Description</strong>
+</dt><dd>Inserts a <span class="teletype">&lt;script&gt;</span> tag importing the given <span class="teletype">JS_SRC</span> JavaScript source file <em>inside the <span class="teletype">&lt;head&gt;</span> of the document</em>.
+</dd></dl><h2><span class="teletype">head-css</span></h2><dl><dt><strong>Attributes</strong>
+</dt><dd><span class="teletype">href=&quot;CSS_SRC&quot;</span>
+</dd><dt><strong>Description</strong>
+</dt><dd>Inserts a <span class="teletype">&lt;link rel=&quot;stylesheet&quot;&gt;</span> tag importing the given <span class="teletype">CSS_SRC</span> CSS stylesheet <em>inside the <span class="teletype">&lt;head&gt;</span> of the document</em>.</dd></dl></article></div></div></body></html>
