@@ -226,7 +226,7 @@ let wiki_kind prot page =
       let wiki = extract_wiki_name wiki in
       let file = Global.current_file () in
       let root = Global.root () in
-      Absolute (Paths.(rewind root file +/+ up +/+ up +/+ wiki +/+ page))
+      Absolute (Paths.(rewind root file +/+ !Global.root_to_site +/+ wiki +/+ page))
 
 let this_wiki_kind prot page =
   let file = Global.current_file () in
@@ -262,7 +262,7 @@ let link_kind bi addr =
       | "site" ->
         let file = Global.current_file () in
         let root = Global.root () in
-        Absolute Paths.(rewind root file +/+ up +/+ up +/+ (Utils.trim '/' page))
+        Absolute Paths.(rewind root file +/+ !Global.root_to_site +/+ (Utils.trim '/' page))
       | p when starts_with "wiki(" p -> wiki_kind p page
       | p when starts_with "wiki" p -> this_wiki_kind p page
       | _ -> failwith @@ "unknown prototype: '" ^ p ^ "'"
