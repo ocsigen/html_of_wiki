@@ -12,10 +12,9 @@ let manual_link contents = function
     let root, manual = Global.(root (), the_manual ()) in
     let uri = match (project, chapter) with
       | (Some p, Some c) -> Paths.(rewind root file (* inside this version dir *)
-                                   +/+ up (* inside project dir *)
-                                   +/+ up (* inside all projects dir *)
+                                   +/+ !Global.root_to_site (* inside project dir *)
                                    +/+ p +/+ version +/+ manual +/+ c)
-      | (Some p, None) -> Paths.(rewind root file +/+ up +/+ up +/+ p +/+ version +/+ "index")
+      | (Some p, None) -> Paths.(rewind root file +/+ !Global.root_to_site +/+ p +/+ version +/+ "index")
       | (None, Some c) -> Paths.(rewind root file +/+ manual +/+ c)
       | (None, None) -> failwith "a_manual: no project nor chapter arg found"
     in
@@ -33,8 +32,8 @@ let api_link prefix contents = function
     let id = Api.parse_contents (contents <$> String.trim) in
     let dsp = (Global.options ()).default_subproject in
     let base = match (project, subproject, dsp) with
-      | (Some p, Some s, _) -> Paths.(rewind root file +/+ up +/+ up +/+ p +/+ version +/+ api +/+ s)
-      | (Some p, None, _) -> Paths.(rewind root file +/+ up +/+ up +/+ p +/+ version +/+ api)
+      | (Some p, Some s, _) -> Paths.(rewind root file +/+ !Global.root_to_site +/+ p +/+ version +/+ api +/+ s)
+      | (Some p, None, _) -> Paths.(rewind root file +/+ !Global.root_to_site +/+ p +/+ version +/+ api)
       | (None, Some s, _) | (None, None, Some s) -> Paths.(rewind root file +/+ api +/+ s)
       | (None, None, None) -> (Paths.rewind root file) +/+ api
     in

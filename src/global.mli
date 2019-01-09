@@ -70,3 +70,8 @@ val project_dir : unit -> string
 (** Returns the absolute path to the directory containing all projects
     ([project_dir]'s parent directory). *)
 val all_projects_dir : unit -> string
+
+
+(** The path to take from the project's root to end up in the website root
+    (i.e., where the links [[site:x]] starts to). Defaults to [[up +/+ up]]. *)
+val root_to_site : string ref
