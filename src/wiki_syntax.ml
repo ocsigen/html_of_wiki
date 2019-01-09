@@ -2207,3 +2207,30 @@ let compile_with_content content_text text =
   |> Lwt_main.run
 
 let compile text = compile_with_content "" text
+
+let () =
+  let f_include _ args _ =
+    let file = match List.assoc_opt "wiki" args, List.assoc_opt "template" args with
+      | None, None -> failwith "include: required attribute \"wiki\" or \"template\" missing"
+      | Some _, Some _ -> failwith "include: conflicting attributes \"wiki\" and \"template\" both provided"
+      | None, Some wiki -> begin match (Global.options ()).template with
+          | Some template ->
+            let template_dir = Filename.dirname template in
+            Utils.Operators.(template_dir +/+ wiki)
+          | None -> failwith "include: extension requires --template to be provided"
+        end
+      | Some wiki, None ->
+        let current_dir = Global.current_file () |> Filename.dirname in
+        Utils.Operators.(current_dir +/+ wiki)
+    in
+    file
+    |> Utils.read_file
+    |> compile
+    |> fun c -> `Flow5 (Lwt.return c)
+  in
+  let wp = wikicreole_parser in
+  register_wiki_extension
+    ~name:"include"
+    ~wp ~wp_rec:wp
+    ~context:(fun bi _ -> bi)
+    f_include
