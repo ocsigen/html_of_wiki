@@ -9,7 +9,7 @@ install:
 
 script:
     - how-generate
-    - how-redirect "$HOW_LATEST/manual/intro" $HOW_OUT/index.html # redirect index.html to the intro of the latest version
+    - how-redirect "$HOW_LATEST/manual/intro" $HOW_OUT/index.html
 
 deploy:
   provider: pages

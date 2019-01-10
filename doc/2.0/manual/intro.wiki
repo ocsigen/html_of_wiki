@@ -37,7 +37,6 @@
 
   <<span class="monospace"|html_of_wiki>> is also composable, it can be integrated into a CI/CD process so you can automate
   the deployment of your website. Rebuild and deploy on each commit!
->>
 
 ==@@id="install"@@Installation
 Clone this repository:
