@@ -1,9 +1,6 @@
 language: c
 
-env:
-    - HOW_DOC=doc # replace "doc" with the name of your documentation directory
-      HOW_CONFIG=how.json # replace "how.json" with the name of your file
-      HOW_OUT=_doc # replace "_doc" with the name of the build directory you like (*)
+env: HOW_DOC=doc HOW_CONFIG=how.json HOW_OUT=_doc
 
 install: 
     - wget https://ocsigen.org/how.sh
