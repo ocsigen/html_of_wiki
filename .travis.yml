@@ -10,6 +10,7 @@ install:
 script:
     - how-generate
     - how-redirect "$HOW_LATEST/manual/intro" $HOW_OUT/index.html
+    - exit $HOW_STATUS
 
 deploy:
   provider: pages
