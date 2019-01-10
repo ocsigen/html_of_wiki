@@ -1,75 +1,25 @@
-# Ocsigen documentation compiler
+# html_of_wiki
 
-## What is it?
+`html_of_wiki` is a static website generator used by the Ocsigen project
+to manage its online documentation. You can find it at https://ocsigen.org.
 
-Html_of_wiki makes it possible to update the new ocsigen.org Web Site
-on Github from wiki documentation of each project.
+It is a powerful, language independant, wikicréole compiler, able to manage
+the documentation of several versions of multiple projects---all with a
+single command line instruction! Its simplicity helps a lot for integrating
+this tool in a CI/CD process.
 
-It takes the Wiki documentation of each project from repository
-`ocsigen.org-data` (which are themselves taken from each project repository).
+Wikicréole is a wiki-like language that supports **extensions** written in
+**OCaml**, a robut and powerful functionnal programming language. It gives
+the markup language (almost :wink:) expressivity as HTML!
 
-It translates the wiki into html and saves the html in branch `gh-pages`
-of each project, and pushes this branch to github to make it available
-online.
-
-
-## Build instructions
+## Installation
+Requires OCaml 4.06 or greater (use `opam switch`) and the `opam` package
+manager.
 
 ```shell
+git clone https://github.com/ocsigen/html_of_wiki.git
 opam pin add html_of_wiki .
 ```
 
-## Doc
-
-```shell
-how --help
-```
-gives command line options.
-
-## How to update the docs
-
-Generate the HTML files using html_of_wiki (`how`):
-```shell
-cd ../ocsigen.org-data
-how-clone
-how index.wiki
-how-push
-```
-
-`how-clone` will clone or update branch gh-pages of all repositories in
-`../ocsigen.org-repositories`.
-
-`how index.wiki` will generate the html documentation from wiki files
-accessible from `index.wiki`, and wiki files in
-`../ocsigen.org-data`. The results is saved in branch `gh-pages`
-of each repository.
-
-`how-push` pushes all changes on Github.
-
-## Main pages
-
-The site main pages are hosted as organization github pages.
-The wiki sources are in repository `ocsigen.org`
-and then copied into directory `ocsigen.github.io`
-of repository `ocsigen.org-data`.
-The generated html files are in repository `ocsigen.github.io`
-(branch `master`).
-
-# One HTML of wiki (``ohow``)
-It is a CLI tool that takes a single wikicréole file and converts it into HTML.
-
-## Intallation
-```shell
-make ohow
-```
-
-## Usage
-```shell
-./ohow.byte file.wiki
-```
-produces ``file.html``.
-
-## Help!
-```shell
-./ohow.byte --help
-```
+## Documentation & tutorial
+https://ocsigen.org/html_of_wiki/2.0/manual/intro
