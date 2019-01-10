@@ -93,4 +93,4 @@ let project_dir () = version_dir () |> Filename.dirname
 let all_projects_dir () = project_dir () |> Filename.dirname
 
 
-let root_to_site = ref Paths.(up +/+ up)
+let root_to_site = ref ""

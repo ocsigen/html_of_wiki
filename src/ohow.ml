@@ -101,8 +101,8 @@ let main {Global.print; headless; outfile; suffix; project; root;
   let opts = {Global.print; headless; outfile; suffix; project; root;
               manual; api; default_subproject; images; assets;
               template; csw; docversions; local; files} in
-  begin match Sys.getenv_opt "HOW_HACK_NOPROJECT" with
-    | Some _ -> Global.root_to_site := ""
+  begin match Sys.getenv_opt "HOW_IN_PROJECT" with
+    | Some _ -> Global.root_to_site := Paths.(up +/+ up)
     | None -> ()
   end;
   Global.with_options opts

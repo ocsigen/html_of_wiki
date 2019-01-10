@@ -378,6 +378,7 @@ $show_used && {
 $no_run && exit $EXIT_SUCCESS
 
 ### Compilation
+export HOW_IN_PROJECT=t # dop.sh only exists for projects
 docversions=$(safe_read_file "$docversions")
 cp -r $wikidir $root
 compile
