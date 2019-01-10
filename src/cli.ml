@@ -132,7 +132,7 @@ sub-directories are allowed).";
 to explicitly provide the path to the, respectively, the root directory, the
 manual directory and the api directory."
     ] in
-    Term.info "ohow" ~version:"v0.0.0" ~doc ~exits:Term.default_exits ~man)
+    Term.info "ohow" ~version:"v2.0" ~doc ~exits:Term.default_exits ~man)
 
 
 let register_options k print headless outfile project root manual api default_subproject images assets template csw docversions local files =
