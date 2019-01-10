@@ -37,6 +37,7 @@
 
   <<span class="monospace"|html_of_wiki>> is also composable, it can be integrated into a CI/CD process so you can automate
   the deployment of your website. Rebuild and deploy on each commit!
+>>
 
 ==@@id="install"@@Installation
 Clone this repository:
@@ -63,7 +64,7 @@ The following sections describe:
 ==@@id="wikistd"@@The standard
 The following picture summarises the wikicréole 1.0 format.
 
-<<a_img src="wiki.jpg"|>>
+<<a_img src="wiki.jpg"|>>[[wiki(15):|lol]]
 
 **Notes**:
 * The wikicréole supported by ##html_of_wiki## uses only one {{{=}}} sign for toplevel headings.
