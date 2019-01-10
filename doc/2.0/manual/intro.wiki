@@ -64,7 +64,7 @@ The following sections describe:
 ==@@id="wikistd"@@The standard
 The following picture summarises the wikicréole 1.0 format.
 
-<<a_img src="wiki.jpg"|>>[[wiki(15):|lol]]
+<<a_img src="wiki.jpg"|>>
 
 **Notes**:
 * The wikicréole supported by ##html_of_wiki## uses only one {{{=}}} sign for toplevel headings.
