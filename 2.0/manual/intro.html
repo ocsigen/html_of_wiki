@@ -58,6 +58,7 @@
 </li><li class="drawermainmenu-page"><a href=".././../../projects" class="ocsimore_phrasing_link">Other projects</a>
 </li><li class="drawermainmenu-page"><a href=".././../../papers" class="ocsimore_phrasing_link">Research papers</a>
 </li><li class="drawermainmenu-page"><a href=".././../../credits" class="ocsimore_phrasing_link">Who does Ocsigen?</a>
+</li><li class="drawermainmenu-page"><a href=".././../../contributing" class="ocsimore_phrasing_link">Contributing</a>
 </li><li class="drawermainmenu-page"><a href=".././../../blog" class="ocsimore_phrasing_link">Blog</a>
 </li><li class="drawermainmenu-page"><a href="https://github.com/ocsigen" class="ocsimore_phrasing_link">Source code</a>
 </li></ul><nav class="how-doctree"><h1><span class="monospace">html_of_wiki</span></h1><h3><a href="#install" class="ocsimore_phrasing_link">Installation</a></h3><h2>The wikicréole</h2><h3><a href="#wikistd" class="ocsimore_phrasing_link">Standard</a></h3><h3><a href="#wikiadd" class="ocsimore_phrasing_link">Additions</a></h3><h2><span class="monospace">ohow</span></h2><h3><a href="#ohow" class="ocsimore_phrasing_link">Introduction</a></h3><h3>Advanced usage</h3><h4><a href="#templates" class="ocsimore_phrasing_link">Templates</a></h4><h4><a href="#linkexts" class="ocsimore_phrasing_link">Link extensions</a></h4><h4><a href="#doctree" class="ocsimore_phrasing_link"><span class="teletype">&lt;&lt;doctree&gt;&gt;</span></a></h4><h4><a href="#docversion" class="ocsimore_phrasing_link"><span class="teletype">&lt;&lt;docversion&gt;&gt;</span></a></h4><h3><a href="#legacy" class="ocsimore_phrasing_link">Legacy</a></h3><h2><span class="monospace">dop</span></h2><h3><a href="#dop" class="ocsimore_phrasing_link">Introduction</a></h3><h3><a href="#conf" class="ocsimore_phrasing_link">Configuration file</a></h3><h3><a href="#cli" class="ocsimore_phrasing_link">Command line interface</a></h3><h3><a href="#examples" class="ocsimore_phrasing_link">Examples</a></h3><h2><span class="monospace">quickdop</span></h2><h3><a href="#quickdop" class="ocsimore_phrasing_link">Introduction</a></h3><h2><a href="#ext" class="ocsimore_phrasing_link">Built-in wikicréole extensions</a></h2><h2><a href="#TODO" class="ocsimore_phrasing_link"><span class="monospace">html_of_wiki</span> internals overview (TODO)</a></h2></nav></nav></aside></div><p class="reasonwarning">Warning: Reason support is experimental.
@@ -73,8 +74,7 @@ expressively as with plain HTML.
 </p><p><span class="monospace">html_of_wiki</span> is part of the Ocsigen project and is used to generate its documentation—including this page!
 It has no problem dealing with large websites, it can handle several versions of several projects.
 </p><p><span class="monospace">html_of_wiki</span> is also composable, it can be integrated into a CI/CD process so you can automate
-the deployment of your website. Rebuild and deploy on each commit!
-</p><h2 id="install">Installation <a class="backref" href="#install">&#182;</a></h2><p>Clone this repository:
+the deployment of your website. Rebuild and deploy on each commit!</p></div><h2 id="install">Installation <a class="backref" href="#install">&#182;</a></h2><p>Clone this repository:
 </p><pre>$ git clone https://github.com/ocsigen/html_of_wiki.git
 </pre><p>then, use <span class="monospace">opam pin</span> to install it:
 </p><pre>$ opam pin add -y html_of_wiki html_of_wiki
@@ -372,4 +372,4 @@ resource linking.
 </dd></dl><h2><span class="teletype">head-css</span></h2><dl><dt><strong>Attributes</strong>
 </dt><dd><span class="teletype">href=&quot;CSS_SRC&quot;</span>
 </dd><dt><strong>Description</strong>
-</dt><dd>Inserts a <span class="teletype">&lt;link rel=&quot;stylesheet&quot;&gt;</span> tag importing the given <span class="teletype">CSS_SRC</span> CSS stylesheet <em>inside the <span class="teletype">&lt;head&gt;</span> of the document</em>. syntax error in wikisyntax</dd></dl></div></article></div></div></body></html>
+</dt><dd>Inserts a <span class="teletype">&lt;link rel=&quot;stylesheet&quot;&gt;</span> tag importing the given <span class="teletype">CSS_SRC</span> CSS stylesheet <em>inside the <span class="teletype">&lt;head&gt;</span> of the document</em>.</dd></dl></article></div></div></body></html>
