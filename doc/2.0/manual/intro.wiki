@@ -145,7 +145,10 @@ $ ohow --local file.wiki # generate local-navigation compatible links (REMOVE TH
 
 ==Advanced usage
 ===@@id="templates"@@Templates
-one_html_of_wiki supports the use of //templates//. A template is a classic wikicréole file which contains a (unique occurrence of) {{{<<content>>}}} somewhere. It is where the content will be inserted.
+one_html_of_wiki supports the use of //templates//. A template is a classic
+wikicréole file which contains a (unique occurrence of) {{{<<content>>}}} somewhere.
+It is where the content will be inserted. Use the {{{--template}}} option to
+provide a path to the template.
 
 Consider the following example for a deeper understanding on how to use templates:
 {{{
@@ -173,6 +176,17 @@ $ ohow --template template.wiki --print page.wiki
 <p class="red">After.</p></body></html>
 $
 }}}
+
+There is also an extension, {{{<<include>>}}}, that allows a programmatic content
+insertion. This extension accepts two, //mutually exclusive//, attributes:
+;{{{template="PATH"}}}
+:inserts the content of the file {{{$(dirname T)/PATH}}}, where {{{T}}} is the value of the //required// option {{{--template}}}.
+;{{{wiki="PATH"}}}
+:inserts the content of the file {{{$(dirname CF)/PATH}}}, where {{{CF}}} is the path to the currently compiled wiki file.
+
+__Notes:__
+* The option {{{--template}}} is only required if the {{{template}}} is used somewhere.
+* This extension ignores its content.
 
 ====wiki_in_template
 If the template has to contain more than one {{{<<content>>}}} tag or if several templates have to be used, the integration of ##wit## to your workflow has to be considered.
@@ -229,6 +243,7 @@ Finally, as far as ##wit## is concerned, a page is a wiki file without {{{<<cont
 A few notes:
 * You cannot escape the string {{{<<content>>}}} or {{{<<content|>>}}} using the three curly braces syntax.
 * You cannot write a comment with the string {{{<<content>>}}} or {{{<<content|>>}}} inside.
+* The {{{<<include>>}}} extension is currently not supported by {{{wit}}}. (PR welcomed!)
 
 ===@@id="linkexts"@@Link extensions
 There are several link extensions that ship with ##ohow##. They differ from the classic link syntax because they do not explicitly state where is located the resource to link. For example, {{{<<a_manual project="eliom" chapter="intro" | introduction of Eliom's docs>>}}} leads to the chapter ##intro## of the ##eliom## project //without explicitly giving the location of that page//.
@@ -508,7 +523,7 @@ You may want to add in your CSS the following rule:
 {{{when-local}}} inserts its content when {{{ohow}}} (or any higher level documentation
 generator) is called with the {{{--local}}} (or {{{-l}}}) option. {{{unless-local}}}
 inserts its content when not. This extension is useful for addressing complex
-resource linking.
+resource linking issues.
 
 =={{{when-project}}}
 ;**Attributes**
