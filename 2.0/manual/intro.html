@@ -122,7 +122,10 @@ $ ohow --version # shows version
 $ ohow --print file.wiki # prints the HTML to stdout instead of writing a file
 $ ohow --headless file.wiki # do not include HTML head nor wrapping body tag
 $ ohow --local file.wiki # generate local-navigation compatible links (REMOVE THAT FOR DEPLOYMENT)
-</pre><h2>Advanced usage</h2><h3 id="templates">Templates <a class="backref" href="#templates">&#182;</a></h3><p>one_html_of_wiki supports the use of <em>templates</em>. A template is a classic wikicréole file which contains a (unique occurrence of) <span class="teletype">&lt;&lt;content&gt;&gt;</span> somewhere. It is where the content will be inserted.
+</pre><h2>Advanced usage</h2><h3 id="templates">Templates <a class="backref" href="#templates">&#182;</a></h3><p>one_html_of_wiki supports the use of <em>templates</em>. A template is a classic
+wikicréole file which contains a (unique occurrence of) <span class="teletype">&lt;&lt;content&gt;&gt;</span> somewhere.
+It is where the content will be inserted. Use the <span class="teletype">--template</span> option to
+provide a path to the template.
 </p><p>Consider the following example for a deeper understanding on how to use templates:
 </p><pre>$ cat template.wiki
 &lt;&lt;head-css|
@@ -147,7 +150,16 @@ $ ohow --template template.wiki --print page.wiki
 &lt;span class=&quot;blue&quot;&gt;&lt;strong&gt;useful&lt;/strong&gt;&lt;/span&gt; content!&lt;/p&gt;&lt;/div&gt;
 &lt;p class=&quot;red&quot;&gt;After.&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;
 $
-</pre><h4>wiki_in_template</h4><p>If the template has to contain more than one <span class="teletype">&lt;&lt;content&gt;&gt;</span> tag or if several templates have to be used, the integration of <span class="monospace">wit</span> to your workflow has to be considered.
+</pre><p>There is also an extension, <span class="teletype">&lt;&lt;include&gt;&gt;</span>, that allows a programmatic content
+insertion. This extension accepts two, <em>mutually exclusive</em>, attributes:
+</p><dl><dt><span class="teletype">template=&quot;PATH&quot;</span>
+</dt><dd>inserts the content of the file <span class="teletype">$(dirname T)/PATH</span>, where <span class="teletype">T</span> is the value of the <em>required</em> option <span class="teletype">--template</span>.
+</dd><dt><span class="teletype">wiki=&quot;PATH&quot;</span>
+</dt><dd>inserts the content of the file <span class="teletype">$(dirname CF)/PATH</span>, where <span class="teletype">CF</span> is the path to the currently compiled wiki file.
+</dd></dl><p><span class="underlined">Notes:</span>
+</p><ul><li> The option <span class="teletype">--template</span> is only required if the <span class="teletype">template</span> is used somewhere.
+</li><li> This extension ignores its content.
+</li></ul><h4>wiki_in_template</h4><p>If the template has to contain more than one <span class="teletype">&lt;&lt;content&gt;&gt;</span> tag or if several templates have to be used, the integration of <span class="monospace">wit</span> to your workflow has to be considered.
 <em>wiki_in_template</em> (<span class="monospace">wit</span>) is a simple CLI tool for inserting content inside templates without converting them into HTML: it only deals with wikicréole.
 </p><p>Here's an example of how to use it to insert one page inside several templates:
 </p><pre>$ ls
@@ -193,6 +205,7 @@ $
 </p><p>A few notes:
 </p><ul><li> You cannot escape the string <span class="teletype">&lt;&lt;content&gt;&gt;</span> or <span class="teletype">&lt;&lt;content|&gt;&gt;</span> using the three curly braces syntax.
 </li><li> You cannot write a comment with the string <span class="teletype">&lt;&lt;content&gt;&gt;</span> or <span class="teletype">&lt;&lt;content|&gt;&gt;</span> inside.
+</li><li> The <span class="teletype">&lt;&lt;include&gt;&gt;</span> extension is currently not supported by <span class="teletype">wit</span>. (PR welcomed!)
 </li></ul><h3 id="linkexts">Link extensions <a class="backref" href="#linkexts">&#182;</a></h3><p>There are several link extensions that ship with <span class="monospace">ohow</span>. They differ from the classic link syntax because they do not explicitly state where is located the resource to link. For example, <span class="teletype">&lt;&lt;a_manual project=&quot;eliom&quot; chapter=&quot;intro&quot; | introduction of Eliom's docs&gt;&gt;</span> leads to the chapter <span class="monospace">intro</span> of the <span class="monospace">eliom</span> project <em>without explicitly giving the location of that page</em>.
 </p><p>Here are the available extensions:
 </p><ul><li> <span class="teletype">&lt;&lt;a_manual&gt;&gt;</span>
@@ -356,7 +369,7 @@ You may want to add in your CSS the following rule:
 </p><h2><span class="teletype">when-local</span> and <span class="teletype">unless-local</span></h2><p><span class="teletype">when-local</span> inserts its content when <span class="teletype">ohow</span> (or any higher level documentation
 generator) is called with the <span class="teletype">--local</span> (or <span class="teletype">-l</span>) option. <span class="teletype">unless-local</span>
 inserts its content when not. This extension is useful for addressing complex
-resource linking.
+resource linking issues.
 </p><h2><span class="teletype">when-project</span></h2><dl><dt><strong>Attributes</strong>
 </dt><dd><span class="teletype">when=&quot;P&quot;</span> or (<strong>exclusive</strong>) <span class="teletype">unless=&quot;P&quot;</span>
 </dd><dt><strong>Description</strong>
