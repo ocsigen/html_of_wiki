@@ -38,7 +38,9 @@ let build_page content =
   in
   Tyxml.Html.(html
                 (head (title (pcdata ti))
-                   ([meta ~a:[a_charset "utf8"] ()]
+                   ([ meta ~a:[a_charset "utf8"] ()
+                    ; meta ~a:[ a_content "width=device-width, initial-scale=1"
+                              ; a_name "viewport" ] () ]
                     @ (Site_ocsimore.(List.map make_css @@ List.rev !css_links))
                     @ (Site_ocsimore.(List.map make_script @@ List.rev !head_scripts))))
                 (body content))
