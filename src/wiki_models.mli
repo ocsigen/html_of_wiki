@@ -20,8 +20,6 @@
    @author Vincent Balat
 *)
 
-open Tyxml
-
 type wiki_preprocessor = (module Wiki_syntax_types.Preprocessor)
 val identity_preprocessor : wiki_preprocessor
 

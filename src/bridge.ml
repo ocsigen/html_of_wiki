@@ -1,3 +1,5 @@
+[@@@ocaml.warning "-39"]
+
 type elem =
   [`Id of string | `Container]
   [@@deriving json]

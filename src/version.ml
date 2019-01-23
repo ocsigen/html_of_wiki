@@ -28,7 +28,7 @@
         let l = split_char '.' s' in
         let l = List.map int_of_string l in
         V (s,l,extra)
-      with e ->
+      with _ ->
         assert false
 
   let major = function
@@ -38,7 +38,7 @@
 
   let compint (a : int) b = compare a b
 
-  let rec compare v v' = match v,v' with
+  let compare v v' = match v,v' with
     | Dev, Dev -> 0
     | Dev, _ -> 1
     | _, Dev -> -1

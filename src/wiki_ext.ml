@@ -60,7 +60,7 @@ let do_outline wp bi args c =
    Lwt.return [nav; script])
 
 (* TODO: support for extended link syntax (wiki(toto):titi etc.) *)
-let f_link bi args c =
+let f_link _bi args c =
   let wiki = Ocsimore_lib.list_assoc_default "wiki" args "" in
   let page = Ocsimore_lib.list_assoc_default "page" args "" in
   let href = Ocsimore_lib.list_assoc_opt "href" args in
@@ -68,7 +68,7 @@ let f_link bi args c =
   let content =
     match c with
     | Some c -> c
-    | None -> Lwt.return [Html.pcdata page]
+    | None -> Lwt.return [Html.txt page]
   in
   (* class and id attributes will be taken by Wiki_syntax.a_elem *)
   ( Wiki_syntax_types.Absolute

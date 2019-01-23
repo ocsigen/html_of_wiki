@@ -116,16 +116,16 @@ let path_of_id ?(prefix) id =
     | Some p -> p ^ s
   in
   match id with
-  | (path, `Index) -> add_prefix "index"
-  | (path, `IndexTypes) -> add_prefix "index_types"
-  | (path, `IndexExceptions) -> add_prefix "index_exceptions"
-  | (path, `IndexValues) -> add_prefix "index_values"
-  | (path, `IndexAttributes) -> add_prefix "index_attributes"
-  | (path, `IndexMethods) -> add_prefix "index_methods"
-  | (path, `IndexClasses) -> add_prefix "index_classes"
-  | (path, `IndexClassTypes) -> add_prefix "index_class_types"
-  | (path, `IndexModules) -> add_prefix "index_modules"
-  | (path, `IndexModuleTypes) -> add_prefix "index_module_types"
+  | (_path, `Index) -> add_prefix "index"
+  | (_path, `IndexTypes) -> add_prefix "index_types"
+  | (_path, `IndexExceptions) -> add_prefix "index_exceptions"
+  | (_path, `IndexValues) -> add_prefix "index_values"
+  | (_path, `IndexAttributes) -> add_prefix "index_attributes"
+  | (_path, `IndexMethods) -> add_prefix "index_methods"
+  | (_path, `IndexClasses) -> add_prefix "index_classes"
+  | (_path, `IndexClassTypes) -> add_prefix "index_class_types"
+  | (_path, `IndexModules) -> add_prefix "index_modules"
+  | (_path, `IndexModuleTypes) -> add_prefix "index_module_types"
   | (path, `ModType name)
   | (path, `Mod name) -> String.concat "." (path @ [name])
   | (path, `ClassType name)

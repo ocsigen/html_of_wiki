@@ -17,23 +17,23 @@ let attrs args =
     attrs @ [Html.a_class pre_classes],
     [Html.a_class @@ ("language-" ^ lang) :: code_classes]
 
-let code bi args contents =
+let code _bi args contents =
   `Flow5 (
     let contents = How_lib.Option.default_to "" contents |> String.trim in
     let p_a, c_a = attrs args in
-    (Lwt.return [Html.(pre ~a:p_a [code ~a:c_a [pcdata contents]])])
+    (Lwt.return [Html.(pre ~a:p_a [code ~a:c_a [txt contents]])])
   )
 
-let code_inline bi args contents =
+let code_inline _bi args contents =
   `Phrasing_without_interactive (
     let contents = How_lib.Option.default_to "" contents |> String.trim in
     let _, c_a = attrs args in
-    (Lwt.return [Html.(code ~a:c_a [pcdata contents])])
+    (Lwt.return [Html.(code ~a:c_a [txt contents])])
   )
 
 let reason _ _ _ =
   `Flow5 Html.(
-    Lwt.return [button ~a:[a_id "reason"] [pcdata "Switch to "]]
+    Lwt.return [button ~a:[a_id "reason"] [txt "Switch to "]]
   )
 
 

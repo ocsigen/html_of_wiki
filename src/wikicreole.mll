@@ -69,9 +69,12 @@ module type RawBuilder = sig
   val emdash : phrasing_without_interactive
   val a_elem_phrasing : attribs -> href -> phrasing_without_interactive list -> phrasing
   val a_elem_flow : attribs -> href -> flow_without_interactive list -> flow
+
   val make_href : param -> string -> string option -> href
+  (* the string option is the fragment part of the URL (#...)*)
+
   val string_of_href : href -> string
-  (** the string option is the fragment part of the URL (#...)*)
+
   val p_elem : attribs -> phrasing list -> flow_without_interactive
   val pre_elem : attribs -> string list -> flow_without_interactive
   val h1_elem : attribs -> phrasing list -> flow_without_interactive

@@ -1,5 +1,3 @@
-open Utils.Operators
-
 let replace_content_tag tmpl content =
   let regexp = Str.regexp "<<content>>" in
   try
@@ -25,9 +23,9 @@ let info_cmd = Cmdliner.(
     let doc = "Inlines a wikicreole file into another one with a <<content>> tag." in
     let man = [
       `S Manpage.s_description;
-      `P "$(tname) reads wikicreole content from stdin and inserts it inside the
-given template file $(b,TMPL) in place of the first <<content>> tag found and
-outputs the result on stdout.";
+      `P "$(tname) reads wikicreole content from stdin and inserts it inside the \
+          given template file $(b,TMPL) in place of the first <<content>> tag found and \
+          outputs the result on stdout.";
       `P "The $(b,TMPL) file is never modified.";
 
       `S Manpage.s_bugs;

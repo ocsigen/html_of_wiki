@@ -4,7 +4,7 @@ open Tyxml
 let a_link_of_uri ?fragment suffix uri contents =
   let uri = suffix <$> (fun s -> Paths.concat_uri_suffix s uri) |? uri in
   let uri = uri ^ (fragment <$> (fun f -> "#" ^ f) |? "") in
-  Html.a ~a:[Html.a_href uri] [Html.pcdata (contents |? uri)]
+  Html.a ~a:[Html.a_href uri] [Html.txt (contents |? uri)]
 
 let manual_link contents = function
   | [project; chapter; fragment; Some version] ->
@@ -43,7 +43,7 @@ let api_link prefix contents = function
     Lwt.return [a_link_of_uri ?fragment (Some (Global.suffix ())) uri (Some body)]
   | _ -> assert false
 
-let img_link contents = function
+let img_link _contents = function
   | [Some src] ->
     let file = Global.current_file () in
     let root, images = Global.(root (), the_images ()) in

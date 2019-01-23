@@ -10,7 +10,7 @@ let build_page content =
       match content elt with
       | PCDATA _ -> [elt]
       | Entity _ -> [elt]
-      | Node (name, a, children) -> List.map flatten children |> List.flatten
+      | Node (_name, _a, children) -> List.map flatten children |> List.flatten
       | _ -> []) (* ignore the others *)
   in
   let extract_h1 blocks =
@@ -26,7 +26,7 @@ let build_page content =
           |> fun t -> Some t (* the first one, depth first *)
         | Tyxml_xml.Node (_, _, children) ->
           (match f children with
-           | (Some title) as r -> r (* return the first one *)
+           | (Some _title) as r -> r (* return the first one *)
            | None -> f t (* not found among children, try with the siblings *))
         | _ -> None (* not found at all *)
     in
@@ -37,7 +37,7 @@ let build_page content =
     | None -> ""
   in
   Tyxml.Html.(html
-                (head (title (pcdata ti))
+                (head (title (txt ti))
                    ([ meta ~a:[a_charset "utf8"] ()
                     ; meta ~a:[ a_content "width=device-width, initial-scale=1"
                               ; a_name "viewport" ] () ]
@@ -72,7 +72,7 @@ let get_output_channel output_channel file = match output_channel with
   | None -> open_out @@ infer_output_file file
 
 
-let process_file {Global.root; manual; api; images; assets} output_channel file =
+let process_file _opts output_channel file =
   Global.with_current_file file (fun () ->
       get_output_channel output_channel file |> ohow file)
 

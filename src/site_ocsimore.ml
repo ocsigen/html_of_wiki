@@ -16,8 +16,6 @@
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *)
 
-open How_lib
-open Lwt.Infix
 open Tyxml
 open Utils.Operators
 
@@ -54,7 +52,7 @@ type css_kind = Href of string | Css of string
 
 let make_css = function
   | Href href -> Html.(link ~rel:[`Stylesheet] ~href ())
-  | Css css -> Html.(style [pcdata css])
+  | Css css -> Html.(style [txt css])
 
 let process_css args c = match List.assoc "href" args with
   | exception Not_found -> Css (c |? "")
@@ -73,20 +71,20 @@ let do_head_css _ args c =
 (** Extension wip *)
 (* Work in progress *)
 
-let get_inline bi args =
+let get_inline _bi args =
   List.mem_assoc "inline" args
 
-let do_wip bi args xml =
+let do_wip _bi _args xml =
   `Flow5
     (let%lwt xml = match xml with
       | Some c -> (c :> Html_types.flow5 Html.elt list Lwt.t)
       | None -> Lwt.return [] in
      Lwt.return Html.[
        aside ~a:[a_class ["wip"]]
-         (header [h5 [pcdata "Work in progress"]] :: xml)
+         (header [h5 [txt "Work in progress"]] :: xml)
       ])
 
-let do_wip_inline bi args xml =
+let do_wip_inline _bi args xml =
   `Phrasing_without_interactive
     (let%lwt xml = match xml with
        | Some c -> (c :> Html_types.phrasing Html.elt list Lwt.t)
@@ -96,14 +94,14 @@ let do_wip_inline bi args xml =
        with Not_found -> "WIP: " in
      Lwt.return Html.[
        span ~a:[a_class ["wip"]]
-            (strong [pcdata t] :: xml)
+            (strong [txt t] :: xml)
      ])
 
 
 (*****************************************************************************)
 (** Extension Concepts *)
 
-let do_concepts bi args xml =
+let do_concepts _bi args xml =
   `Flow5
     (let%lwt xml = match xml with
       | Some c -> (c :> Html_types.flow5 Html.elt list Lwt.t)
@@ -111,13 +109,13 @@ let do_concepts bi args xml =
      let attrs = Wiki_syntax.parse_common_attribs args in
      Lwt.return Html.[
        aside ~a:(a_class ["concepts"]::attrs)
-             (header [h5 [pcdata "Concepts"]] :: xml)
+             (header [h5 [txt "Concepts"]] :: xml)
      ])
 
 
 (* Concept *)
 
-let get_title bi args =
+let get_title _bi args =
   try List.assoc "title" args
   with Not_found -> "Concept"
 
@@ -132,8 +130,8 @@ let do_concept bi args xml =
        ~a:(a_class ["concept"]::attrs)
        (header [
           h5 [span ~a:[a_class ["concept_prefix"]]
-                   [pcdata "Concept: "];
-              pcdata t]
+                [txt "Concept: "];
+              txt t]
         ]
         :: xml)
       ])
@@ -142,7 +140,7 @@ let do_concept bi args xml =
 (*****************************************************************************)
 (* Extension paragraph *)
 
-let do_paragraph bi args xml =
+let do_paragraph _bi args xml =
   `Flow5
     (let%lwt xml = match xml with
        | Some c -> (c :> _ Html.elt list Lwt.t)
@@ -157,10 +155,9 @@ let do_paragraph bi args xml =
 let do_client_server_switch _ args _ = match (Global.options ()).api with
   | None -> `Flow5 (Lwt.return [])
   | Some api ->
-    let open Utils.Operators in
     let client = "client" in
     let server = "server" in
-    let {Global.csw; root} = Global.options () in
+    let {Global.csw; root; _} = Global.options () in
     let file = Global.current_file () in
     let attrs = Wiki_syntax.parse_common_attribs args in
     let is_api = Paths.(is_inside_dir (root +/+ api) file) in
@@ -181,9 +178,9 @@ let do_client_server_switch _ args _ = match (Global.options ()).api with
                     ();
                   span ~a:[a_class ["csw-slider"; "csw-slider-style-round"]] [];
                   span ~a:[a_class ["csw-slider-no"]]
-                    [pcdata "Server version"];
+                    [txt "Server version"];
                   span ~a:[a_class ["csw-slider-yes"]]
-                    [pcdata "Client version"]]])
+                    [txt "Client version"]]])
     in
     let make = function
       | [] -> []

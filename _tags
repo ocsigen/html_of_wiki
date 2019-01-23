@@ -1,4 +1,4 @@
-true: bin_annot, annot
+true: bin_annot, annot, thread
 true: package(lwt.unix)
 true: package(lwt_ppx)
 true: package(lwt_log)
@@ -14,3 +14,4 @@ true: package(ppx_blob)
 true: package(ppx_deriving.std)
 true: package(reason)
 true: package(str)
+true: warn(+a-4-40-41-42-44-48-58)

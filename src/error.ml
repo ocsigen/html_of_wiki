@@ -2,7 +2,7 @@ open Tyxml
 exception Error of string
 
 let error (msg:string) =
-  Lwt.return [ Html.span ~a:[Html.a_class ["doclink_error"]] [Html.pcdata msg] ]
+  Lwt.return [ Html.span ~a:[Html.a_class ["doclink_error"]] [Html.txt msg] ]
 
 let wrap_phrasing name f = fun bi args contents ->
   `Phrasing_without_interactive
