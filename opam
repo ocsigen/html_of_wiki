@@ -12,19 +12,10 @@ build: [
 ]
 depends: [
   "ocamlfind"
-  "lwt"
-  "lwt_ppx"
-  "lwt_log"
   "re"
   "tyxml" {>= "4.3"}
   "cmdliner"
-  "yojson"
-  "fileutils"
-  "js_of_ocaml"
-  "js_of_ocaml-ppx"
   "js_of_ocaml-ppx_deriving_json"
   "ppx_deriving"
-  "ppx_blob"
   "reason"
-  "uri"
 ]
