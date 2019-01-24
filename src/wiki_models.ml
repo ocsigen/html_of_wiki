@@ -25,8 +25,8 @@ type wiki_preprocessor = (module Wiki_syntax_types.Preprocessor)
 
 let identity_preprocessor =
   let module Identity_preprocessor = struct
-    let preparse_string ?href_action:_ ?link_action:_ _ s = Lwt.return s
-    let desugar_string ?href_action:_ ?link_action:_ _ s = Lwt.return s
+    let preparse_string ?href_action:_ ?link_action:_ _ s = s
+    let desugar_string ?href_action:_ ?link_action:_ _ s = s
   end in
   (module Identity_preprocessor : Wiki_syntax_types.Preprocessor)
 
@@ -39,4 +39,4 @@ let desugar_string ?href_action ?link_action wpp p c =
   Preprocessor.desugar_string ?href_action ?link_action p c
 
 type +'res wiki_parser =
-  Wiki_widgets_interface.box_info -> string -> 'res Lwt.t (* pretty printer *)
+  Wiki_widgets_interface.box_info -> string -> 'res (* pretty printer *)

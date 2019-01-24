@@ -1,8 +1,8 @@
-let do_pdfonly _ _ _ = `Phrasing_without_interactive (Lwt.return [])
+let do_pdfonly _ _ _ = `Phrasing_without_interactive ([])
 
 let do_webonly _ _ contents =
   match contents with
-  | None -> `Phrasing_without_interactive (Lwt.return [])
+  | None -> `Phrasing_without_interactive ([])
   | Some contents -> `Flow5 contents
 
 

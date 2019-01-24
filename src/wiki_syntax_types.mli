@@ -19,18 +19,17 @@ type link_action =
     string ->
     string option ->
     Wikicreole.attribs ->
-    Wiki_types.wikibox -> string option Lwt.t
+    Wiki_types.wikibox -> string option
 
 module type Preprocessor = sig
 
   (** [desugar_string dc content] does some possible syntactical desugaring in
       [content]. It should be safe to call this, i.e. there shall be no side
-      effects in it. (The result must still be [Lwt.t] because it may access
-      the DB read-only.  *)
+      effects in it. *)
   val desugar_string :
     ?href_action:link_action ->
     ?link_action:link_action ->
-    desugar_param -> string -> string Lwt.t
+    desugar_param -> string -> string
 
   (** [preparse_string wb content] does possibly some replacements in
       [content] and may have arbitrary side effects in the process
@@ -38,7 +37,7 @@ module type Preprocessor = sig
   val preparse_string:
     ?href_action:link_action ->
     ?link_action:link_action ->
-    Wiki_types.wikibox -> string -> string Lwt.t
+    Wiki_types.wikibox -> string -> string
 
 end
 
@@ -55,7 +54,7 @@ module type Parser = sig
     sectioning:bool ->
     Wiki_widgets_interface.box_info ->
     string ->
-    res Html.elt list Lwt.t list
+    res Html.elt list list
 
 end
 
@@ -74,37 +73,37 @@ type preparser =
     Wiki_types.wikibox ->
     Wikicreole.attribs ->
     string option ->
-    string option Lwt.t
+    string option
 
 type desugarer =
     desugar_param ->
     Wikicreole.attribs ->
     string option ->
-    string option Lwt.t
+    string option
 
 type (+'flow,
       +'flow_without_interactive,
       +'phrasing_without_interactive) plugin_content =
   [ `Flow5_link
-      of (href * Wikicreole.attribs * 'flow_without_interactive Html.elt list Lwt.t)
+      of (href * Wikicreole.attribs * 'flow_without_interactive Html.elt list)
   | `Phrasing_link
-      of (href * Wikicreole.attribs * 'phrasing_without_interactive Html.elt list Lwt.t)
-  | `Flow5 of 'flow Html.elt list Lwt.t
+      of (href * Wikicreole.attribs * 'phrasing_without_interactive Html.elt list)
+  | `Flow5 of 'flow Html.elt list
   | `Phrasing_without_interactive
-      of 'phrasing_without_interactive Html.elt list Lwt.t ]
+      of 'phrasing_without_interactive Html.elt list ]
 
 type (+'flow_without_interactive,
       +'phrasing_without_interactive) ni_plugin_content =
-  [ `Flow5 of 'flow_without_interactive Html.elt list Lwt.t
+  [ `Flow5 of 'flow_without_interactive Html.elt list
   | `Phrasing_without_interactive
-      of 'phrasing_without_interactive Html.elt list Lwt.t ]
+      of 'phrasing_without_interactive Html.elt list ]
 
 type (+'flow_without_interactive,
       +'phrasing_without_interactive) link_plugin_content =
   [ `Flow5_link
-      of (href * Wikicreole.attribs * 'flow_without_interactive Html.elt list Lwt.t)
+      of (href * Wikicreole.attribs * 'flow_without_interactive Html.elt list)
   | `Phrasing_link
-      of (href * Wikicreole.attribs * 'phrasing_without_interactive Html.elt list Lwt.t) ]
+      of (href * Wikicreole.attribs * 'phrasing_without_interactive Html.elt list) ]
 
 
 (** Module type for representing extensible wikicreole parser on which
@@ -124,7 +123,7 @@ module rec ExtParser : sig
       sectioning:bool ->
       Wiki_widgets_interface.box_info ->
       string ->
-      res_without_interactive Html.elt list Lwt.t list
+      res_without_interactive Html.elt list list
 
     type simple_plugin =
         Wiki_widgets_interface.box_info -> Wikicreole.attribs ->
@@ -138,17 +137,17 @@ module rec ExtParser : sig
 
     type 'a wiki_plugin =
         Wiki_widgets_interface.box_info -> Wikicreole.attribs ->
-        'a Html.elt list Lwt.t option ->
+        'a Html.elt list option ->
         (res, res_without_interactive, link_content) plugin_content
 
     type 'a wiki_ni_plugin =
         Wiki_widgets_interface.box_info -> Wikicreole.attribs ->
-        'a Html.elt list Lwt.t option ->
+        'a Html.elt list option ->
         (res_without_interactive, link_content) ni_plugin_content
 
     type 'a link_plugin =
         Wiki_widgets_interface.box_info -> Wikicreole.attribs ->
-        'a Html.elt list Lwt.t option ->
+        'a Html.elt list option ->
         (res_without_interactive, link_content) link_plugin_content
 
     (* Module to encode existential type parameter of the recursive wikiparser.

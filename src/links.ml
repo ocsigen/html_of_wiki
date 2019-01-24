@@ -22,7 +22,7 @@ let manual_link contents = function
       | Some fragment -> a_link_of_uri ~fragment
       | None -> a_link_of_uri ?fragment:None
     in
-    Lwt.return [link (Some (Global.suffix ())) uri contents]
+    [link (Some (Global.suffix ())) uri contents]
   | _ -> assert false
 
 let api_link prefix contents = function
@@ -40,7 +40,7 @@ let api_link prefix contents = function
     let uri = Filename.concat base @@ Api.path_of_id ?prefix id in
     let fragment = Api.fragment_of_id id in
     let body = text |? (Api.string_of_id ~spacer:"." id) in
-    Lwt.return [a_link_of_uri ?fragment (Some (Global.suffix ())) uri (Some body)]
+    [a_link_of_uri ?fragment (Some (Global.suffix ())) uri (Some body)]
   | _ -> assert false
 
 let img_link _contents = function
@@ -49,7 +49,7 @@ let img_link _contents = function
     let root, images = Global.(root (), the_images ()) in
     let uri = Paths.(rewind root file +/+ images +/+ src) in
     let alt = Filename.basename src in
-    Lwt.return [Html.img ~src:uri ~alt ()]
+    [Html.img ~src:uri ~alt ()]
   | [None] -> failwith "a_img: no src argument error"
   | _ -> assert false
 
@@ -58,7 +58,7 @@ let file_link contents = function
     let file = Global.current_file () in
     let root, assets = Global.(root (), the_assets ()) in
     let uri = Paths.(rewind root file +/+ assets +/+ src) in
-    Lwt.return [a_link_of_uri None uri (Some (contents |? Filename.basename uri))]
+    [a_link_of_uri None uri (Some (contents |? Filename.basename uri))]
   | [None] -> failwith "a_file: no src argument error"
   | _ -> assert false
 

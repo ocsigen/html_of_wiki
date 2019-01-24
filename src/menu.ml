@@ -19,7 +19,6 @@ let doctree _ args _ =
     |> (Wiki_syntax.xml_of_wiki
           (Wiki_syntax.cast_wp Wiki_syntax.menu_parser)
           bi)
-    |> Lwt_main.run (* FIXME remove me *)
   in
   let bi_of_menu_file mf =
     let bi_page = Global.(match mf with
@@ -32,7 +31,7 @@ let doctree _ args _ =
       bi_page;
       bi_sectioning = true;
       bi_add_link = ignore;
-      bi_content = Lwt.return [];
+      bi_content = [];
       bi_title = ""}
   in
   let compile_with_menu_file mf =
@@ -43,10 +42,10 @@ let doctree _ args _ =
   let compile_manual f = compile_with_menu_file (Global.Manual f) in
   let compile_api f = compile_with_menu_file (Global.Api f) in
 
-  let menus = Lwt.return (List.map compile_manual pman_menus
-                          @ List.map compile_api papi_menus) in
-  `Flow5 (let%lwt r = Lwt.map List.concat menus in
-          Lwt.return [nav ~a:(a_class ["how-doctree"] :: attrs) r])
+  let menus = (List.map compile_manual pman_menus
+               @ List.map compile_api papi_menus) in
+  `Flow5 (let r = List.concat menus in
+          [nav ~a:(a_class ["how-doctree"] :: attrs) r])
 
 let path_from_versions_dir file =
   let {Global.root; _} = Global.options () in
@@ -68,11 +67,11 @@ let docversion _bi args _contents =
       let selected = if (Filename.basename root) = v then Some (a_selected ())  else None in
       option ~a:(a_value dst :: (selected <$> (fun s -> [s]) |? [])) (txt v))
   in
-  `Flow5 (Lwt.return [txt "Version ";
-                      select ~a:(a_class ["how-versions"]
-                                 :: a_onchange "location = this.value;"
-                                 :: attrs)
-                        links])
+  `Flow5 ([txt "Version ";
+           select ~a:(a_class ["how-versions"]
+                      :: a_onchange "location = this.value;"
+                      :: attrs)
+             links])
 
 let init () =
   Wiki_syntax.register_interactive_simple_flow_extension

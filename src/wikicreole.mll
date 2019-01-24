@@ -845,8 +845,7 @@ and parse_rem c =
       parse_rem c lexbuf
     }
   | _ {
-     Lwt_log.ign_warning_f ~section
-       "Wikicreole: Unrecognized char %s." (Lexing.lexeme lexbuf) ;
+     Format.eprintf "Wikicreole: Unrecognized char %s." (Lexing.lexeme lexbuf) ;
      raise Unrecognized_char
   }
   | eof {
@@ -1075,7 +1074,7 @@ and parse_extension_content_wiki start rec_plugin lev beg c =
           parse_extension_content_wiki start rec_plugin lev (beg^s) c lexbuf
         }
       | _ {
-          Lwt_log.ign_warning_f ~section
+          Format.eprintf
             "Wikicreole: Unrecognized char in extension: %s."
             (Lexing.lexeme lexbuf) ;
           raise Unrecognized_char
@@ -1099,7 +1098,7 @@ and parse_extension_content_nowiki start unquote beg c =
           parse_extension_content_nowiki start unquote (beg^s) c lexbuf
         }
       | _ {
-          Lwt_log.ign_warning_f ~section
+          Format.eprintf
             "Wikicreole: Unrecognized char in extension %s."
             (Lexing.lexeme lexbuf) ;
           raise Unrecognized_char
