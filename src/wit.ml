@@ -1,8 +1,8 @@
 let replace_content_tag tmpl content =
-  let regexp = Str.regexp "<<content>>" in
+  let regexp = Re.Str.regexp "<<content>>" in
   try
-    ignore @@ Str.search_forward regexp tmpl 0;
-    Some (Str.substitute_first regexp (fun _ -> content) tmpl)
+    ignore @@ Re.Str.search_forward regexp tmpl 0;
+    Some (Re.Str.substitute_first regexp (fun _ -> content) tmpl)
   with Not_found ->
     None
 
