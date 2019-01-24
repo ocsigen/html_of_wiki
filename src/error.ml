@@ -2,12 +2,12 @@ open Tyxml
 exception Error of string
 
 let error (msg:string) =
-  Lwt.return [ Html.span ~a:[Html.a_class ["doclink_error"]] [Html.txt msg] ]
+  [Html.span ~a:[Html.a_class ["doclink_error"]] [Html.txt msg]]
 
 let wrap_phrasing name f = fun bi args contents ->
   `Phrasing_without_interactive
-    (let%lwt content =
-       try%lwt
+    (let content =
+       try
          f bi args contents
        with
        (* HACK comment references to module Document to avoid circular build *)
@@ -18,11 +18,11 @@ let wrap_phrasing name f = fun bi args contents ->
         (* bi.Wiki_widgets_interface.bi_add_link (Document.Deadlink exc); *)
         error (Format.sprintf "Error %s: exception %s" name
                   (Printexc.to_string exc) ) in
-     Lwt.return [Html.span content])
+     [Html.span content])
 
 let wrap_flow5 name f = fun bi args contents ->
   `Flow5
-    (try%lwt
+    (try
         f bi args contents
      with
        | Error msg -> error (Format.sprintf "Error %s: %s" name msg)

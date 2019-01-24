@@ -35,14 +35,14 @@ let process_script args c = match List.assoc "src" args with
   | src when Utils.is_none c -> Src src
   | _ -> failwith "script: both src and content are provided"
 
-let do_script _ args c = `Flow5 ([process_script args c |> make_script] |> Lwt.return)
+let do_script _ args c = `Flow5 ([process_script args c |> make_script])
 
 let head_scripts : script_kind list ref = ref []
 
 let do_head_script _ args c =
   let script = process_script args c in
   head_scripts := script :: !head_scripts;
-  `Flow5 (Lwt.return [])
+  `Flow5 ([])
 
 
 (*****************************************************************************)
@@ -64,7 +64,7 @@ let css_links : css_kind list ref = ref []
 let do_head_css _ args c =
   let css = process_css args c in
   css_links := css :: !css_links;
-  `Flow5 (Lwt.return [])
+  `Flow5 []
 
 
 (*****************************************************************************)
@@ -76,23 +76,23 @@ let get_inline _bi args =
 
 let do_wip _bi _args xml =
   `Flow5
-    (let%lwt xml = match xml with
-      | Some c -> (c :> Html_types.flow5 Html.elt list Lwt.t)
-      | None -> Lwt.return [] in
-     Lwt.return Html.[
+    (let xml = match xml with
+      | Some c -> (c :> Html_types.flow5 Html.elt list)
+      | None -> [] in
+     Html.[
        aside ~a:[a_class ["wip"]]
          (header [h5 [txt "Work in progress"]] :: xml)
       ])
 
 let do_wip_inline _bi args xml =
   `Phrasing_without_interactive
-    (let%lwt xml = match xml with
-       | Some c -> (c :> Html_types.phrasing Html.elt list Lwt.t)
-       | None -> Lwt.return [] in
+    (let xml = match xml with
+       | Some c -> (c :> Html_types.phrasing Html.elt list)
+       | None -> [] in
      let t =
        try List.assoc "title" args
        with Not_found -> "WIP: " in
-     Lwt.return Html.[
+     Html.[
        span ~a:[a_class ["wip"]]
             (strong [txt t] :: xml)
      ])
@@ -103,11 +103,11 @@ let do_wip_inline _bi args xml =
 
 let do_concepts _bi args xml =
   `Flow5
-    (let%lwt xml = match xml with
-      | Some c -> (c :> Html_types.flow5 Html.elt list Lwt.t)
-      | None -> Lwt.return [] in
+    (let xml = match xml with
+      | Some c -> (c :> Html_types.flow5 Html.elt list)
+      | None -> [] in
      let attrs = Wiki_syntax.parse_common_attribs args in
-     Lwt.return Html.[
+     Html.[
        aside ~a:(a_class ["concepts"]::attrs)
              (header [h5 [txt "Concepts"]] :: xml)
      ])
@@ -121,12 +121,12 @@ let get_title _bi args =
 
 let do_concept bi args xml =
   `Flow5
-    (let%lwt xml = match xml with
-      | Some c -> (c :> Html_types.flow5 Html.elt list Lwt.t)
-      | None -> Lwt.return [] in
+    (let xml = match xml with
+      | Some c -> (c :> Html_types.flow5 Html.elt list)
+      | None -> [] in
      let t = get_title bi args in
      let attrs = Wiki_syntax.parse_common_attribs args in
-     Lwt.return Html.[aside
+     Html.[aside
        ~a:(a_class ["concept"]::attrs)
        (header [
           h5 [span ~a:[a_class ["concept_prefix"]]
@@ -142,18 +142,18 @@ let do_concept bi args xml =
 
 let do_paragraph _bi args xml =
   `Flow5
-    (let%lwt xml = match xml with
-       | Some c -> (c :> _ Html.elt list Lwt.t)
-       | None -> Lwt.return [] in
+    (let xml = match xml with
+       | Some c -> (c :> _ Html.elt list)
+       | None -> [] in
      let attrs = Wiki_syntax.parse_common_attribs args in
-     Lwt.return Html.[div ~a:(a_class ["paragraph"]::attrs) xml])
+     Html.[div ~a:(a_class ["paragraph"]::attrs) xml])
 
 
 (*****************************************************************************)
 (** Extension Client/Server-Switch *)
 
 let do_client_server_switch _ args _ = match (Global.options ()).api with
-  | None -> `Flow5 (Lwt.return [])
+  | None -> `Flow5 []
   | Some api ->
     let client = "client" in
     let server = "server" in
@@ -193,7 +193,7 @@ let do_client_server_switch _ args _ = match (Global.options ()).api with
         end
       | _ -> []
     in
-    `Flow5 (Lwt.return (make csw))
+    `Flow5 (make csw)
 
 (*****************************************************************************)
 (** Extension google search *)
@@ -219,7 +219,7 @@ let do_google_search _ args _ =
                      a_id "gsearch-submit";
                      a_onclick @@ "document.getElementById('gsearch-box').value += ' site:" ^ domain ^ "';"]
              ()]]
-  |> (fun x -> `Flow5 (Lwt.return x))
+  |> (fun x -> `Flow5 x)
 
 let init () =
   Wiki_syntax.register_simple_flow_extension

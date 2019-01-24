@@ -24,8 +24,6 @@ module String = struct
     String.trim (String.sub s (seppos+1) (len-seppos-1))
 end
 
-let section = Lwt_log.Section.make "wiki_syntax"
-
 let list_assoc_opt a l =
   try
     Some (List.assoc a l)

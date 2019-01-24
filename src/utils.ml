@@ -39,7 +39,6 @@ let sorted_dir_files sort dir = Sys.readdir dir |> Array.to_list |> sort
 let dir_files = sorted_dir_files id
 let a'_sorted_dir_files = sorted_dir_files (List.sort compare)
 
-(* FIXME use Lwt_unix.files_of_directory *)
 let rec find_files name = function
   | file when Filename.basename file = name -> [file]
   | dir when Sys.is_directory dir ->

@@ -53,25 +53,25 @@ type (+'flow,
       +'flow_without_interactive,
       +'phrasing_without_interactive) plugin_content =
   [ `Flow5_link
-      of (href * Wikicreole.attribs * 'flow_without_interactive Html.elt list Lwt.t)
+      of (href * Wikicreole.attribs * 'flow_without_interactive Html.elt list)
   | `Phrasing_link
-      of (href * Wikicreole.attribs * 'phrasing_without_interactive Html.elt list Lwt.t)
-  | `Flow5 of 'flow Html.elt list Lwt.t
+      of (href * Wikicreole.attribs * 'phrasing_without_interactive Html.elt list )
+  | `Flow5 of 'flow Html.elt list
   | `Phrasing_without_interactive
-      of 'phrasing_without_interactive Html.elt list Lwt.t ]
+      of 'phrasing_without_interactive Html.elt list  ]
 
 type (+'flow_without_interactive,
       +'phrasing_without_interactive) ni_plugin_content =
-  [ `Flow5 of 'flow_without_interactive Html.elt list Lwt.t
+  [ `Flow5 of 'flow_without_interactive Html.elt list
   | `Phrasing_without_interactive
-      of 'phrasing_without_interactive Html.elt list Lwt.t ]
+      of 'phrasing_without_interactive Html.elt list ]
 
 type (+'flow_without_interactive,
       +'phrasing_without_interactive) link_plugin_content =
   [ `Flow5_link
-      of (href * Wikicreole.attribs * 'flow_without_interactive Html.elt list Lwt.t)
+      of (href * Wikicreole.attribs * 'flow_without_interactive Html.elt list)
   | `Phrasing_link
-      of (href * Wikicreole.attribs * 'phrasing_without_interactive Html.elt list Lwt.t) ]
+      of (href * Wikicreole.attribs * 'phrasing_without_interactive Html.elt list) ]
 
 (** The type of extension that can be registred into both the
     interactive and non_interactive variant and of a parser. *)
@@ -94,7 +94,7 @@ type preparser =
     Wiki_types.wikibox ->
     Wikicreole.attribs ->
     string option ->
-    string option Lwt.t
+    string option
 
 (* Register an extension whose content does not follow the wiki
    syntax. *)
@@ -118,7 +118,7 @@ type (-'content,
   wiki_plugin =
     Wiki_widgets_interface.box_info ->
       Wikicreole.attribs ->
-      'content Html.elt list Lwt.t option ->
+      'content Html.elt list option ->
     ('flow_without_interactive, 'phrasing_without_interactive) ni_plugin_content
 
 (* Register an extension whose content follow the wiki syntax. *)
@@ -149,7 +149,7 @@ type (-'content,
   link_plugin =
     Wiki_widgets_interface.box_info ->
       Wikicreole.attribs ->
-      'content Html.elt list Lwt.t option ->
+      'content Html.elt list option ->
     ('flow_without_interactive, 'phrasing_without_interactive) link_plugin_content
 
 (* Register an extension whose content follow the wiki syntax. The
@@ -164,7 +164,7 @@ val register_link_extension :
           'c) ext_wikicreole_parser ->
   ?preparser:(Wiki_types.wikibox ->
               Wikicreole.attribs ->
-              string option -> string option Lwt.t) ->
+              string option -> string option) ->
   ?context:
     (Wiki_widgets_interface.box_info ->
      Wikicreole.attribs -> Wiki_widgets_interface.box_info) ->
@@ -215,7 +215,7 @@ val register_interactive_simple_flow_extension :
 
 type (+'without_interactive) link_simple_plugin =
     (Wiki_widgets_interface.box_info,
-     href * Wikicreole.attribs * 'without_interactive Html.elt list Lwt.t)
+     href * Wikicreole.attribs * 'without_interactive Html.elt list)
       Wikicreole.plugin
 
 val register_link_simple_flow_extension :
@@ -262,8 +262,8 @@ type link_wiki_flow_pplugin = {
   lfpp: 'flow_without_interactive.
     Wiki_widgets_interface.box_info ->
       Wikicreole.attribs ->
-      ([> Html_types.flow5_without_interactive_header_footer] as 'flow_without_interactive) Html.elt list Lwt.t option ->
-      (href * Wikicreole.attribs * 'flow_without_interactive Html.elt list Lwt.t)
+      ([> Html_types.flow5_without_interactive_header_footer] as 'flow_without_interactive) Html.elt list option ->
+      (href * Wikicreole.attribs * 'flow_without_interactive Html.elt list)
 }
 
 val register_link_flow_extension :
@@ -330,8 +330,8 @@ val register_interactive_wiki_phrasing_extension :
 type link_wiki_phrasing_pplugin =
     Wiki_widgets_interface.box_info ->
     Wikicreole.attribs ->
-    Html_types.phrasing_without_interactive Html.elt list Lwt.t option ->
-    (href * Wikicreole.attribs * Html_types.phrasing_without_interactive Html.elt list Lwt.t)
+    Html_types.phrasing_without_interactive Html.elt list option ->
+    (href * Wikicreole.attribs * Html_types.phrasing_without_interactive Html.elt list)
 
 val register_link_phrasing_extension :
   name: string ->
@@ -416,7 +416,7 @@ val xml_of_wiki :
   'res wikicreole_parser ->
   Wiki_widgets_interface.box_info ->
   string ->
-  'res Html.elt list Lwt.t
+  'res Html.elt list
 
 (** Returns the wiki syntax for an extension box
     from its name, arguments and content.

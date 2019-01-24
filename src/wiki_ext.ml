@@ -30,10 +30,10 @@ let do_outline wp bi args c =
      let depth =
        try Some (int_of_string (List.assoc "depth" args))
        with _ -> None in
-     let%lwt content = match c with
-       | None -> Lwt.return []
+     let content = match c with
+       | None -> []
        | Some c ->
-         (Wiki_syntax.xml_of_wiki wp bi c :> Html_types.flow5 Html.elt list Lwt.t)
+         (Wiki_syntax.xml_of_wiki wp bi c :> Html_types.flow5 Html.elt list)
      in
      let ignore =
        Ocsimore_lib.get ~default:"nav aside" args "ignore" |>
@@ -57,7 +57,7 @@ let do_outline wp bi args c =
        let js = "window.addEventListener(\"load\", function(){ outline(" ^ Buffer.contents buf ^ "); }, false); " in
        Html.(script @@ cdata_script js)
      in
-   Lwt.return [nav; script])
+   [nav; script])
 
 (* TODO: support for extended link syntax (wiki(toto):titi etc.) *)
 let f_link _bi args c =
@@ -68,7 +68,7 @@ let f_link _bi args c =
   let content =
     match c with
     | Some c -> c
-    | None -> Lwt.return [Html.txt page]
+    | None -> [Html.txt page]
   in
   (* class and id attributes will be taken by Wiki_syntax.a_elem *)
   ( Wiki_syntax_types.Absolute
@@ -83,12 +83,12 @@ let do_drawer wp bi args c =
   let open Html in
   `Flow5
     (let attrs = Wiki_syntax.parse_common_attribs args in
-     let%lwt content =
+     let content =
        match c with
        | Some c ->
          (Wiki_syntax.xml_of_wiki wp bi c
-          :> Html_types.flow5 Html.elt list Lwt.t)
-       | None -> Lwt.return []
+          :> Html_types.flow5 Html.elt list)
+       | None -> []
      in
      let button = input ~a:[ a_id "how-drawer-toggle"
                            ; a_input_type `Checkbox ] ()
@@ -101,7 +101,7 @@ let do_drawer wp bi args c =
      let elt = aside ~a:( a_class [ "how-drawer" ]
                           :: attrs) [ button ; label ; content ]
      in
-     Lwt.return [ elt ])
+     [ elt ])
 
 let do_when_project _ _ args c =
   let open Utils.Operators in
@@ -116,21 +116,21 @@ let do_when_project _ _ args c =
   in
   (Global.options ()).project >>= (fun current ->
   if predicate project current
-  then Some (`Flow5 (Lwt.return (c <$> Wiki_syntax.compile |? [])))
+  then Some (`Flow5 ((c <$> Wiki_syntax.compile |? [])))
   else None)
-                                  |? `Flow5 (Lwt.return [])
+                                  |? `Flow5 ([])
 
 let do_when_local _ _ _ c =
   let open Utils.Operators in
-  `Flow5 (Lwt.return (if (Global.options ()).local
-                      then c <$> Wiki_syntax.compile |? []
-                      else []))
+  `Flow5 ((if (Global.options ()).local
+           then c <$> Wiki_syntax.compile |? []
+           else []))
 
 let do_unless_local _ _ _ c =
   let open Utils.Operators in
-  `Flow5 (Lwt.return (if not (Global.options ()).local
-                      then c <$> Wiki_syntax.compile |? []
-                      else []))
+  `Flow5 ((if not (Global.options ()).local
+           then c <$> Wiki_syntax.compile |? []
+           else []))
 
 let init () =
   Wiki_syntax.register_raw_wiki_extension ~name:"outline"

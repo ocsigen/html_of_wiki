@@ -23,7 +23,6 @@
    @author Boris Yakobowski
 *)
 
-open Lwt.Infix
 open Ocsimore_lib
 open Wiki_types
 open Wiki_syntax_types
@@ -42,14 +41,6 @@ let string_of_extension name args content =
 let opt_of_list = function | [] -> None | _::_ as l -> Some l
 
 (***)
-
-let element c = (* : 'a Lwt.t list Lwt.t -> 'a list Lwt.t *)
-  let rec aux = function
-    | [] -> Lwt.return []
-    | x::xs -> x      >>= fun y ->
-               aux xs >|= fun ys ->
-               y::ys
-  in aux c
 
 let rec filter_raw = function (* /!\ NOT TAIL REC /!\ *)
   | [] -> []
@@ -97,44 +88,41 @@ let parse_table_cell_attribs attribs =
   atts @ filter_raw [at5; at6; at7]
 
 let item_builder
-    ((c : Html_types.phrasing Html.elt list Lwt.t list), l, attribs) =
+    ((c : Html_types.phrasing Html.elt list list), l, attribs) =
   let a = opt_of_list (parse_common_attribs attribs) in
-  let%lwt r = element c >|= List.flatten in
-  let%lwt l = unopt ~def:(Lwt.return []) l in
-  Lwt.return
-    (Html.li ?a ((r : Html_types.phrasing Html.elt list
+  let r = List.flatten c in
+  let l = unopt ~def:([]) l in
+  (Html.li ?a ((r : Html_types.phrasing Html.elt list
                      :> Html_types.li_content_fun Html.elt list)
                     @ (l :> Html_types.li_content_fun Html.elt list)))
 
 let item_builder =
   (item_builder (* opening types *)
-     : (Html_types.phrasing Html.elt list Lwt.t list * _ * _ -> _)
-     :> ([< Html_types.phrasing ] Html.elt list Lwt.t list * _ * _ -> _))
+     : (Html_types.phrasing Html.elt list list * _ * _ -> _)
+     :> ([< Html_types.phrasing ] Html.elt list list * _ * _ -> _))
 
 let list_builder xs = match xs with
-  | [] -> Lwt.return (Html.li [], [])
+  | [] -> (Html.li [], [])
   | x :: xs ->
-      let%lwt y = item_builder x in
-      let%lwt ys = Lwt_list.map_s item_builder xs in
-      Lwt.return (y, ys)
+      let y = item_builder x in
+      let ys = List.map item_builder xs in
+      (y, ys)
 
 let ddt_builder
-    (istitle, (d : Html_types.phrasing Html.elt list Lwt.t list), attribs) =
+    (istitle, (d : Html_types.phrasing Html.elt list list), attribs) =
   let a = opt_of_list (parse_common_attribs attribs) in
-  let%lwt d = element d in
-  Lwt.return
-    (if istitle
-     then Html.dt ?a ((List.flatten d :> Html_types.dt_content_fun Html.elt list))
-     else Html.dd ?a ((List.flatten  d
+  (if istitle
+   then Html.dt ?a ((List.flatten d :> Html_types.dt_content_fun Html.elt list))
+   else Html.dd ?a ((List.flatten  d
                                  : Html_types.phrasing Html.elt list
                                :> Html_types.dd_content_fun Html.elt list)))
 
 let ddt_builder =
   (ddt_builder (* opening types *)
-     : (_ * Html_types.phrasing Html.elt list Lwt.t list * _ -> _)
-     :> (_ * [< Html_types.phrasing ] Html.elt list Lwt.t list * _ -> _))
+     : (_ * Html_types.phrasing Html.elt list list * _ -> _)
+     :> (_ * [< Html_types.phrasing ] Html.elt list list * _ -> _))
 
-let descr_builder l = Lwt_list.map_s ddt_builder l
+let descr_builder l = List.map ddt_builder l
 
 type href = Wiki_syntax_types.href
 
@@ -142,7 +130,7 @@ let uri_of_href = function
   | Absolute s -> s
   | Document {document; fragment} -> Document.to_uri ?fragment document
 
-let normalize_link _ _ _ _ = Lwt.return None
+let normalize_link _ _ _ _ = None
 
 let starts_with prefix s =
   let p = String.length prefix in
@@ -287,7 +275,7 @@ let desugar_string (type a) (type b) (type c) wp =
 let xml_of_wiki (type t) wp bi content =
   let module Parser = (val wp : Parser with type res = t) in
   let xml = Parser.from_string ~sectioning:false bi content in
-  element xml >|= List.flatten
+  List.flatten xml
 
 let preprocess_extension (type t) wp =
   let module Parser = (val wp : Parser with type res = t) in
@@ -306,30 +294,30 @@ module type RawParser = sig
   include Wikicreole.RawBuilder
     with type param := Wiki_widgets_interface.box_info
     and type href := href
-    and type phrasing = text Html.elt list Lwt.t
-    and type phrasing_without_interactive = link_content Html.elt list Lwt.t
-    and type flow = res Html.elt list Lwt.t
-    and type flow_without_interactive = res_without_interactive Html.elt list Lwt.t
-    and type uo_list = list_item Html.elt list Lwt.t
+    and type phrasing = text Html.elt list
+    and type phrasing_without_interactive = link_content Html.elt list
+    and type flow = res Html.elt list
+    and type flow_without_interactive = res_without_interactive Html.elt list
+    and type uo_list = list_item Html.elt list
 
   val ignore_a_elem_phrasing :
     Wikicreole.attribs -> href ->
-    link_content Html.elt list Lwt.t list ->
-    link_content Html.elt list Lwt.t
+    link_content Html.elt list list ->
+    link_content Html.elt list
   val ignore_a_elem_flow :
     Wikicreole.attribs -> href ->
-    res_without_interactive Html.elt list Lwt.t list ->
-    res_without_interactive Html.elt list Lwt.t
+    res_without_interactive Html.elt list list ->
+    res_without_interactive Html.elt list
 
   val default_extension:
     name:string ->
     Wiki_widgets_interface.box_info -> Wikicreole.attribs ->
-    string option -> link_content Html.elt list Lwt.t
+    string option -> link_content Html.elt list
 
   val default_ni_extension:
     name:string ->
     Wiki_widgets_interface.box_info -> Wikicreole.attribs ->
-    string option -> link_content Html.elt list Lwt.t
+    string option -> link_content Html.elt list
 
 end
 
@@ -337,25 +325,25 @@ type (+'flow,
       +'flow_without_interactive,
       +'phrasing_without_interactive) plugin_content =
   [ `Flow5_link
-      of (href * Wikicreole.attribs * 'flow_without_interactive Html.elt list Lwt.t)
+      of (href * Wikicreole.attribs * 'flow_without_interactive Html.elt list)
   | `Phrasing_link
-      of (href * Wikicreole.attribs * 'phrasing_without_interactive Html.elt list Lwt.t)
-  | `Flow5 of 'flow Html.elt list Lwt.t
+      of (href * Wikicreole.attribs * 'phrasing_without_interactive Html.elt list)
+  | `Flow5 of 'flow Html.elt list
   | `Phrasing_without_interactive
-      of 'phrasing_without_interactive Html.elt list Lwt.t ]
+      of 'phrasing_without_interactive Html.elt list ]
 
 type (+'flow_without_interactive,
       +'phrasing_without_interactive) ni_plugin_content =
-  [ `Flow5 of 'flow_without_interactive Html.elt list Lwt.t
+  [ `Flow5 of 'flow_without_interactive Html.elt list
   | `Phrasing_without_interactive
-      of 'phrasing_without_interactive Html.elt list Lwt.t ]
+      of 'phrasing_without_interactive Html.elt list ]
 
 type (+'flow_without_interactive,
       +'phrasing_without_interactive) link_plugin_content =
   [ `Flow5_link
-      of (href * Wikicreole.attribs * 'flow_without_interactive Html.elt list Lwt.t)
+      of (href * Wikicreole.attribs * 'flow_without_interactive Html.elt list )
   | `Phrasing_link
-      of (href * Wikicreole.attribs * 'phrasing_without_interactive Html.elt list Lwt.t) ]
+      of (href * Wikicreole.attribs * 'phrasing_without_interactive Html.elt list ) ]
 
 
 module MakeParser(B: RawParser) :
@@ -385,17 +373,17 @@ module MakeParser(B: RawParser) :
 
   type 'a wiki_plugin =
       Wiki_widgets_interface.box_info -> Wikicreole.attribs ->
-      'a Html.elt list Lwt.t option ->
+      'a Html.elt list option ->
       (res, res_without_interactive, link_content) plugin_content
 
   type 'a wiki_ni_plugin =
       Wiki_widgets_interface.box_info -> Wikicreole.attribs ->
-      'a Html.elt list Lwt.t option ->
+      'a Html.elt list option ->
       (res_without_interactive, link_content) ni_plugin_content
 
   type 'a link_plugin =
       Wiki_widgets_interface.box_info -> Wikicreole.attribs ->
-      'a Html.elt list Lwt.t option ->
+      'a Html.elt list option ->
       (res_without_interactive, link_content) link_plugin_content
 
     (* Module to encode existential type parameter of the recursive wikiparser.
@@ -742,10 +730,10 @@ module MakeParser(B: RawParser) :
   end
 
   (* Type of the substitutions collected by [desugar_string] and [preparse_string]. *)
-  type substitutions = (int * int * string option Lwt.t) list ref
+  type substitutions = (int * int * string option ) list ref
 
-  let link_action_ref = ref (fun _ _ _ _ -> Lwt.return None)
-  let href_action_ref = ref (fun _ _ _ _ -> Lwt.return None)
+  let link_action_ref = ref (fun _ _ _ _ -> None)
+  let href_action_ref = ref (fun _ _ _ _ -> None)
 
   let preparser =
     let module Preparser = struct
@@ -756,39 +744,39 @@ module MakeParser(B: RawParser) :
         try
           let plugin, preparser = Hashtbl.find plugin_assoc name in
           let content' =
-            let%lwt content' = match plugin with
-              | SimplePlugin _ -> Lwt.return content
+            let content' = match plugin with
+              | SimplePlugin _ -> content
               | WikiPlugin p ->
                 ( let module Plugin = (val p: WikiPlugin) in
                   match content with
-                  | None -> Lwt.return None
+                  | None -> None
                   | Some content ->
-                      let%lwt content =
+                      let content =
                         preparse_string Plugin.wikiparser wb content in
-                      Lwt.return (Some content) )
+                      Some content )
               | LinkPlugin p ->
                 ( let module Plugin = (val p: LinkPlugin) in
                   match content with
-                  | None -> Lwt.return None
+                  | None -> None
                   | Some content ->
-                      let%lwt content =
+                      let content =
                         preparse_string Plugin.wikiparser wb content in
-                      Lwt.return (Some content) )
+                      Some content )
               | RawWikiPlugin p ->
                 ( let module Plugin = (val p: RawWikiPlugin) in
                   match content with
-                  | None -> Lwt.return None
+                  | None -> None
                   | Some content ->
-                      let%lwt content =
+                      let content =
                         preparse_string Plugin.wikiparser wb content in
-                      Lwt.return (Some content) )
+                      Some content )
             in
             match preparser with
             | None ->
               ( match content, content' with
-                | None, None -> Lwt.return None
-                | Some content, Some content' when content' == content -> Lwt.return None
-                | _, _ -> Lwt.return (Some (string_of_extension name attribs content')) )
+                | None, None -> None
+                | Some content, Some content' when content' == content -> None
+                | _, _ -> Some (string_of_extension name attribs content') )
             | Some preparser -> preparser wb attribs content'
           in
           subst := (start, end_, content') :: !subst
@@ -798,13 +786,13 @@ module MakeParser(B: RawParser) :
         subst := (start,
                   end_,
                   try !link_action_ref addr fragment attribs params
-                  with _ -> Lwt.return None) ::!subst
+                  with _ -> None) ::!subst
 
       let href_action addr fragment attribs (start, end_) (subst, params) =
         subst := (start,
                   end_,
                   try !href_action_ref addr fragment attribs params
-                  with _ -> Lwt.return None) ::!subst
+                  with _ -> None) ::!subst
 
 
     end in
@@ -822,25 +810,25 @@ module MakeParser(B: RawParser) :
       let plugin_action : string -> int -> int -> (param, unit) Wikicreole.plugin =
         fun name start end_ (subst, wb) attribs content ->
         let desugar_attributes () =
-          let%lwt attribs' =
+          let attribs' =
             let f = function
               | "item", it ->
-                  let%lwt it' =
+                  let it' =
                     let link, text =
                       try String.sep '|' it
                       with Not_found -> it, it
                     in
-                    match%lwt !normalize_href_ref (0,0) link None wb with
+                    match !normalize_href_ref (0,0) link None wb with
                       | Some link' ->
-                          Lwt.return (link'^"|"^text)
-                      | None -> Lwt.return it
+                          (link'^"|"^text)
+                      | None -> it
                   in
-                  Lwt.return ("item", it')
-              | x -> Lwt.return x
+                  ("item", it')
+              | x -> x
             in
-            Lwt_list.map_s f attribs
+            List.map f attribs
           in
-          Lwt.return (
+          (
             if attribs' <> attribs then
               Some (string_of_extension name attribs' content)
             else
@@ -849,11 +837,10 @@ module MakeParser(B: RawParser) :
         in
         let desugar_content desugar_string_with_parser =
           match content with
-            | None ->
-                Lwt.return None
+            | None -> None
             | Some content ->
-                let%lwt content' = desugar_string_with_parser wb content in
-                Lwt.return (
+                let content' = desugar_string_with_parser wb content in
+                (
                   if content' <> content then
                     Some (string_of_extension name attribs (Some content'))
                   else None
@@ -889,7 +876,7 @@ module MakeParser(B: RawParser) :
           subst := (start,
                     end_,
                     try !normalize_href_ref pos addr fragment wikipage
-                    with _ -> Lwt.return None) ::!subst
+                    with _ -> None) ::!subst
     end in
     (module Desugarer : Wikicreole.Builder
       with type param = substitutions * Wiki_syntax_types.desugar_param
@@ -897,20 +884,20 @@ module MakeParser(B: RawParser) :
 
   let apply_subst subst content =
     let buf = Buffer.create 1024 in
-    Lwt_list.fold_left_s
+    let pos = List.fold_left
       (fun pos (start, end_, replacement) ->
-        replacement >>=
-          function None -> Lwt.return pos;
-            | Some replacement ->
-              Buffer.add_substring buf content pos (start - pos);
-              Buffer.add_string buf replacement;
-              Lwt.return end_)
+        match replacement with
+          None -> pos;
+        | Some replacement ->
+          Buffer.add_substring buf content pos (start - pos);
+          Buffer.add_string buf replacement;
+          end_)
       0
       subst
-    >>= fun pos ->
+    in
     if pos < String.length content then
       Buffer.add_substring buf content pos (String.length content - pos);
-    Lwt.return (Buffer.contents buf)
+    (Buffer.contents buf)
 
   let with_actions ?href_action ?link_action f =
     (* No mutex required: the "lexer" do not cooperate and any access
@@ -1010,48 +997,48 @@ end
 
 module FlowBuilder = struct
 
-  let chars s = Lwt.return [Html.txt s]
+  let chars s = [Html.txt s]
 
   let strong_elem attribs content =
     let a = opt_of_list (parse_common_attribs attribs) in
-    element content >|= List.flatten >|= fun r ->
+    let r = List.flatten content in
       [(Html.strong ?a r : [>`Strong] Html.elt)]
 
   let em_elem attribs content =
     let a = opt_of_list (parse_common_attribs attribs) in
-    element content >|= List.flatten >|= fun r ->
+    let r = List.flatten content in
       [(Html.em ?a r : [>`Em] Html.elt)]
 
   let monospace_elem attribs content =
     let a = Html.a_class ["monospace"] :: parse_common_attribs attribs in
-    element content >|= List.flatten >|= fun r ->
+    let r = List.flatten content  in
       [(Html.span ~a r : [>`Span] Html.elt)]
 
 
   (* FIXME use <u>? *)
   let underlined_elem attribs content =
     let a = Html.a_class ["underlined"] :: parse_common_attribs attribs in
-    element content >|= List.flatten >|= fun r ->
+    let r = List.flatten content in
       [(Html.span ~a r : [>`Span] Html.elt)]
 
   let linethrough_elem attribs content =
     let a = Html.a_class ["linethrough"] :: parse_common_attribs attribs in
-    element content >|= List.flatten >|= fun r ->
+    let r = List.flatten content in
       [(Html.span ~a r : [>`Span] Html.elt)]
 
   let subscripted_elem attribs content =
     let a = opt_of_list (parse_common_attribs attribs) in
-    element content >|= List.flatten >|= fun r ->
+    let r = List.flatten content in
       [(Html.sub ?a r : [>`Sub] Html.elt)]
 
   let superscripted_elem attribs content =
     let a = opt_of_list (parse_common_attribs attribs) in
-    element content >|= List.flatten >|= fun r ->
+    let r = List.flatten content in
       [(Html.sup ?a r : [>`Sup] Html.elt)]
 
   let a_elem_phrasing
       attribs addr
-      (c : Html_types.phrasing_without_interactive Html.elt list Lwt.t list) =
+      (c : Html_types.phrasing_without_interactive Html.elt list list) =
     let a = parse_common_attribs ~classes:["ocsimore_phrasing_link"] attribs in
     let address, text = match addr with
       | Absolute "" -> Some "", Some "."
@@ -1060,7 +1047,7 @@ module FlowBuilder = struct
       | Absolute a -> Some (a ^ Global.suffix ()), None
       | _ -> assert false
     in
-    Lwt_list.map_s (fun x -> x) c >|= List.flatten >|= fun c ->
+    let c = List.flatten c in
     [(Html.a ~a:((let open Utils.Operators in
                   (* NOTE address is always Some x for now but one could add
                   another case to the matching above in which the original
@@ -1070,13 +1057,13 @@ module FlowBuilder = struct
                  |> Html.a_href
                  |> (fun x -> x :: a))
         (let open Utils.Operators in
-         text >>= (fun t -> Some [Html.txt t]) |? c)
+          text >>= (fun t -> Some [Html.txt t]) |? c)
       :> Html_types.phrasing Html.elt)]
 
   let a_elem_flow attribs addr c =
     let a = parse_common_attribs ~classes:["ocsimore_flow_link"] attribs in
-    Lwt_list.map_s (fun x -> x) c >|= List.flatten >|= fun c ->
-      [Html.a ~a:(Html.a_href (uri_of_href addr) :: a) c]
+    let c = List.flatten c in
+    [Html.a ~a:(Html.a_href (uri_of_href addr) :: a) c]
 
   let make_href = href_of_link_kind
 
@@ -1084,35 +1071,33 @@ module FlowBuilder = struct
 
   let br_elem attribs =
     let a = opt_of_list (parse_common_attribs attribs) in
-    Lwt.return [(Html.br ?a () : [>`Br] Html.elt)]
+    [(Html.br ?a () : [>`Br] Html.elt)]
 
   let img_elem attribs href alt =
     let a = opt_of_list (parse_common_attribs attribs) in
     let src = uri_of_href href (* CCC https ? *) in
-    Lwt.return
       [(Html.img ~src ~alt:alt ?a ()
           : [>`Img] Html.elt)]
 
   let tt_elem attribs content =
     let a = Html.a_class ["teletype"] :: parse_common_attribs attribs in
-    element content >|= List.flatten >|= fun r ->
+    let r = List.flatten content in
       [(Html.span ~a r : [>`Span] Html.elt)]
 
 
-  let nbsp = Lwt.return [(Html.txt " " : [>`PCDATA] Html.elt)]
+  let nbsp = [(Html.txt " " : [>`PCDATA] Html.elt)]
 
-  let endash = Lwt.return [(Html.txt "–" : [>`PCDATA] Html.elt)]
+  let endash = [(Html.txt "–" : [>`PCDATA] Html.elt)]
 
-  let emdash = Lwt.return [(Html.txt "—" : [>`PCDATA] Html.elt)]
+  let emdash = [(Html.txt "—" : [>`PCDATA] Html.elt)]
 
   let p_elem attribs content =
     let a = opt_of_list (parse_common_attribs attribs) in
-    element content >|= List.flatten >|= fun r ->
+    let r = List.flatten content in
       [(Html.p ?a r : [>`P] Html.elt)]
 
   let pre_elem attribs content =
     let a = opt_of_list (parse_common_attribs attribs) in
-    Lwt.return
       [(Html.pre ?a [Html.txt (String.concat "" content)]
           : [>`Pre] Html.elt)]
 
@@ -1130,64 +1115,63 @@ module FlowBuilder = struct
 
   let h1_elem attribs content =
     let a = opt_of_list (parse_common_attribs attribs) in
-    element content >|= List.flatten >|= fun r ->
+    let r = List.flatten content in
       [(Html.h1 ?a (add_backref attribs r) : [>`H1] Html.elt)]
 
   let h2_elem attribs content =
     let a = opt_of_list (parse_common_attribs attribs) in
-    element content >|= List.flatten >|= fun r ->
+    let r = List.flatten content in
       [(Html.h2 ?a (add_backref attribs r) : [>`H2] Html.elt)]
 
   let h3_elem attribs content =
     let a = opt_of_list (parse_common_attribs attribs) in
-    element content >|= List.flatten >|= fun r ->
+    let r = List.flatten content in
       [(Html.h3 ?a (add_backref attribs r) : [>`H3] Html.elt)]
 
   let h4_elem attribs content =
     let a = opt_of_list (parse_common_attribs attribs) in
-    element content >|= List.flatten >|= fun r ->
+    let r = List.flatten content in
       [(Html.h4 ?a (add_backref attribs r) : [>`H4] Html.elt)]
 
   let h5_elem attribs content =
     let a = opt_of_list (parse_common_attribs attribs) in
-    element content >|= List.flatten >|= fun r ->
+    let r = List.flatten content in
       [(Html.h5 ?a (add_backref attribs r) : [>`H5] Html.elt)]
 
   let h6_elem attribs content =
     let a = opt_of_list (parse_common_attribs attribs) in
-    element content >|= List.flatten >|= fun r ->
+    let r = List.flatten content in
       [(Html.h6 ?a (add_backref attribs r) : [>`H6] Html.elt)]
 
   let section_elem attribs content =
     let a = opt_of_list (parse_common_attribs attribs) in
-    element content >|= List.flatten >|= fun r ->
+    let r = List.flatten content in
       [(Html.section ?a
           (r :> Html_types.section_content_fun Html.elt list)
           : [>`Section] Html.elt)]
 
   let ul_elem attribs content =
     let a = opt_of_list (parse_common_attribs attribs) in
-    list_builder content >|= fun (r,rs) ->
+    list_builder content |> fun (r,rs) ->
       [(Html.ul ?a (r::rs) : [>`Ul] Html.elt)]
 
   let ol_elem attribs content =
     let a = opt_of_list (parse_common_attribs attribs) in
-    list_builder content >|= fun (r,rs) ->
+    list_builder content |> fun (r,rs) ->
       [(Html.ol ?a (r::rs) : [>`Ol] Html.elt)]
 
   let dl_elem attribs content =
     let a = opt_of_list (parse_common_attribs attribs) in
-    descr_builder content >|= fun r ->
+    descr_builder content |> fun r ->
       [(Html.dl ?a r : [>`Dl] Html.elt)]
 
   let hr_elem attribs =
     let a = opt_of_list (parse_common_attribs attribs) in
-    Lwt.return [(Html.hr ?a () : [>`Hr] Html.elt)]
+    [(Html.hr ?a () : [>`Hr] Html.elt)]
 
-  let tdh_builder (h, attribs, (c: Html_types.phrasing Html.elt list Lwt.t list)) =
+  let tdh_builder (h, attribs, (c: Html_types.phrasing Html.elt list list)) =
     let a = opt_of_list (parse_table_cell_attribs attribs) in
-    let%lwt r = element c >|= List.flatten in
-    Lwt.return
+    let r = List.flatten c in
       (if h
        then Html.th ?a r
        else Html.td ?a (r : Html_types.phrasing Html.elt list
@@ -1195,17 +1179,17 @@ module FlowBuilder = struct
 
   let tdh_builder =
     (tdh_builder (* opening types *)
-       : _ * _ * Html_types.phrasing Html.elt list Lwt.t list -> _
-     :> _ * _ * [< Html_types.phrasing] Html.elt list Lwt.t list -> _)
+       : _ * _ * Html_types.phrasing Html.elt list list -> _
+     :> _ * _ * [< Html_types.phrasing] Html.elt list list -> _)
 
   let tr_builder (row, attribs) = match row with
-    | [] -> Lwt.return (Html.tr [Html.td []])
+    | [] -> (Html.tr [Html.td []])
     | x::xs ->
       let a = opt_of_list (parse_common_attribs attribs) in
     (*let a = opt_of_list (parse_table_row_attribs attribs) in*)
-      let%lwt y = tdh_builder x in
-      let%lwt ys = Lwt_list.map_s tdh_builder xs in
-      Lwt.return (Html.tr ?a (y::ys))
+      let  y = tdh_builder x in
+      let ys = List.map tdh_builder xs in
+      (Html.tr ?a (y::ys))
 
   let table_elem attribs l =
     let a = opt_of_list (parse_common_attribs attribs) in
@@ -1214,29 +1198,29 @@ module FlowBuilder = struct
       with Not_found -> None
     in
     match l with
-      | [] -> Lwt.return [Html.table ?a ?caption [Html.tr [Html.td []]]]
+      | [] -> [Html.table ?a ?caption [Html.tr [Html.td []]]]
       | rows ->
-        let%lwt rows = Lwt_list.map_s tr_builder rows in
-        Lwt.return [(Html.table ?a ?caption rows : [>`Table] Html.elt)]
+        let rows = List.map tr_builder rows in
+        [(Html.table ?a ?caption rows : [>`Table] Html.elt)]
 
   let error =
     (fun (s : string) ->
-      Lwt.return [(Html.strong [Html.txt s] : [>`Strong] Html.elt)])
+      [(Html.strong [Html.txt s] : [>`Strong] Html.elt)])
 
   let span_elem attribs content =
     let a = opt_of_list (parse_common_attribs attribs) in
-    element content >|= List.flatten >|= fun r ->
+    let r = List.flatten content in
       [(Html.span ?a r : [>`Span] Html.elt)]
 
   let ignore_a_elem_phrasing attribs _ content = span_elem attribs content
   let ignore_a_elem_flow attribs _ content =
     let a = opt_of_list (parse_common_attribs attribs) in
-    element content >|= List.flatten >|= fun r ->
+    let r = List.flatten content in
     [(Html.div ?a r : [>`Div] Html.elt)]
 
   let default_extension ~name _ attribs content =
     let s = string_of_extension name attribs content in
-     Lwt.return [Html.txt s]
+     [Html.txt s]
   let default_ni_extension = default_extension
 
 end
@@ -1248,7 +1232,6 @@ module ReducedFlowBuilder = struct
   include FlowBuilder
 
   let img_elem _ _ _ =
-    Lwt.return
       [Html.em [Html.txt "Images not enabled in this syntax"]]
 
 end
@@ -1267,16 +1250,12 @@ module Reduced2FlowBuilder = struct
   let h5_elem = p_elem
   let h6_elem = p_elem
   let ul_elem _ _ =
-    Lwt.return
       [Html.em [Html.txt "Lists not enabled in this syntax"]]
   let ol_elem _ _ =
-    Lwt.return
       [Html.em [Html.txt "Lists not enabled in this syntax"]]
   let dl_elem _ _ =
-    Lwt.return
       [Html.em [Html.txt "Lists not enabled in this syntax"]]
   let table_elem  _ _ =
-    Lwt.return
           [Html.em [Html.txt "Tables not enabled in this syntax"]]
 end
 
@@ -1288,12 +1267,10 @@ module PhrasingBuilder = struct
 
   include Reduced2FlowBuilder
 
-  let p_elem _ (c: PhrasingTypes.text Html.elt list Lwt.t list) : PhrasingTypes.res_without_interactive  Html.elt list Lwt.t =
-    let%lwt l = Lwt_list.map_s (* Don't do this at home kids ! PC *)
-      (fun x ->  let%lwt x = x in Lwt.return (Html.totl (Html.toeltl x))) c in
-    Lwt.return (List.flatten l)
+  let p_elem _ (c: PhrasingTypes.text Html.elt list list) : PhrasingTypes.res_without_interactive  Html.elt list =
+    let l = List.map (fun x ->  (Html.totl (Html.toeltl x))) c in
+    (List.flatten l)
   let pre_elem _ _ =
-         Lwt.return
           [Html.em
              [Html.txt "Blocks of code not enabled in this syntax"]]
   let h1_elem = span_elem
@@ -1304,11 +1281,9 @@ module PhrasingBuilder = struct
   let h6_elem = span_elem
   let section_elem = span_elem
   let hr_elem _ =
-    Lwt.return
       [Html.em
           [Html.txt "Horizontal rules not enabled in this syntax"]]
   let table_elem _ _ =
-    Lwt.return
       [Html.em [Html.txt "Tables not enabled in this syntax"]]
 
   let ignore_a_elem_flow = ignore_a_elem_phrasing
@@ -1319,8 +1294,8 @@ module MenuBuilder = struct
 
   include FlowBuilder
 
-  let nothing _ _ = Lwt.return []
-  and nothing1 _ = Lwt.return []
+  let nothing _ _ = []
+  and nothing1 _ = []
 
   let strong_elem = strong_elem
   let em_elem = em_elem
@@ -1330,7 +1305,7 @@ module MenuBuilder = struct
   let subscripted_elem = subscripted_elem
   let superscripted_elem = superscripted_elem
   let a_elem_phrasing = a_elem_phrasing
-  let a_elem_flow _ _ _ = Lwt.return []
+  let a_elem_flow _ _ _ = []
   let make_href = menu_make_href
   let br_elem = nothing1
   let p_elem = nothing
@@ -1342,7 +1317,7 @@ module MenuBuilder = struct
   let hr_elem = nothing1
   let table_elem = nothing
 
-  let ignore_a_elem_flow _ _ _ = Lwt.return []
+  let ignore_a_elem_flow _ _ _ = []
 
 end
 
@@ -1351,7 +1326,7 @@ module ButtonBuilder = struct
   include FlowBuilder
 
   let forbid0 s =
-    Lwt.return [(Html.em [Html.txt (s ^ " not enabled in buttons")]
+    [(Html.em [Html.txt (s ^ " not enabled in buttons")]
                    : [Html_types.button_content | `PCDATA] Html.elt)]
 
   let forbid1 s _ = forbid0 s
@@ -1404,14 +1379,14 @@ end
 module WikicreoleParser = MakeParser(struct
   include FlowTypes
   (* *)
-  type flow = res Html.elt list Lwt.t
+  type flow = res Html.elt list
   type flow_without_interactive =
-      res_without_interactive Html.elt list Lwt.t
+      res_without_interactive Html.elt list
   let flow x = (x: flow_without_interactive :> flow)
-  type phrasing = text  Html.elt list Lwt.t
-  type phrasing_without_interactive = link_content Html.elt list Lwt.t
+  type phrasing = text  Html.elt list
+  type phrasing_without_interactive = link_content Html.elt list
   let phrasing x = (x : phrasing_without_interactive :> phrasing)
-  type uo_list = list_item Html.elt list Lwt.t
+  type uo_list = list_item Html.elt list
   let list x = (x : uo_list :> flow_without_interactive)
   (* *)
   include FlowBuilder
@@ -1430,14 +1405,14 @@ let wikicreole_parser =
 module WikicreoleParserWithoutHeaderFooter = MakeParser(struct
   include FlowWithoutHeaderFooterTypes
   (* *)
-  type flow = res Html.elt list Lwt.t
+  type flow = res Html.elt list
   type flow_without_interactive =
-      res_without_interactive Html.elt list Lwt.t
+      res_without_interactive Html.elt list
   let flow x = (x: flow_without_interactive :> flow)
-  type phrasing = text  Html.elt list Lwt.t
-  type phrasing_without_interactive = link_content Html.elt list Lwt.t
+  type phrasing = text  Html.elt list
+  type phrasing_without_interactive = link_content Html.elt list
   let phrasing x = (x : phrasing_without_interactive :> phrasing)
-  type uo_list = list_item Html.elt list Lwt.t
+  type uo_list = list_item Html.elt list
   let list x = (x : uo_list :> flow_without_interactive)
   (* *)
   include FlowBuilder
@@ -1457,14 +1432,14 @@ let wikicreole_parser_without_header_footer =
 module ReducedWikicreoleParser0 = MakeParser(struct
   include FlowTypes
   (* *)
-  type flow = res Html.elt list Lwt.t
+  type flow = res Html.elt list
   type flow_without_interactive =
-      res_without_interactive Html.elt list Lwt.t
+      res_without_interactive Html.elt list
   let flow x = (x: flow_without_interactive :> flow)
-  type phrasing = text  Html.elt list Lwt.t
-  type phrasing_without_interactive = link_content Html.elt list Lwt.t
+  type phrasing = text  Html.elt list
+  type phrasing_without_interactive = link_content Html.elt list
   let phrasing x = (x : phrasing_without_interactive :> phrasing)
-  type uo_list = list_item Html.elt list Lwt.t
+  type uo_list = list_item Html.elt list
   let list x = (x : uo_list :> flow_without_interactive)
   (* *)
   include FlowBuilder
@@ -1473,14 +1448,14 @@ end)
 module ReducedWikicreoleParser1 = MakeParser(struct
   include FlowTypes
   (* *)
-  type flow = res Html.elt list Lwt.t
+  type flow = res Html.elt list
   type flow_without_interactive =
-      res_without_interactive Html.elt list Lwt.t
+      res_without_interactive Html.elt list
   let flow x = (x: flow_without_interactive :> flow)
-  type phrasing = text  Html.elt list Lwt.t
-  type phrasing_without_interactive = link_content Html.elt list Lwt.t
+  type phrasing = text  Html.elt list
+  type phrasing_without_interactive = link_content Html.elt list
   let phrasing x = (x : phrasing_without_interactive :> phrasing)
-  type uo_list = list_item Html.elt list Lwt.t
+  type uo_list = list_item Html.elt list
   let list x = (x : uo_list :> flow_without_interactive)
   (* *)
   include ReducedFlowBuilder
@@ -1489,14 +1464,14 @@ end)
 module ReducedWikicreoleParser2 = MakeParser(struct
   include FlowTypes
   (* *)
-  type flow = res Html.elt list Lwt.t
+  type flow = res Html.elt list
   type flow_without_interactive =
-      res_without_interactive Html.elt list Lwt.t
+      res_without_interactive Html.elt list
   let flow x = (x: flow_without_interactive :> flow)
-  type phrasing = text  Html.elt list Lwt.t
-  type phrasing_without_interactive = link_content Html.elt list Lwt.t
+  type phrasing = text  Html.elt list
+  type phrasing_without_interactive = link_content Html.elt list
   let phrasing x = (x : phrasing_without_interactive :> phrasing)
-  type uo_list = list_item Html.elt list Lwt.t
+  type uo_list = list_item Html.elt list
   let list x = (x : uo_list :> flow_without_interactive)
   (* *)
   include Reduced2FlowBuilder
@@ -1531,14 +1506,14 @@ let reduced_wikicreole_parser2 =
 module PhrasingWikicreoleParser = MakeParser(struct
   include PhrasingTypes
   (* *)
-  type flow = res Html.elt list Lwt.t
+  type flow = res Html.elt list
   type flow_without_interactive =
-      res_without_interactive Html.elt list Lwt.t
+      res_without_interactive Html.elt list
   let flow x = (x: flow_without_interactive :> flow)
-  type phrasing = text  Html.elt list Lwt.t
-  type phrasing_without_interactive = link_content Html.elt list Lwt.t
+  type phrasing = text  Html.elt list
+  type phrasing_without_interactive = link_content Html.elt list
   let phrasing x = (x : phrasing_without_interactive :> phrasing)
-  type uo_list = list_item Html.elt list Lwt.t
+  type uo_list = list_item Html.elt list
   let list x = (x : uo_list :> flow_without_interactive)
   (* *)
   include PhrasingBuilder
@@ -1556,14 +1531,14 @@ let phrasing_wikicreole_parser =
 module MenuParser = MakeParser(struct
   include MenuTypes
   (* *)
-  type flow = res Html.elt list Lwt.t
+  type flow = res Html.elt list
   type flow_without_interactive =
-      res_without_interactive Html.elt list Lwt.t
+      res_without_interactive Html.elt list
   let flow x = (x: flow_without_interactive :> flow)
-  type phrasing = text  Html.elt list Lwt.t
-  type phrasing_without_interactive = link_content Html.elt list Lwt.t
+  type phrasing = text  Html.elt list
+  type phrasing_without_interactive = link_content Html.elt list
   let phrasing x = (x : phrasing_without_interactive :> phrasing)
-  type uo_list = list_item Html.elt list Lwt.t
+  type uo_list = list_item Html.elt list
   let list x = (x : uo_list :> flow_without_interactive)
   (* *)
   include MenuBuilder
@@ -1581,13 +1556,13 @@ let menu_parser =
 module ButtonParser = MakeParser(struct
   include ButtonTypes
   (* *)
-  type flow = res Html.elt list Lwt.t
+  type flow = res Html.elt list
   type flow_without_interactive =
-      res_without_interactive Html.elt list Lwt.t
+      res_without_interactive Html.elt list
   let flow x = (x: flow_without_interactive :> flow)
-  type phrasing = text  Html.elt list Lwt.t
-  type phrasing_without_interactive = link_content Html.elt list Lwt.t
-  type uo_list = list_item Html.elt list Lwt.t
+  type phrasing = text  Html.elt list
+  type phrasing_without_interactive = link_content Html.elt list
+  type uo_list = list_item Html.elt list
   let list x = (x : uo_list :> flow_without_interactive)
   (* *)
   include ButtonBuilder
@@ -1619,7 +1594,7 @@ type (+'flow,
 
 type (+'without_interactive) link_simple_plugin =
     (Wiki_widgets_interface.box_info,
-     href * Wikicreole.attribs * 'without_interactive Html.elt list Lwt.t)
+     href * Wikicreole.attribs * 'without_interactive Html.elt list)
     Wikicreole.plugin
 
 let register_simple_extension
@@ -1787,7 +1762,7 @@ type (-'content,
   wiki_plugin =
     Wiki_widgets_interface.box_info ->
       Wikicreole.attribs ->
-      'content Html.elt list Lwt.t option ->
+      'content Html.elt list option ->
     ('flow_without_interactive, 'phrasing_without_interactive) ni_plugin_content
 
 let register_wiki_extension
@@ -1816,7 +1791,7 @@ type (-'content,
   link_plugin =
     Wiki_widgets_interface.box_info ->
       Wikicreole.attribs ->
-      'content Html.elt list Lwt.t option ->
+      'content Html.elt list option ->
     ('flow_without_interactive, 'phrasing_without_interactive) link_plugin_content
 
 let register_link_extension
@@ -1923,8 +1898,8 @@ type link_wiki_flow_pplugin = {
     Wiki_widgets_interface.box_info ->
       Wikicreole.attribs ->
       ([> Html_types.flow5_without_interactive_header_footer] as 'flow_without_interactive)
-        Html.elt list Lwt.t option ->
-      (href * Wikicreole.attribs * 'flow_without_interactive Html.elt list Lwt.t)
+        Html.elt list option ->
+      (href * Wikicreole.attribs * 'flow_without_interactive Html.elt list)
 }
 
 let register_link_flow_extension ~name ?(reduced = true) ?preparser plugin =
@@ -2014,8 +1989,8 @@ let register_interactive_wiki_phrasing_extension
 type link_wiki_phrasing_pplugin =
     Wiki_widgets_interface.box_info ->
     Wikicreole.attribs ->
-    Html_types.phrasing_without_interactive Html.elt list Lwt.t option ->
-    (href * Wikicreole.attribs * Html_types.phrasing_without_interactive Html.elt list Lwt.t)
+    Html_types.phrasing_without_interactive Html.elt list option ->
+    (href * Wikicreole.attribs * Html_types.phrasing_without_interactive Html.elt list)
 
 let register_link_phrasing_extension ~name ?(reduced = true) ?preparser
     (plugin: link_wiki_phrasing_pplugin) =
@@ -2040,10 +2015,10 @@ let f_block make _ args content =
   `Flow5
     ( let a = Some (parse_common_attribs args) in
       match content with
-      | None -> Lwt.return [make ?a []]
+      | None -> [make ?a []]
       | Some content ->
-        let%lwt content = content in
-        Lwt.return [make ?a content])
+        let content = content in
+        [make ?a content])
 
 let () =
   let add_divs wp wp_rec =
@@ -2084,12 +2059,12 @@ let () =
 
 let f_pre _ args content =
   `Flow5
-    (let%lwt content = match content with
-       | None -> Lwt.return []
-       | Some c -> (c :> Html_types.pre_content Html.elt list Lwt.t)
+    (let content = match content with
+       | None -> []
+       | Some c -> (c :> Html_types.pre_content Html.elt list)
      in
      let a = Some (parse_common_attribs args) in
-     Lwt.return [Html.pre ?a content])
+     [Html.pre ?a content])
 
 let () =
   let register wp =
@@ -2106,19 +2081,19 @@ let () =
 
 let f_span _ args content =
   `Phrasing_without_interactive
-    (let%lwt content = match content with
-       | None -> Lwt.return []
-       | Some c -> (c :> Html_types.phrasing Html.elt list Lwt.t)
+    (let content = match content with
+       | None -> []
+       | Some c -> (c :> Html_types.phrasing Html.elt list)
      in
      let a = Some (parse_common_attribs args) in
-     Lwt.return [(Html.span ?a content : 'a Html.elt)])
+     [(Html.span ?a content : 'a Html.elt)])
 
 let () =
   register_wiki_phrasing_extension ~name:"span" { ppp = f_span }
 
 (* Empty (comment) *)
 
-let f_empty _bi _args _c = `Flow5 (Lwt.return [])
+let f_empty _bi _args _c = `Flow5 ([])
 
 let () =
   register_simple_phrasing_extension ~name:"" f_empty
@@ -2138,7 +2113,7 @@ let () =
 
 let () =
   let f_title bi _ _ =
-    `Phrasing_without_interactive (Lwt.return [Html.txt bi.bi_title])
+    `Phrasing_without_interactive ([Html.txt bi.bi_title])
   in
   register_simple_phrasing_extension ~name:"title" f_title
 
@@ -2152,9 +2127,8 @@ let compile_with_content content_text text =
                             bi_content = c;
                             bi_title = "";}
   in
-  let c = xml_of_wiki par (bi_with_content @@ Lwt.return []) content_text in
+  let c = xml_of_wiki par (bi_with_content @@ []) content_text in
   xml_of_wiki par (bi_with_content c) text
-  |> Lwt_main.run
 
 let compile text = compile_with_content "" text
 
@@ -2176,7 +2150,7 @@ let () =
     file
     |> Utils.read_file
     |> compile
-    |> fun c -> `Flow5 (Lwt.return c)
+    |> fun c -> `Flow5 (c)
   in
   let wp = wikicreole_parser in
   register_wiki_extension
