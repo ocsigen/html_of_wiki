@@ -1,10 +1,9 @@
-open Tyxml
 open Tyxml.Html
 open Utils.Operators
 
 let doctree _ args _ =
   let attrs = Wiki_syntax.parse_common_attribs args in
-  let {Global.root; manual; api} = Global.options () in
+  let {Global.root; manual; api; _} = Global.options () in
   let find_menus p =
     try p >>= (fun p -> Some (root +/+ p))
               <$> Utils.find_files "menu.wiki"
@@ -24,10 +23,10 @@ let doctree _ args _ =
   in
   let bi_of_menu_file mf =
     let bi_page = Global.(match mf with
-        | Manual _ -> Document.(Project {page = Manual ""; project = ""; version = Version.Dev})
-        | Api _ -> Document.(Project {page = Api {subproject = ""; file = ""};
+        | Manual _ -> Document.Project {page = Manual ""; project = ""; version = Version.Dev}
+        | Api _ -> Document.Project {page = Api {subproject = ""; file = ""};
                                       project = "";
-                                      version = Version.Dev}))
+                                      version = Version.Dev})
     in
     Wiki_widgets_interface.{
       bi_page;
@@ -50,15 +49,15 @@ let doctree _ args _ =
           Lwt.return [nav ~a:(a_class ["how-doctree"] :: attrs) r])
 
 let path_from_versions_dir file =
-  let {Global.root} = Global.options () in
+  let {Global.root; _} = Global.options () in
   file
   |> Paths.realpath
   |> Paths.path_rm_prefix root
 
-let docversion bi args contents =
+let docversion _bi args _contents =
   let attrs = Wiki_syntax.parse_common_attribs args in
   let file = Global.current_file () in
-  let {Global.root; docversions; suffix} = Global.options () in
+  let {Global.root; docversions; suffix; _} = Global.options () in
   let current_wiki_path =
     path_from_versions_dir file
     |> Filename.chop_extension
@@ -67,9 +66,9 @@ let docversion bi args contents =
   let links = docversions |> List.map (fun v ->
       let dst = Paths.(rewind root file +/+ up +/+ v +/+ current_wiki_path) in
       let selected = if (Filename.basename root) = v then Some (a_selected ())  else None in
-      option ~a:(a_value dst :: (selected <$> (fun s -> [s]) |? [])) (pcdata v))
+      option ~a:(a_value dst :: (selected <$> (fun s -> [s]) |? [])) (txt v))
   in
-  `Flow5 (Lwt.return [pcdata "Version ";
+  `Flow5 (Lwt.return [txt "Version ";
                       select ~a:(a_class ["how-versions"]
                                  :: a_onchange "location = this.value;"
                                  :: attrs)
@@ -81,6 +80,6 @@ let init () =
     ~reduced:false
     doctree;
   Wiki_syntax.register_simple_extension
-    Wiki_syntax.wikicreole_parser
-    "docversion"
+    ~wp:Wiki_syntax.wikicreole_parser
+    ~name:"docversion"
     docversion

@@ -21,15 +21,12 @@
    @author Boris Yakobowski
 *)
 
-open Tyxml
-open Lwt.Infix
-
 type wiki_preprocessor = (module Wiki_syntax_types.Preprocessor)
 
 let identity_preprocessor =
   let module Identity_preprocessor = struct
-    let preparse_string ?href_action ?link_action _ s = Lwt.return s
-    let desugar_string ?href_action ?link_action _ s = Lwt.return s
+    let preparse_string ?href_action:_ ?link_action:_ _ s = Lwt.return s
+    let desugar_string ?href_action:_ ?link_action:_ _ s = Lwt.return s
   end in
   (module Identity_preprocessor : Wiki_syntax_types.Preprocessor)
 

@@ -1,4 +1,3 @@
-open Wiki_types
 open Tyxml
 
 type box_info = {

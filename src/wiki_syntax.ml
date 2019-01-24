@@ -56,10 +56,6 @@ let rec filter_raw = function (* /!\ NOT TAIL REC /!\ *)
   | None :: xs -> filter_raw xs
   | Some x :: xs -> x :: filter_raw xs
 
-let apply_opt f = function
-  | None -> None
-  | Some x -> Some (f x)
-
 let unopt ~def = function
   | None -> def
   | Some x -> x
@@ -146,44 +142,6 @@ let uri_of_href = function
   | Absolute s -> s
   | Document {document; fragment} -> Document.to_uri ?fragment document
 
-let link_regexp =
-  Re.Pcre.regexp "([a-z|A-Z-1-9]+)(\\((.*)\\))?:(.*)"
-let wiki_title_regexp = Re.Pcre.regexp "\"([a-z|A-Z_][a-zA-Z_0-9-]*)\""
-let wiki_id_regexp = Re.Pcre.regexp "([0-9]+)"
-let prototype_group = 1
-let wiki_id_parentheses_group = 2 (* with ()... *)
-let wiki_id_group = 3
-let page_group = 4
-
-let replace_regexp_group ~str ~result ~group ~replacement =
-  let open Re.Pcre in
-  let before =
-    String.sub str 0 (Re.Group.start result group)
-  in
-  let after =
-    let e = Re.Group.stop result group in
-    String.sub str e (String.length str - e)
-  in
-  before ^ replacement ^ after
-
-let sub_string ?from ?to_ str =
-  let from = match from with Some ix -> ix | None -> 0 in
-  let to_ = match to_ with Some ix -> ix | None -> String.length str in
-  String.sub str from (to_ - from)
-
-let has_prefix ?(offset=0) ~prefix str =
-  String.(length str - offset > length prefix && sub str offset (length prefix) = prefix)
-
-(** If [list] starts with [prefix] and ends with [res] (i.e. [list = prefix @ res]
-    [list_suffix ~prefix list] return [Some res], otherwise [None].  *)
-let list_suffix ~prefix list =
-  let rec aux = function
-      [], res -> Some res
-    | x::xs, y::ys when x = y -> aux (xs, ys)
-    | _ -> None
-  in
-  aux (prefix, list)
-
 let normalize_link _ _ _ _ = Lwt.return None
 
 let starts_with prefix s =
@@ -228,12 +186,12 @@ let wiki_kind prot page =
       let root = Global.root () in
       Absolute (Paths.(rewind root file +/+ !Global.root_to_site +/+ wiki +/+ page))
 
-let this_wiki_kind prot page =
+let this_wiki_kind _prot page =
   let file = Global.current_file () in
   let root = Global.root () in
   Absolute (Paths.(rewind root file +/+ page))
 
-let link_kind bi addr =
+let link_kind _bi addr =
   match deabbrev_address addr |> String.split_on_char ':' with
   | p :: rest ->
     let page = String.concat ":" rest in (* the page may contain ':' *)
@@ -241,7 +199,7 @@ let link_kind bi addr =
       | "href" ->
         let menu_page = Global.using_menu_file (fun mf ->
             let open Utils.Operators in
-            let {Global.root; manual; api} = Global.options () in
+            let {Global.root; manual; api; _} = Global.options () in
             let file = Global.current_file () in
             let is_manual = manual
                             <$> (fun m -> Paths.(is_inside_dir (root +/+ m) file))
@@ -982,14 +940,6 @@ module MakeParser(B: RawParser) :
 
 end
 
-let make_href bi addr fragment =
-  (* FIXME remember how it was desugared! *)
-  match addr with
-  | Absolute _ -> addr
-  | Document {document; _} ->
-    bi.bi_add_link document;
-    addr
-
 let menu_make_href = href_of_link_kind
 
 (*******************************************)
@@ -1060,7 +1010,7 @@ end
 
 module FlowBuilder = struct
 
-  let chars s = Lwt.return [Html.pcdata s]
+  let chars s = Lwt.return [Html.txt s]
 
   let strong_elem attribs content =
     let a = opt_of_list (parse_common_attribs attribs) in
@@ -1120,7 +1070,7 @@ module FlowBuilder = struct
                  |> Html.a_href
                  |> (fun x -> x :: a))
         (let open Utils.Operators in
-         text >>= (fun t -> Some [Html.pcdata t]) |? c)
+         text >>= (fun t -> Some [Html.txt t]) |? c)
       :> Html_types.phrasing Html.elt)]
 
   let a_elem_flow attribs addr c =
@@ -1149,11 +1099,11 @@ module FlowBuilder = struct
       [(Html.span ~a r : [>`Span] Html.elt)]
 
 
-  let nbsp = Lwt.return [(Html.pcdata " " : [>`PCDATA] Html.elt)]
+  let nbsp = Lwt.return [(Html.txt " " : [>`PCDATA] Html.elt)]
 
-  let endash = Lwt.return [(Html.pcdata "–" : [>`PCDATA] Html.elt)]
+  let endash = Lwt.return [(Html.txt "–" : [>`PCDATA] Html.elt)]
 
-  let emdash = Lwt.return [(Html.pcdata "—" : [>`PCDATA] Html.elt)]
+  let emdash = Lwt.return [(Html.txt "—" : [>`PCDATA] Html.elt)]
 
   let p_elem attribs content =
     let a = opt_of_list (parse_common_attribs attribs) in
@@ -1163,7 +1113,7 @@ module FlowBuilder = struct
   let pre_elem attribs content =
     let a = opt_of_list (parse_common_attribs attribs) in
     Lwt.return
-      [(Html.pre ?a [Html.pcdata (String.concat "" content)]
+      [(Html.pre ?a [Html.txt (String.concat "" content)]
           : [>`Pre] Html.elt)]
 
   let add_backref attribs r =
@@ -1171,7 +1121,7 @@ module FlowBuilder = struct
       try
         let id = List.assoc "id" attribs in
         let open Html in
-        r @ [ pcdata " ";
+        r @ [ txt " ";
               a ~a:[a_class ["backref"]; a_href ("#" ^ id)]
                 [entity "#182"]
             ]
@@ -1260,7 +1210,7 @@ module FlowBuilder = struct
   let table_elem attribs l =
     let a = opt_of_list (parse_common_attribs attribs) in
     let caption =
-      try Some (Html.caption [Html.pcdata (List.assoc "summary" attribs)])
+      try Some (Html.caption [Html.txt (List.assoc "summary" attribs)])
       with Not_found -> None
     in
     match l with
@@ -1271,7 +1221,7 @@ module FlowBuilder = struct
 
   let error =
     (fun (s : string) ->
-      Lwt.return [(Html.strong [Html.pcdata s] : [>`Strong] Html.elt)])
+      Lwt.return [(Html.strong [Html.txt s] : [>`Strong] Html.elt)])
 
   let span_elem attribs content =
     let a = opt_of_list (parse_common_attribs attribs) in
@@ -1286,7 +1236,7 @@ module FlowBuilder = struct
 
   let default_extension ~name _ attribs content =
     let s = string_of_extension name attribs content in
-     Lwt.return [Html.pcdata s]
+     Lwt.return [Html.txt s]
   let default_ni_extension = default_extension
 
 end
@@ -1299,7 +1249,7 @@ module ReducedFlowBuilder = struct
 
   let img_elem _ _ _ =
     Lwt.return
-      [Html.em [Html.pcdata "Images not enabled in this syntax"]]
+      [Html.em [Html.txt "Images not enabled in this syntax"]]
 
 end
 
@@ -1318,16 +1268,16 @@ module Reduced2FlowBuilder = struct
   let h6_elem = p_elem
   let ul_elem _ _ =
     Lwt.return
-      [Html.em [Html.pcdata "Lists not enabled in this syntax"]]
+      [Html.em [Html.txt "Lists not enabled in this syntax"]]
   let ol_elem _ _ =
     Lwt.return
-      [Html.em [Html.pcdata "Lists not enabled in this syntax"]]
+      [Html.em [Html.txt "Lists not enabled in this syntax"]]
   let dl_elem _ _ =
     Lwt.return
-      [Html.em [Html.pcdata "Lists not enabled in this syntax"]]
+      [Html.em [Html.txt "Lists not enabled in this syntax"]]
   let table_elem  _ _ =
     Lwt.return
-          [Html.em [Html.pcdata "Tables not enabled in this syntax"]]
+          [Html.em [Html.txt "Tables not enabled in this syntax"]]
 end
 
 module PhrasingBuilder = struct
@@ -1345,7 +1295,7 @@ module PhrasingBuilder = struct
   let pre_elem _ _ =
          Lwt.return
           [Html.em
-             [Html.pcdata "Blocks of code not enabled in this syntax"]]
+             [Html.txt "Blocks of code not enabled in this syntax"]]
   let h1_elem = span_elem
   let h2_elem = span_elem
   let h3_elem = span_elem
@@ -1356,10 +1306,10 @@ module PhrasingBuilder = struct
   let hr_elem _ =
     Lwt.return
       [Html.em
-          [Html.pcdata "Horizontal rules not enabled in this syntax"]]
+          [Html.txt "Horizontal rules not enabled in this syntax"]]
   let table_elem _ _ =
     Lwt.return
-      [Html.em [Html.pcdata "Tables not enabled in this syntax"]]
+      [Html.em [Html.txt "Tables not enabled in this syntax"]]
 
   let ignore_a_elem_flow = ignore_a_elem_phrasing
 
@@ -1401,7 +1351,7 @@ module ButtonBuilder = struct
   include FlowBuilder
 
   let forbid0 s =
-    Lwt.return [(Html.em [Html.pcdata (s ^ " not enabled in buttons")]
+    Lwt.return [(Html.em [Html.txt (s ^ " not enabled in buttons")]
                    : [Html_types.button_content | `PCDATA] Html.elt)]
 
   let forbid1 s _ = forbid0 s
@@ -2188,7 +2138,7 @@ let () =
 
 let () =
   let f_title bi _ _ =
-    `Phrasing_without_interactive (Lwt.return [Html.pcdata bi.bi_title])
+    `Phrasing_without_interactive (Lwt.return [Html.txt bi.bi_title])
   in
   register_simple_phrasing_extension ~name:"title" f_title
 

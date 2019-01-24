@@ -16,7 +16,7 @@ depends: [
   "lwt_ppx"
   "lwt_log"
   "re"
-  "tyxml"
+  "tyxml" {>= "4.3"}
   "cmdliner"
   "yojson"
   "fileutils"

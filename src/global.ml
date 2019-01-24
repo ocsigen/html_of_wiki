@@ -4,8 +4,8 @@ let ref_current_file : string option ref = ref None
 
 let with_current_file file k =
   ignore (!ref_current_file >>= (fun f ->
-      let format = "Links.with_current_file \"%s\": file \"%s\" is currently
-being processed. Refusing to override that value." ^^ "" in
+      let format = "Links.with_current_file \"%s\": file \"%s\" is currently \
+                    being processed. Refusing to override that value." ^^ "" in
       failwith @@ Printf.sprintf format file f));
   ref_current_file := Some file;
   let r = k () in
