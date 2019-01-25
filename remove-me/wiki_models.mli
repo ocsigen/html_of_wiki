@@ -21,19 +21,26 @@
 *)
 
 type wiki_preprocessor = (module Wiki_syntax_types.Preprocessor)
+
 val identity_preprocessor : wiki_preprocessor
 
+val preparse_string :
+     ?href_action:Wiki_syntax_types.link_action
+  -> ?link_action:Wiki_syntax_types.link_action
+  -> wiki_preprocessor
+  -> Wiki_types.wikibox
+  -> string
+  -> string
 (** See [Wiki_syntax_types.Preprocessor.preparse_string] *)
-val preparse_string:
-  ?href_action:Wiki_syntax_types.link_action ->
-  ?link_action:Wiki_syntax_types.link_action ->
-  wiki_preprocessor -> Wiki_types.wikibox -> string -> string
 
-(** See [Wiki_syntax_types.Preprocessor.desugar_string] *)
 val desugar_string :
-  ?href_action:Wiki_syntax_types.link_action ->
-  ?link_action:Wiki_syntax_types.link_action ->
-  wiki_preprocessor -> Wiki_syntax_types.desugar_param -> string -> string
+     ?href_action:Wiki_syntax_types.link_action
+  -> ?link_action:Wiki_syntax_types.link_action
+  -> wiki_preprocessor
+  -> Wiki_syntax_types.desugar_param
+  -> string
+  -> string
+(** See [Wiki_syntax_types.Preprocessor.desugar_string] *)
 
-type +'res wiki_parser =
-  Wiki_widgets_interface.box_info -> string -> 'res (* pretty printer *)
+type +'res wiki_parser = Wiki_widgets_interface.box_info -> string -> 'res
+(* pretty printer *)
