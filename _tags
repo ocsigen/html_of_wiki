@@ -1,8 +1,0 @@
-true: bin_annot, annot, thread
-true: package(re)
-true: package(tyxml)
-true: package(cmdliner)
-true: package(js_of_ocaml-ppx_deriving_json)
-true: package(ppx_deriving.std)
-true: package(reason)
-true: warn(+a-4-40-41-42-44-48-58)

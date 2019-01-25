@@ -1,0 +1,5 @@
+(executables
+  (names wit)
+  (public_names wit)
+  (package html_of_wiki)
+  (libraries re cmdliner))

@@ -6,9 +6,28 @@ let replace_content_tag tmpl content =
   with Not_found ->
     None
 
+let read_channel_lines ic =
+  let rec readall lines =
+    try
+      let line = input_line ic in
+      readall (line :: lines)
+    with End_of_file -> List.rev lines
+  in
+  readall []
+
+let read_file_lines file =
+  let ic = open_in file in
+  let lines = read_channel_lines ic in
+  close_in ic;
+  lines
+
+let read_in_channel ic = read_channel_lines ic |> String.concat "\n"
+let read_file file = read_file_lines file |> String.concat "\n"
+
+
 let main template =
-  let tmpl = Utils.read_file template in
-  let wiki = Utils.read_in_channel stdin in
+  let tmpl = read_file template in
+  let wiki = read_in_channel stdin in
   match replace_content_tag tmpl wiki with
   | Some replacement -> print_string replacement
   | None -> Printf.fprintf stderr "no <<content>> tag found in template\n"; exit 1

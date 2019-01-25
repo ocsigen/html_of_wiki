@@ -1,6 +1,0 @@
-bin: [
-  "_build/src/ohow.byte" {"ohow"}
-  "_build/src/wit.byte" {"wit"}
-  "dop.sh" {"dop"}
-  "quickdop.sh" {"quickdop"}
-]

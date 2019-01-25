@@ -1,0 +1,5 @@
+(install
+  (section bin)
+  (package html_of_wiki)
+  (files (dop.sh as dop)
+         (quickdop.sh as quickdop)))
