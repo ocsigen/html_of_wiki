@@ -28,7 +28,11 @@ open Wiki_types
 open Wiki_syntax_types
 open Wiki_widgets_interface
 open Tyxml
-open How_lib
+
+(* TODO: use Base ? *)
+module Option = struct
+  let map ~f x = match x with None -> None | Some x -> Some (f x)
+end
 
 let class_wikibox wb = Printf.sprintf "wikiboxcontent%s" (string_of_wikibox wb)
 
@@ -58,7 +62,7 @@ let parse_common_attribs ?classes attribs =
       Some
         (Html.a_class
            (Re.split spaces (List.assoc "class" attribs) @ unopt ~def:[] classes))
-    with Not_found -> Option.map Html.a_class classes
+    with Not_found -> Option.map ~f:Html.a_class classes
   and at2 = try Some (Html.a_id (List.assoc "id" attribs)) with Not_found -> None
   and at3 =
     try Some (Html.a_style (List.assoc "style" attribs)) with Not_found -> None
@@ -538,8 +542,8 @@ module MakeParser (B : RawParser) :
                 let bi = Plugin.update_context bi attribs in
                 let xml =
                   Option.map
-                    (xml_of_wiki (cast_wp Plugin.wikiparser) bi)
-                    (Option.map String.trim content)
+                    ~f:(xml_of_wiki (cast_wp Plugin.wikiparser) bi)
+                    (Option.map ~f:String.trim content)
                 in
                 Plugin.plugin bi attribs xml )
         | LinkPlugin p, _ ->
@@ -549,8 +553,8 @@ module MakeParser (B : RawParser) :
                 let bi = Plugin.update_context bi attribs in
                 let xml =
                   Option.map
-                    (xml_of_wiki (cast_niwp Plugin.wikiparser) bi)
-                    (Option.map String.trim content)
+                    ~f:(xml_of_wiki (cast_niwp Plugin.wikiparser) bi)
+                    (Option.map ~f:String.trim content)
                 in
                 ( Plugin.plugin bi attribs xml
                   :> ( res
@@ -703,8 +707,8 @@ module MakeParser (B : RawParser) :
                 let bi = Plugin.update_context bi attribs in
                 let xml =
                   Option.map
-                    (xml_of_wiki (cast_niwp Plugin.wikiparser) bi)
-                    (Option.map String.trim content)
+                    ~f:(xml_of_wiki (cast_niwp Plugin.wikiparser) bi)
+                    (Option.map ~f:String.trim content)
                 in
                 match Plugin.ni_plugin with
                 | Some f -> f bi attribs xml

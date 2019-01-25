@@ -67,4 +67,4 @@ let read_file ?(buffer_size = 4096) filename =
   close_in ch;
   Buffer.to_bytes buf |> Bytes.to_string
 
-let read d = to_source d |> How_lib.Option.force |> read_file
+let read d = match to_source d with None -> raise Not_found | Some x -> read_file x

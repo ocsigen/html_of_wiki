@@ -17,13 +17,13 @@ let attrs args =
 
 let code _bi args contents =
   `Flow5
-    (let contents = How_lib.Option.default_to "" contents |> String.trim in
+    (let contents = match contents with None -> "" | Some x -> String.trim x in
      let p_a, c_a = attrs args in
      [Html.(pre ~a:p_a [code ~a:c_a [txt contents]])])
 
 let code_inline _bi args contents =
   `Phrasing_without_interactive
-    (let contents = How_lib.Option.default_to "" contents |> String.trim in
+    (let contents = match contents with None -> "" | Some x -> String.trim x in
      let _, c_a = attrs args in
      [Html.(code ~a:c_a [txt contents])])
 
