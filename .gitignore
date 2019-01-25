@@ -2,4 +2,5 @@ _build/
 *.byte
 *.native
 *.swp
+.merlin
 client.js

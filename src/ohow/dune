@@ -1,0 +1,9 @@
+(executables
+  (names ohow)
+  (public_names ohow)
+  (package html_of_wiki)
+  (libraries tyxml re cmdliner unix)
+  (modules_without_implementation wiki_syntax_types)
+  (preprocess (pps js_of_ocaml-ppx_deriving_json ppx_deriving.std)))
+
+(ocamllex (modules wikicreole))
