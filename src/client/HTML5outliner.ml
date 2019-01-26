@@ -1,3 +1,5 @@
+open Js_of_ocaml
+
 exception Not_implemented
 
 let sectionning_content = ["article"; "aside"; "nav"; "section"]
