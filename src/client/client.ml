@@ -1,5 +1,5 @@
 open Js_of_ocaml
-open Tyxml
+open Common
 
 let reason_error = "(* Error while translating to Reason *) \n"
 
@@ -23,10 +23,9 @@ let () =
                  if div
                  then
                    try
-                     let open How_lib.Option in
                      HTML5outliner.find_previous_heading nav
                      |> Js.Opt.to_option
-                     >>= HTML5outliner.get_fragment
+                     |> Option.bind ~f:HTML5outliner.get_fragment
                    with Not_found -> None
                  else None
                in
@@ -111,7 +110,7 @@ let translate existing =
       highlight_element code';
       (* remove translatable, so that we only do this once *)
       existing##.className := Js.string "language-ocaml"
-    with e -> existing##.className := Js.string "language-ocaml error" )
+    with _e -> existing##.className := Js.string "language-ocaml error" )
 
 let convert pre =
   let code = Dom_html.(createCode document) in
@@ -142,7 +141,6 @@ let toggle_reason () =
            let t = Js.string "language-ocaml error" in
            to_list (Dom_html.document##getElementsByClassName t)
            |> List.iter remove_error_message;
-           let tmp = Js.to_string body##.className in
            class_list##remove (Js.string "reason") )
          else
            let t = Js.string "translatable" in

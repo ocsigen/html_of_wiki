@@ -28,11 +28,7 @@ open Wiki_types
 open Wiki_syntax_types
 open Wiki_widgets_interface
 open Tyxml
-
-(* TODO: use Base ? *)
-module Option = struct
-  let map ~f x = match x with None -> None | Some x -> Some (f x)
-end
+open Common
 
 let class_wikibox wb = Printf.sprintf "wikiboxcontent%s" (string_of_wikibox wb)
 

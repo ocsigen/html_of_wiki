@@ -45,9 +45,9 @@ let do_outline wp bi args c =
      in
      let nav = (if div then Html.div else Html.nav) ~a content in
      let script =
-       let params = {Bridge.elem; restrict; depth; ignore; nav = id; div} in
+       let params = {Common.Bridge.elem; restrict; depth; ignore; nav = id; div} in
        let buf = Buffer.create 256 in
-       Bridge.outline_params_to_json buf params;
+       Common.Bridge.outline_params_to_json buf params;
        let js =
          "window.addEventListener(\"load\", function(){ outline("
          ^ Buffer.contents buf
