@@ -3,4 +3,4 @@ _build/
 *.native
 *.swp
 .merlin
-client.js
+html_of_wiki.install

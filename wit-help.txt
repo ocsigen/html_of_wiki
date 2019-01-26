@@ -1,0 +1,39 @@
+NAME
+       wit - Inlines a wikicreole file into another one with a <<content>>
+       tag.
+
+SYNOPSIS
+       wit [OPTION]... TMPL
+
+DESCRIPTION
+       wit reads wikicreole content from stdin and inserts it inside the
+       given template file TMPL in place of the first <<content>> tag found
+       and outputs the result on stdout.
+
+       The TMPL file is never modified.
+
+ARGUMENTS
+       TMPL (required)
+           The template to put the wiki into.
+
+OPTIONS
+       --help[=FMT] (default=auto)
+           Show this help in format FMT. The value FMT must be one of `auto',
+           `pager', `groff' or `plain'. With `auto', the format is `pager` or
+           `plain' whenever the TERM env var is `dumb' or undefined.
+
+       --version
+           Show version information.
+
+EXIT STATUS
+       wit exits with the following status:
+
+       0   on success.
+
+       124 on command line parsing errors.
+
+       125 on unexpected internal errors (bugs).
+
+BUGS
+       Escaping <<content>> tags has no effect, the tag is still recognized.
+
