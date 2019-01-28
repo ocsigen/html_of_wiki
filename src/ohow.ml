@@ -5,7 +5,7 @@
 *)
 open Utils.Operators
 
-let build_page content =
+let build_page file content =
   let rec flatten elt = Tyxml_xml.(
       match content elt with
       | PCDATA _ -> [elt]
@@ -36,6 +36,12 @@ let build_page content =
     | Some s -> s
     | None -> ""
   in
+  let a_cl =
+    file ::
+    match (Global.options ()).project with
+    | Some p -> [ p ]
+    | None -> []
+  in
   Tyxml.Html.(html
                 (head (title (txt ti))
                    ([ meta ~a:[a_charset "utf8"] ()
@@ -43,7 +49,7 @@ let build_page content =
                               ; a_name "viewport" ] () ]
                     @ (Site_ocsimore.(List.map make_css @@ List.rev !css_links))
                     @ (Site_ocsimore.(List.map make_script @@ List.rev !head_scripts))))
-                (body content))
+                (body ~a:[ a_class a_cl ] content))
 
 let pprint oc html =
   let fmt = Format.formatter_of_out_channel oc in
@@ -64,7 +70,7 @@ let ohow file oc =
   |> (fun c ->
       if (Global.options ()).headless
       then List.iter (pprint oc) c
-      else pprint oc (build_page c));
+      else pprint oc (build_page (infer_wiki_name file) c));
   close_out oc
 
 let get_output_channel output_channel file = match output_channel with
