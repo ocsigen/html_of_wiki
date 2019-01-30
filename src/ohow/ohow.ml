@@ -74,7 +74,7 @@ let ohow file oc =
   |> fun c ->
   if (Global.options ()).headless
   then List.iter (pprint oc) c
-  else pprint oc (build_page (infer_wiki_name file) c));
+  else pprint oc (build_page (Filename.basename (infer_wiki_name file)) c));
   close_out oc
 
 let get_output_channel output_channel file =
