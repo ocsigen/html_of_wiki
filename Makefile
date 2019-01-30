@@ -1,14 +1,19 @@
-all: ohow wit
+.PHONY: all
+all:
+	dune build src/wit/wit.exe src/ohow/ohow.exe
 
-ohow:
-	ocamlbuild -use-ocamlfind -ocamlc "ocamlc ${CFLAGS}" src/ohow.byte
+.PHONY: client
+client:
+	dune build src/client/client.js
 
-wit:
-	ocamlbuild -use-ocamlfind -ocamlc "ocamlc ${CFLAGS}" src/wit.byte
+.PHONY: fmt
+fmt:
+	dune build @fmt --auto-promote
 
-.PHONY: linkchecker2json
-linkchecker2json:
-	sbcl --load src/linkchecker2json.lisp <<< "(sb-ext:save-lisp-and-die \"linkchecker2json\" :toplevel #'main :executable t)"
+.PHONY: gen-help
+gen-help:
+	dune build ohow-help.txt wit-help.txt
 
+.PHONY: clean
 clean:
-	ocamlbuild -clean
+	dune clean

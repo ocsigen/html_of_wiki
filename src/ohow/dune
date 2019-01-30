@@ -1,0 +1,9 @@
+(executables
+  (names ohow)
+  (public_names ohow)
+  (package html_of_wiki)
+  (libraries tyxml re cmdliner unix common)
+  (modules_without_implementation wiki_syntax_types)
+)
+
+(ocamllex (modules wikicreole))

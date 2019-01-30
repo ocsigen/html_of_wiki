@@ -1,0 +1,19 @@
+opam-version: "2.0"
+name: "html_of_wiki"
+version: "2.0"
+synopsis: "A wikicreole to HTML compiler"
+maintainer: "dev@ocsigen.org"
+authors: "<dev@ocsigen.org>, Léo Valais <leo.valais97@gmail.com>"
+homepage: "https://github.com/ocsigen/html_of_wiki/"
+bug-reports: "https://github.com/ocsigen/html_of_wiki/issues"
+license: "LGPL-2.1 with OCaml linking exception"
+build: [["dune" "build" "-p" name "-j" jobs]]
+
+depends: [
+  "ocamlfind"
+  "re"
+  "tyxml" {>= "4.3"}
+  "cmdliner"
+  "js_of_ocaml-ppx_deriving_json"
+  "ppx_deriving"
+]

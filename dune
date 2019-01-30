@@ -1,0 +1,17 @@
+(install
+  (section bin)
+  (package html_of_wiki)
+  (files (dop.sh as dop)
+         (quickdop.sh as quickdop)))
+
+(rule
+ (targets ohow-help.txt)
+ (deps ./src/ohow/ohow.exe)
+ (mode promote)
+ (action (with-stdout-to %{targets} (run %{deps} --help=plain))))
+
+(rule
+ (targets wit-help.txt)
+ (deps ./src/wit/wit.exe)
+ (mode promote)
+ (action (with-stdout-to %{targets} (run %{deps} --help=plain))))
