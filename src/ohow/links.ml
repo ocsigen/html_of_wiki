@@ -24,7 +24,7 @@ let manual_link contents = function
               +/+ c)
         | Some p, None ->
             Paths.(
-              rewind root file +/+ !Global.root_to_site +/+ p +/+ version +/+ "index")
+              rewind root file +/+ !Global.root_to_site +/+ p +/+ "index.html")
         | None, Some c -> Paths.(rewind root file +/+ manual +/+ c)
         | None, None -> failwith "a_manual: no project nor chapter arg found"
       in
