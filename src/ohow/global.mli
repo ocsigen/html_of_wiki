@@ -29,7 +29,6 @@ val manual_menu_file : unit -> string option
 val api_menu_file : unit -> string option
 (** Returns [Some (menu_file ())] if [menu_file ()] is [Api f] or [None] otherwise. *)
 
-(** A type containing the values of the CLI options accepted by ohow. *)
 type cli_options =
   { files : string list
   ; print : bool
@@ -47,6 +46,7 @@ type cli_options =
   ; template : string option
   ; csw : string list
   ; docversions : string list }
+(** A type containing the values of the CLI options accepted by ohow. *)
 
 val with_options : cli_options -> (unit -> 'a) -> 'a
 (** [with_options opts k] sets the [options] fo [opts] and calls [k ()].

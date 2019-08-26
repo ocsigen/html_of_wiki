@@ -16,7 +16,8 @@ end
 val id : 'a -> 'a
 (** The identity function. *)
 
-val zipk : (('a -> 'b) -> 'c) -> (('d -> 'e) -> 'b) -> ('a -> 'd -> 'e) -> 'c
+val zipk :
+  (('a -> 'b) -> 'c) -> (('d -> 'e) -> 'b) -> ('a -> 'd -> 'e) -> 'c
 (** Continuation argument zipper.
     [f (fun a -> g (fun b -> ...))] = [zipk f g (fun a b -> ...)] *)
 
@@ -33,7 +34,8 @@ val is_none : 'a option -> bool
 val trim : char -> string -> string
 (** [trim c s] returns [s] with the trailing occurences of [c] removed. *)
 
-val sorted_dir_files : (string list -> string list) -> string -> string list
+val sorted_dir_files :
+  (string list -> string list) -> string -> string list
 (** [sorted_dir_files sort dir] returns the list of the files inside [dir]
     sorted using the given [sort] function. *)
 

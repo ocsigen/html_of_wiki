@@ -1,9 +1,18 @@
 module Operators = struct
-  let ( >>= ) x f = match x with Some x -> f x | None -> None
+  let ( >>= ) x f =
+    match x with
+    | Some x -> f x
+    | None -> None
 
-  let ( <$> ) x f = match x with Some x -> Some (f x) | None -> None
+  let ( <$> ) x f =
+    match x with
+    | Some x -> Some (f x)
+    | None -> None
 
-  let ( |? ) x default = match x with Some x -> x | None -> default
+  let ( |? ) x default =
+    match x with
+    | Some x -> x
+    | None -> default
 
   let ( +/+ ) p q = Paths.(p +/+ q)
 end
@@ -12,11 +21,16 @@ let id x = x
 
 let zipk f g k = f (fun fk -> g (fun gk -> k fk gk))
 
-let check_errors = List.iter (fun (err, b) -> if Lazy.force b then () else failwith err)
+let check_errors =
+  List.iter (fun (err, b) -> if Lazy.force b then () else failwith err)
 
-let is_some = function Some _ -> true | None -> false
+let is_some = function
+  | Some _ -> true
+  | None -> false
 
-let is_none = function Some _ -> false | None -> true
+let is_none = function
+  | Some _ -> false
+  | None -> true
 
 let trim char string =
   let rem_first s = String.sub s 1 (String.length s - 1) in

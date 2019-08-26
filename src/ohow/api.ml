@@ -12,7 +12,9 @@ let check_capitalized_path path =
   List.iter
     (fun name ->
       if not (is_capitalized name)
-      then raise (Error (Printf.sprintf "%S is not a valid module name" name)) )
+      then
+        raise
+          (Error (Printf.sprintf "%S is not a valid module name" name)))
     path
 
 let parse_lid id =
@@ -20,19 +22,27 @@ let parse_lid id =
   | id :: rpath when not (is_capitalized id) ->
       check_capitalized_path rpath;
       List.rev rpath, id
-  | _ -> raise (Error (Printf.sprintf "invalid ocaml id %S" (String.concat "" id)))
+  | _ ->
+      raise
+        (Error
+           (Printf.sprintf "invalid ocaml id %S" (String.concat "" id)))
 
 let parse_uid id =
   match List.rev (Re.split dot (String.concat "" id)) with
   | id :: rpath when is_capitalized id ->
       check_capitalized_path rpath;
       List.rev rpath, id
-  | _ -> raise (Error (Printf.sprintf "invalid ocaml id %S" (String.concat "" id)))
+  | _ ->
+      raise
+        (Error
+           (Printf.sprintf "invalid ocaml id %S" (String.concat "" id)))
 
 let parse_method id =
   let re = Re.char '#' |> Re.compile in
   match Re.split re id with
-  | [id; mid] when (not (is_capitalized id)) && not (is_capitalized mid) -> id, mid
+  | [id; mid] when (not (is_capitalized id)) && not (is_capitalized mid)
+    ->
+      id, mid
   | _ -> raise (Error (Printf.sprintf "invalid method name %S" id))
 
 let parse_contents contents =
@@ -87,7 +97,6 @@ let parse_contents contents =
       | x :: _ -> raise (Error ("invalid contents: " ^ x))
       | [] -> raise (Error "empty contents") )
 
-(** OCaml identifier *)
 type id =
   string list
   * [ `Mod of string
@@ -110,9 +119,14 @@ type id =
     | `IndexClassTypes
     | `IndexModules
     | `IndexModuleTypes ]
+(** OCaml identifier *)
 
 let path_of_id ?prefix id =
-  let add_prefix s = match prefix with None -> s | Some p -> p ^ s in
+  let add_prefix s =
+    match prefix with
+    | None -> s
+    | Some p -> p ^ s
+  in
   match id with
   | _path, `Index -> add_prefix "index"
   | _path, `IndexTypes -> add_prefix "index_types"
@@ -124,7 +138,8 @@ let path_of_id ?prefix id =
   | _path, `IndexClassTypes -> add_prefix "index_class_types"
   | _path, `IndexModules -> add_prefix "index_modules"
   | _path, `IndexModuleTypes -> add_prefix "index_module_types"
-  | path, `ModType name | path, `Mod name -> String.concat "." (path @ [name])
+  | path, `ModType name | path, `Mod name ->
+      String.concat "." (path @ [name])
   | path, `ClassType name | path, `Class name -> (
     match prefix with
     | None -> String.concat "." (path @ [name]) ^ "-c"

@@ -32,13 +32,16 @@ let identity_preprocessor =
   (module Identity_preprocessor : Wiki_syntax_types.Preprocessor)
 
 let preparse_string ?href_action ?link_action wpp p c =
-  let module Preprocessor = (val wpp : Wiki_syntax_types.Preprocessor) in
+  let module Preprocessor = (val wpp : Wiki_syntax_types.Preprocessor)
+  in
   Preprocessor.preparse_string ?href_action ?link_action p c
 
 let desugar_string ?href_action ?link_action wpp p c =
-  let module Preprocessor = (val wpp : Wiki_syntax_types.Preprocessor) in
+  let module Preprocessor = (val wpp : Wiki_syntax_types.Preprocessor)
+  in
   Preprocessor.desugar_string ?href_action ?link_action p c
 
-type +'res wiki_parser = Wiki_widgets_interface.box_info -> string -> 'res
+type +'res wiki_parser =
+  Wiki_widgets_interface.box_info -> string -> 'res
 
 (* pretty printer *)

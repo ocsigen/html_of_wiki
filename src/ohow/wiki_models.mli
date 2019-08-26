@@ -42,5 +42,7 @@ val desugar_string :
   -> string
 (** See [Wiki_syntax_types.Preprocessor.desugar_string] *)
 
-type +'res wiki_parser = Wiki_widgets_interface.box_info -> string -> 'res
+type +'res wiki_parser =
+  Wiki_widgets_interface.box_info -> string -> 'res
+
 (* pretty printer *)

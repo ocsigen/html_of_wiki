@@ -28,8 +28,12 @@ type script_kind =
 
 let make_script = function
   | Src src ->
-      Html.(script ~a:[a_mime_type "text/javascript"; a_src src] (cdata_script ""))
-  | Js js -> Html.(script ~a:[a_mime_type "text/javascript"] (cdata_script js))
+      Html.(
+        script
+          ~a:[a_mime_type "text/javascript"; a_src src]
+          (cdata_script ""))
+  | Js js ->
+      Html.(script ~a:[a_mime_type "text/javascript"] (cdata_script js))
 
 let process_script args c =
   match List.assoc "src" args with
@@ -80,14 +84,21 @@ let get_inline _bi args = List.mem_assoc "inline" args
 let do_wip _bi _args xml =
   `Flow5
     (let xml =
-       match xml with Some c -> (c :> Html_types.flow5 Html.elt list) | None -> []
+       match xml with
+       | Some c -> (c :> Html_types.flow5 Html.elt list)
+       | None -> []
      in
-     Html.[aside ~a:[a_class ["wip"]] (header [h5 [txt "Work in progress"]] :: xml)])
+     Html.
+       [ aside
+           ~a:[a_class ["wip"]]
+           (header [h5 [txt "Work in progress"]] :: xml) ])
 
 let do_wip_inline _bi args xml =
   `Phrasing_without_interactive
     (let xml =
-       match xml with Some c -> (c :> Html_types.phrasing Html.elt list) | None -> []
+       match xml with
+       | Some c -> (c :> Html_types.phrasing Html.elt list)
+       | None -> []
      in
      let t = try List.assoc "title" args with Not_found -> "WIP: " in
      Html.[span ~a:[a_class ["wip"]] (strong [txt t] :: xml)])
@@ -98,27 +109,39 @@ let do_wip_inline _bi args xml =
 let do_concepts _bi args xml =
   `Flow5
     (let xml =
-       match xml with Some c -> (c :> Html_types.flow5 Html.elt list) | None -> []
+       match xml with
+       | Some c -> (c :> Html_types.flow5 Html.elt list)
+       | None -> []
      in
      let attrs = Wiki_syntax.parse_common_attribs args in
      Html.
-       [aside ~a:(a_class ["concepts"] :: attrs) (header [h5 [txt "Concepts"]] :: xml)])
+       [ aside
+           ~a:(a_class ["concepts"] :: attrs)
+           (header [h5 [txt "Concepts"]] :: xml) ])
 
 (* Concept *)
 
-let get_title _bi args = try List.assoc "title" args with Not_found -> "Concept"
+let get_title _bi args =
+  try List.assoc "title" args with Not_found -> "Concept"
 
 let do_concept bi args xml =
   `Flow5
     (let xml =
-       match xml with Some c -> (c :> Html_types.flow5 Html.elt list) | None -> []
+       match xml with
+       | Some c -> (c :> Html_types.flow5 Html.elt list)
+       | None -> []
      in
      let t = get_title bi args in
      let attrs = Wiki_syntax.parse_common_attribs args in
      Html.
        [ aside
            ~a:(a_class ["concept"] :: attrs)
-           ( header [h5 [span ~a:[a_class ["concept_prefix"]] [txt "Concept: "]; txt t]]
+           ( header
+               [ h5
+                   [ span
+                       ~a:[a_class ["concept_prefix"]]
+                       [txt "Concept: "]
+                   ; txt t ] ]
            :: xml ) ])
 
 (*****************************************************************************)
@@ -126,7 +149,11 @@ let do_concept bi args xml =
 
 let do_paragraph _bi args xml =
   `Flow5
-    (let xml = match xml with Some c -> (c :> _ Html.elt list) | None -> [] in
+    (let xml =
+       match xml with
+       | Some c -> (c :> _ Html.elt list)
+       | None -> []
+     in
      let attrs = Wiki_syntax.parse_common_attribs args in
      Html.[div ~a:(a_class ["paragraph"] :: attrs) xml])
 
@@ -143,27 +170,50 @@ let do_client_server_switch _ args _ =
       let file = Global.current_file () in
       let attrs = Wiki_syntax.parse_common_attribs args in
       let is_api = Paths.(is_inside_dir (root +/+ api) file) in
-      let is_client = Paths.(is_inside_dir (root +/+ api +/+ client) file) in
-      let is_server = Paths.(is_inside_dir (root +/+ api +/+ server) file) in
+      let is_client =
+        Paths.(is_inside_dir (root +/+ api +/+ client) file)
+      in
+      let is_server =
+        Paths.(is_inside_dir (root +/+ api +/+ server) file)
+      in
       let wiki = Filename.basename file in
       let make_switch = function
         | None -> []
         | Some other ->
-            let html = Filename.chop_extension wiki ^ Global.suffix () in
-            let href = Paths.(rewind (root +/+ api) file +/+ other +/+ html) in
-            let checked = if other = server then [Html.a_checked ()] else [] in
+            let html =
+              Filename.chop_extension wiki ^ Global.suffix ()
+            in
+            let href =
+              Paths.(rewind (root +/+ api) file +/+ other +/+ html)
+            in
+            let checked =
+              if other = server then [Html.a_checked ()] else []
+            in
             let onchange = "location = '" ^ href ^ "';" in
             Html.
               [ label
                   ~a:(a_class ["csw-switch"] :: attrs)
-                  [ input ~a:([a_input_type `Checkbox; a_onchange onchange] @ checked) ()
-                  ; span ~a:[a_class ["csw-slider"; "csw-slider-style-round"]] []
-                  ; span ~a:[a_class ["csw-slider-no"]] [txt "Server version"]
-                  ; span ~a:[a_class ["csw-slider-yes"]] [txt "Client version"] ] ]
+                  [ input
+                      ~a:
+                        ( [a_input_type `Checkbox; a_onchange onchange]
+                        @ checked )
+                      ()
+                  ; span
+                      ~a:
+                        [ a_class
+                            ["csw-slider"; "csw-slider-style-round"] ]
+                      []
+                  ; span
+                      ~a:[a_class ["csw-slider-no"]]
+                      [txt "Server version"]
+                  ; span
+                      ~a:[a_class ["csw-slider-yes"]]
+                      [txt "Client version"] ] ]
       in
       let make = function
         | [] -> []
-        | wikis when is_api && List.exists (fun s -> s = wiki) wikis -> (
+        | wikis when is_api && List.exists (fun s -> s = wiki) wikis
+          -> (
           match is_client, is_server with
           | true, false -> make_switch @@ Some server
           | false, true -> make_switch @@ Some client
@@ -180,7 +230,8 @@ let do_google_search _ args _ =
   let image =
     match Ocsimore_lib.get_opt args "icon" with
     | Some i -> i
-    | None -> failwith "googlesearch: must provide an \"icon\" path to use"
+    | None ->
+        failwith "googlesearch: must provide an \"icon\" path to use"
   in
   let domain =
     match Ocsimore_lib.get_opt args "domain" with
@@ -191,7 +242,10 @@ let do_google_search _ args _ =
     [ form
         ~a:[a_id "googlesearch"; a_action "https://google.com/search"]
         [ input
-            ~a:[a_name "q"; a_id "gsearch-box"; a_placeholder "Search using Google"]
+            ~a:
+              [ a_name "q"
+              ; a_id "gsearch-box"
+              ; a_placeholder "Search using Google" ]
             ()
         ; label
             ~a:[a_label_for "gsearch-box"]
@@ -201,19 +255,26 @@ let do_google_search _ args _ =
               [ a_input_type `Submit
               ; a_id "gsearch-submit"
               ; a_onclick
-                @@ "document.getElementById('gsearch-box').value += ' site:"
+                @@ "document.getElementById('gsearch-box').value += ' \
+                    site:"
                 ^ domain
                 ^ "';" ]
             () ] ]
   |> fun x -> `Flow5 x
 
 let init () =
-  Wiki_syntax.register_simple_flow_extension ~name:"script" ~reduced:false do_script;
+  Wiki_syntax.register_simple_flow_extension
+    ~name:"script"
+    ~reduced:false
+    do_script;
   Wiki_syntax.register_simple_flow_extension
     ~name:"head-script"
     ~reduced:false
     do_head_script;
-  Wiki_syntax.register_simple_flow_extension ~name:"head-css" ~reduced:false do_head_css;
+  Wiki_syntax.register_simple_flow_extension
+    ~name:"head-css"
+    ~reduced:false
+    do_head_css;
   Wiki_syntax.register_wiki_flow_extension
     ~reduced:false
     ~name:"wip"

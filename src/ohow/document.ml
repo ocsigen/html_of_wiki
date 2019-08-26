@@ -6,7 +6,10 @@ let pp_exn _ _ = ()
 
 type t =
   | Site of string
-  | Project of {page : t'; version : Version.t; project : string}
+  | Project of
+      { page : t'
+      ; version : Version.t
+      ; project : string }
   | Deadlink of exn
 [@@deriving show]
 
@@ -15,12 +18,16 @@ and t' =
   | Template
   | Page of string
   | Manual of string
-  | Api of {subproject : string; file : string}
+  | Api of
+      { subproject : string
+      ; file : string }
 [@@deriving show]
 
 let to_string src with_html d =
   let src, ext =
-    if src then "src/", ".wiki" else "", if with_html then ".html" else ""
+    if src
+    then "src/", ".wiki"
+    else "", if with_html then ".html" else ""
   in
   match d with
   | Site s -> s ^ ext
@@ -31,7 +38,10 @@ let to_string src with_html d =
         | Page p -> p ^ ext
         | Manual m -> "manual/" ^ src ^ m ^ ext
         | Api {subproject; file} ->
-            "api/" ^ (if subproject = "" then "" else subproject ^ "/") ^ file ^ ext
+            "api/"
+            ^ (if subproject = "" then "" else subproject ^ "/")
+            ^ file
+            ^ ext
         | Template -> assert false (* handled above... *)
         | Static (p, `File) | Static (p, `Folder) -> "manual/files/" ^ p
       in
@@ -45,7 +55,12 @@ let to_source = function
 let to_output d = !output ^ to_string false true d
 
 let to_uri ?fragment x =
-  "/" ^ to_string false false x ^ match fragment with None -> "" | Some f -> "#" ^ f
+  "/"
+  ^ to_string false false x
+  ^
+  match fragment with
+  | None -> ""
+  | Some f -> "#" ^ f
 
 let compare a b = String.compare (to_output a) (to_output b)
 
@@ -67,4 +82,7 @@ let read_file ?(buffer_size = 4096) filename =
   close_in ch;
   Buffer.to_bytes buf |> Bytes.to_string
 
-let read d = match to_source d with None -> raise Not_found | Some x -> read_file x
+let read d =
+  match to_source d with
+  | None -> raise Not_found
+  | Some x -> read_file x

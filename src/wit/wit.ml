@@ -34,22 +34,36 @@ let main template =
 
 let tmpl_cmd =
   let doc = "The template to put the wiki into." in
-  Cmdliner.Arg.(required & pos ~rev:true 0 (some file) None & info [] ~docv:"TMPL" ~doc)
+  Cmdliner.Arg.(
+    required
+    & pos ~rev:true 0 (some file) None
+    & info [] ~docv:"TMPL" ~doc)
 
 let info_cmd =
   Cmdliner.(
-    let doc = "Inlines a wikicreole file into another one with a <<content>> tag." in
+    let doc =
+      "Inlines a wikicreole file into another one with a <<content>> \
+       tag."
+    in
     let man =
       [ `S Manpage.s_description
       ; `P
-          "$(tname) reads wikicreole content from stdin and inserts it inside the given \
-           template file $(b,TMPL) in place of the first <<content>> tag found and \
-           outputs the result on stdout."
+          "$(tname) reads wikicreole content from stdin and inserts it \
+           inside the given template file $(b,TMPL) in place of the \
+           first <<content>> tag found and outputs the result on \
+           stdout."
       ; `P "The $(b,TMPL) file is never modified."
       ; `S Manpage.s_bugs
-      ; `P "Escaping <<content>> tags has no effect, the tag is still recognized." ]
+      ; `P
+          "Escaping <<content>> tags has no effect, the tag is still \
+           recognized." ]
     in
-    Term.info "wit" ~version:"v0.0.0" ~doc ~exits:Term.default_exits ~man)
+    Term.info
+      "wit"
+      ~version:"v0.0.0"
+      ~doc
+      ~exits:Term.default_exits
+      ~man)
 
 let () =
   let wit_cmd = Cmdliner.Term.(const main $ tmpl_cmd) in
