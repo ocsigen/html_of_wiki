@@ -20,13 +20,22 @@ open Tyxml
 
 let do_outline wp bi args c =
   `Flow5
-    (let elem = try `Id (List.assoc "target" args) with Not_found -> `Container in
-     let restrict = try Some (List.assoc "restrict" args) with Not_found -> None in
-     let depth = try Some (int_of_string (List.assoc "depth" args)) with _ -> None in
+    (let elem =
+       try `Id (List.assoc "target" args) with Not_found -> `Container
+     in
+     let restrict =
+       try Some (List.assoc "restrict" args) with Not_found -> None
+     in
+     let depth =
+       try Some (int_of_string (List.assoc "depth" args))
+       with _ -> None
+     in
      let content =
        match c with
        | None -> []
-       | Some c -> (Wiki_syntax.xml_of_wiki wp bi c :> Html_types.flow5 Html.elt list)
+       | Some c ->
+           ( Wiki_syntax.xml_of_wiki wp bi c
+             :> Html_types.flow5 Html.elt list )
      in
      let ignore =
        Ocsimore_lib.get ~default:"nav aside" args "ignore"
@@ -41,11 +50,15 @@ let do_outline wp bi args c =
      (* FIXME allow multiple blocks? *)
      let a =
        Html.a_id id
-       :: Wiki_syntax.parse_common_attribs ~classes:["ocsimore_outline"] args
+       :: Wiki_syntax.parse_common_attribs
+            ~classes:["ocsimore_outline"]
+            args
      in
      let nav = (if div then Html.div else Html.nav) ~a content in
      let script =
-       let params = {Common.Bridge.elem; restrict; depth; ignore; nav = id; div} in
+       let params =
+         {Common.Bridge.elem; restrict; depth; ignore; nav = id; div}
+       in
        let buf = Buffer.create 256 in
        Common.Bridge.outline_params_to_json buf params;
        let js =
@@ -63,13 +76,18 @@ let f_link _bi args c =
   let page = Ocsimore_lib.list_assoc_default "page" args "" in
   let href = Ocsimore_lib.list_assoc_opt "href" args in
   let fragment = Ocsimore_lib.list_assoc_opt "fragment" args in
-  let content = match c with Some c -> c | None -> [Html.txt page] in
+  let content =
+    match c with
+    | Some c -> c
+    | None -> [Html.txt page]
+  in
   (* class and id attributes will be taken by Wiki_syntax.a_elem *)
   ( Wiki_syntax_types.Absolute
       ( match href, fragment with
       | Some href, _ -> href
       | _, None -> Printf.sprintf "/%s/%s" wiki page
-      | _, Some fragment -> Printf.sprintf "/%s/%s#%s" wiki page fragment )
+      | _, Some fragment ->
+          Printf.sprintf "/%s/%s#%s" wiki page fragment )
   , args
   , content )
 
@@ -79,17 +97,25 @@ let do_drawer wp bi args c =
     (let attrs = Wiki_syntax.parse_common_attribs args in
      let content =
        match c with
-       | Some c -> (Wiki_syntax.xml_of_wiki wp bi c :> Html_types.flow5 Html.elt list)
+       | Some c ->
+           ( Wiki_syntax.xml_of_wiki wp bi c
+             :> Html_types.flow5 Html.elt list )
        | None -> []
      in
-     let button = input ~a:[a_id "how-drawer-toggle"; a_input_type `Checkbox] () in
+     let button =
+       input ~a:[a_id "how-drawer-toggle"; a_input_type `Checkbox] ()
+     in
      let label =
        label
          ~a:[a_label_for "how-drawer-toggle"; a_id "how-drawer-label"]
          [span ~a:[a_class ["how-drawer-icon"]] []]
      in
      let content = nav ~a:[a_class ["how-drawer-content"]] content in
-     let elt = aside ~a:(a_class ["how-drawer"] :: attrs) [button; label; content] in
+     let elt =
+       aside
+         ~a:(a_class ["how-drawer"] :: attrs)
+         [button; label; content]
+     in
      [elt])
 
 let do_when_project _ _ args c =
@@ -100,25 +126,34 @@ let do_when_project _ _ args c =
     match opts with
     | [Some p; None] -> p, ( = )
     | [None; Some p] -> p, ( <> )
-    | [None; None] -> fail "required arguments missing: \"when\" or \"unless\""
+    | [None; None] ->
+        fail "required arguments missing: \"when\" or \"unless\""
     | [Some _; Some _] ->
-        fail "mutually incompatible arguments provided: \"when\", \"unless\""
+        fail
+          "mutually incompatible arguments provided: \"when\", \
+           \"unless\""
     | _ -> fail "unexpected argument list provided"
   in
   (Global.options ()).project
   >>= (fun current ->
         if predicate project current
         then Some (`Flow5 (c <$> Wiki_syntax.compile |? []))
-        else None )
+        else None)
   |? `Flow5 []
 
 let do_when_local _ _ _ c =
   let open Utils.Operators in
-  `Flow5 (if (Global.options ()).local then c <$> Wiki_syntax.compile |? [] else [])
+  `Flow5
+    ( if (Global.options ()).local
+    then c <$> Wiki_syntax.compile |? []
+    else [] )
 
 let do_unless_local _ _ _ c =
   let open Utils.Operators in
-  `Flow5 (if not (Global.options ()).local then c <$> Wiki_syntax.compile |? [] else [])
+  `Flow5
+    ( if not (Global.options ()).local
+    then c <$> Wiki_syntax.compile |? []
+    else [] )
 
 let init () =
   Wiki_syntax.register_raw_wiki_extension
@@ -131,8 +166,12 @@ let init () =
     ~wp:Wiki_syntax.wikicreole_parser_without_header_footer
     ~wp_rec:Wiki_syntax.wikicreole_parser_without_header_footer
     do_outline;
-  Wiki_syntax.register_link_flow_extension ~name:"link" {Wiki_syntax.lfpp = f_link};
-  Wiki_syntax.register_link_phrasing_extension ~name:"link-inline" f_link;
+  Wiki_syntax.register_link_flow_extension
+    ~name:"link"
+    {Wiki_syntax.lfpp = f_link};
+  Wiki_syntax.register_link_phrasing_extension
+    ~name:"link-inline"
+    f_link;
   Wiki_syntax.register_raw_wiki_extension
     ~name:"drawer"
     ~wp:Wiki_syntax.wikicreole_parser

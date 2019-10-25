@@ -2,7 +2,9 @@ open Utils.Operators
 open Tyxml
 
 let a_link_of_uri ?fragment suffix uri contents =
-  let uri = suffix <$> (fun s -> Paths.concat_uri_suffix s uri) |? uri in
+  let uri =
+    suffix <$> (fun s -> Paths.concat_uri_suffix s uri) |? uri
+  in
   let uri = uri ^ (fragment <$> (fun f -> "#" ^ f) |? "") in
   Html.a ~a:[Html.a_href uri] [Html.txt (contents |? uri)]
 
@@ -24,9 +26,13 @@ let manual_link contents = function
               +/+ c)
         | Some p, None ->
             Paths.(
-              rewind root file +/+ !Global.root_to_site +/+ p +/+ "index.html")
+              rewind root file
+              +/+ !Global.root_to_site
+              +/+ p
+              +/+ "index.html")
         | None, Some c -> Paths.(rewind root file +/+ manual +/+ c)
-        | None, None -> failwith "a_manual: no project nor chapter arg found"
+        | None, None ->
+            failwith "a_manual: no project nor chapter arg found"
       in
       let link =
         match fragment with
@@ -46,10 +52,21 @@ let api_link prefix contents = function
         match project, subproject, dsp with
         | Some p, Some s, _ ->
             Paths.(
-              rewind root file +/+ !Global.root_to_site +/+ p +/+ version +/+ api +/+ s)
+              rewind root file
+              +/+ !Global.root_to_site
+              +/+ p
+              +/+ version
+              +/+ api
+              +/+ s)
         | Some p, None, _ ->
-            Paths.(rewind root file +/+ !Global.root_to_site +/+ p +/+ version +/+ api)
-        | None, Some s, _ | None, None, Some s -> Paths.(rewind root file +/+ api +/+ s)
+            Paths.(
+              rewind root file
+              +/+ !Global.root_to_site
+              +/+ p
+              +/+ version
+              +/+ api)
+        | None, Some s, _ | None, None, Some s ->
+            Paths.(rewind root file +/+ api +/+ s)
         | None, None, None -> Paths.rewind root file +/+ api
       in
       let uri = Filename.concat base @@ Api.path_of_id ?prefix id in
@@ -92,6 +109,6 @@ let init () =
              name
              ["project"; "subproject"; "text"; "version"]
              ~defaults:[None; None; None; Some "latest"]
-             (api_link prefix) );
+             (api_link prefix));
     register "a_img" ["src"] img_link;
     register "a_file" ["src"] file_link)

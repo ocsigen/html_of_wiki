@@ -11,7 +11,8 @@ let build_page file content =
       match content elt with
       | PCDATA _ -> [elt]
       | Entity _ -> [elt]
-      | Node (_name, _a, children) -> List.map flatten children |> List.flatten
+      | Node (_name, _a, children) ->
+          List.map flatten children |> List.flatten
       | _ -> [])
     (* ignore the others *)
   in
@@ -30,28 +31,40 @@ let build_page file content =
         | Tyxml_xml.Node (_, _, children) -> (
           match f children with
           | Some _title as r -> r (* return the first one *)
-          | None -> f t (* not found among children, try with the siblings *) )
+          | None ->
+              f t (* not found among children, try with the siblings *)
+          )
         | _ -> None )
       (* not found at all *)
     in
     f @@ List.map Tyxml_html.toelt blocks
   in
-  let ti = match extract_h1 content with Some s -> s | None -> "" in
+  let ti =
+    match extract_h1 content with
+    | Some s -> s
+    | None -> ""
+  in
   let a_cl =
-    file ::
-    match (Global.options ()).project with
-    | Some p -> [ p ]
-    | None -> []
+    file
+    ::
+    ( match (Global.options ()).project with
+    | Some p -> [p]
+    | None -> [] )
   in
   Tyxml.Html.(
     html
-      (head (title (txt ti))
-         ([ meta ~a:[a_charset "utf8"] ()
-          ; meta ~a:[ a_content "width=device-width, initial-scale=1"
-                    ; a_name "viewport" ] () ]
-          @ (Site_ocsimore.(List.map make_css @@ List.rev !css_links))
-          @ (Site_ocsimore.(List.map make_script @@ List.rev !head_scripts))))
-      (body ~a:[ a_class a_cl ] content))
+      (head
+         (title (txt ti))
+         ( [ meta ~a:[a_charset "utf8"] ()
+           ; meta
+               ~a:
+                 [ a_content "width=device-width, initial-scale=1"
+                 ; a_name "viewport" ]
+               () ]
+         @ Site_ocsimore.(List.map make_css @@ List.rev !css_links)
+         @ Site_ocsimore.(
+             List.map make_script @@ List.rev !head_scripts) ))
+      (body ~a:[a_class a_cl] content))
 
 let pprint oc html =
   let fmt = Format.formatter_of_out_channel oc in
@@ -67,14 +80,17 @@ let ohow file oc =
   ( file
   |> Utils.read_file
   |> (fun wiki ->
-      match (Global.options ()).template with
-      | Some template ->
-        Utils.read_file template |> Wiki_syntax.compile_with_content wiki
-      | None -> Wiki_syntax.compile wiki)
+       match (Global.options ()).template with
+       | Some template ->
+           Utils.read_file template
+           |> Wiki_syntax.compile_with_content wiki
+       | None -> Wiki_syntax.compile wiki)
   |> fun c ->
   if (Global.options ()).headless
   then List.iter (pprint oc) c
-  else pprint oc (build_page (Filename.basename (infer_wiki_name file)) c));
+  else
+    pprint oc (build_page (Filename.basename (infer_wiki_name file)) c)
+  );
   close_out oc
 
 let get_output_channel output_channel file =
@@ -84,7 +100,7 @@ let get_output_channel output_channel file =
 
 let process_file _opts output_channel file =
   Global.with_current_file file (fun () ->
-      get_output_channel output_channel file |> ohow file )
+      get_output_channel output_channel file |> ohow file)
 
 let init_extensions () =
   Wiki_ext.init ();
@@ -112,11 +128,13 @@ let main
     ; local
     ; files } =
   Utils.check_errors
-    ["Some input files doesn't exist...", lazy (List.for_all Sys.file_exists files)];
+    [ ( "Some input files doesn't exist..."
+      , lazy (List.for_all Sys.file_exists files) ) ];
   init_extensions ();
   let root = Paths.realpath root in
   let relative_to_root p =
-    try Paths.path_rm_prefix root @@ Paths.realpath p with Failure _ -> p
+    try Paths.path_rm_prefix root @@ Paths.realpath p
+    with Failure _ -> p
   in
   let manual = manual <$> relative_to_root in
   let api = api <$> relative_to_root in
@@ -150,6 +168,6 @@ let main
         | _ -> None )
       |> process_file opts
       |> List.iter )
-      @@ files )
+      @@ files)
 
 let () = Cli.run main

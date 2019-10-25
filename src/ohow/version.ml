@@ -50,7 +50,10 @@ let compare v v' =
         | [], [] -> 0
         | [], y :: _ -> compint 0 y
         | x :: _, [] -> compint x 0
-        | x :: xs, y :: ys -> ( match compint x y with 0 -> cmp xs ys | n -> n )
+        | x :: xs, y :: ys -> (
+          match compint x y with
+          | 0 -> cmp xs ys
+          | n -> n )
       in
       cmp v v'
 
@@ -80,4 +83,6 @@ let match_ pattern v =
       in
       cmp lpat l
 
-let to_string = function Dev -> "dev" | V (s, _, _) -> s
+let to_string = function
+  | Dev -> "dev"
+  | V (s, _, _) -> s

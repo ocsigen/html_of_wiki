@@ -1,5 +1,5 @@
 sequence-style=terminator
-margin=90
+margin=73
 if-then-else=keyword-first
 infix-precedence=parens
 parens-tuple=multi-line-only
@@ -10,4 +10,5 @@ break-struct=force
 field-space=loose
 wrap-fun-args=false
 wrap-comments=false
-version=0.8
+break-cases=toplevel
+version=0.11.0

@@ -7,8 +7,8 @@ let with_current_file file k =
     ( !ref_current_file
     >>= fun f ->
     let format =
-      "Links.with_current_file \"%s\": file \"%s\" is currently being processed. \
-       Refusing to override that value."
+      "Links.with_current_file \"%s\": file \"%s\" is currently being \
+       processed. Refusing to override that value."
       ^^ ""
     in
     failwith @@ Printf.sprintf format file f );
@@ -20,7 +20,8 @@ let with_current_file file k =
 let using_current_file k =
   match !ref_current_file with
   | Some file -> k file
-  | None -> failwith "Links.using_current_file: current_file is not set."
+  | None ->
+      failwith "Links.using_current_file: current_file is not set."
 
 let current_file () = using_current_file Utils.id
 
@@ -33,7 +34,8 @@ let ref_menu_file : menu_file option ref = ref None
 let with_menu_file mf k =
   ignore
     ( !ref_menu_file
-    >>= (function Manual s | Api s -> Some s)
+    >>= (function
+          | Manual s | Api s -> Some s)
     >>= fun s -> failwith @@ "menu_file " ^ s ^ "already set. Abort." );
   ref_menu_file := Some mf;
   let r = k () in
@@ -44,9 +46,17 @@ let using_menu_file k = !ref_menu_file <$> k
 
 let menu_file () = !ref_menu_file
 
-let manual_menu_file () = !ref_menu_file >>= function Manual s -> Some s | _ -> None
+let manual_menu_file () =
+  !ref_menu_file
+  >>= function
+  | Manual s -> Some s
+  | _ -> None
 
-let api_menu_file () = !ref_menu_file >>= function Api s -> Some s | _ -> None
+let api_menu_file () =
+  !ref_menu_file
+  >>= function
+  | Api s -> Some s
+  | _ -> None
 
 type cli_options =
   { files : string list
@@ -85,16 +95,24 @@ let options () = using_options Utils.id
 let suffix () = (options ()).suffix
 
 let the_manual () =
-  match (options ()).manual with Some s -> s | None -> failwith "no manual given"
+  match (options ()).manual with
+  | Some s -> s
+  | None -> failwith "no manual given"
 
 let the_api () =
-  match (options ()).api with Some s -> s | None -> failwith "no api given"
+  match (options ()).api with
+  | Some s -> s
+  | None -> failwith "no api given"
 
 let the_images () =
-  match (options ()).images with Some s -> s | None -> failwith "no images given"
+  match (options ()).images with
+  | Some s -> s
+  | None -> failwith "no images given"
 
 let the_assets () =
-  match (options ()).assets with Some s -> s | None -> failwith "no assets given"
+  match (options ()).assets with
+  | Some s -> s
+  | None -> failwith "no assets given"
 
 (* Preserve absolute path *)
 let root () = (options ()).root
