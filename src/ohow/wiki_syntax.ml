@@ -1439,7 +1439,10 @@ module FlowBuilder = struct
     let a = opt_of_list (parse_table_cell_attribs attribs) in
     let r = List.flatten c in
     if h
-    then Html.th ?a r
+    then Html.th ?a 
+        ( r
+          : Html_types.phrasing Html.elt list
+          :> Html_types.th_content_fun Html.elt list )
     else
       Html.td
         ?a
