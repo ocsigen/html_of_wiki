@@ -8,7 +8,7 @@
   .manproject {color: red}
   .mandir {color: orange}
   .manchap {color: red}
-  .intro {
+  .chapterintro {
      background-color: #F8F8F8;
      padding: 5px 25px;
      width: 90%;
@@ -21,7 +21,7 @@
 >>
 
 =html_of_wiki
-<<div class="intro"|
+<<div class="chapterintro"|
   <<span class="monospace"|html_of_wiki>> is a versatile, minimalist yet powerful **static website generator**.
   It is designed with simplicity in mind: no special directories, almost no configuration
   and everything working out of the box. No web server required, just the compilation of
