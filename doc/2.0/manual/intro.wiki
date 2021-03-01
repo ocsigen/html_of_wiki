@@ -22,6 +22,7 @@
 
 
 =html_of_wiki
+
 <<div class="chapterintro"|
   <<span class="monospace"|html_of_wiki>> is a versatile, minimalist yet powerful **static website generator**.
   It is designed with simplicity in mind: no special directories, almost no configuration
