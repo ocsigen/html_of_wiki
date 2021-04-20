@@ -1,6 +1,3 @@
+_opam/
 _build/
-*.byte
-*.native
-*.swp
-.merlin
-html_of_wiki.install
+*.install
