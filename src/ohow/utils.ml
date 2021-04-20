@@ -22,7 +22,11 @@ let id x = x
 let zipk f g k = f (fun fk -> g (fun gk -> k fk gk))
 
 let check_errors =
-  List.iter (fun (err, b) -> if Lazy.force b then () else failwith err)
+  List.iter (fun (err, b) ->
+      if Lazy.force b then
+        ()
+      else
+        failwith err)
 
 let is_some = function
   | Some _ -> true
@@ -48,12 +52,12 @@ let dir_files = sorted_dir_files id
 let a'_sorted_dir_files = sorted_dir_files (List.sort compare)
 
 let rec find_files name = function
-  | file when Filename.basename file = name -> [file]
+  | file when Filename.basename file = name -> [ file ]
   | dir when Sys.is_directory dir ->
-      dir_files dir
-      |> List.map (fun f -> Paths.(dir +/+ f))
-      |> List.map (find_files name)
-      |> List.concat
+    dir_files dir
+    |> List.map (fun f -> Paths.(dir +/+ f))
+    |> List.map (find_files name)
+    |> List.concat
   | _ -> []
 
 let uri_absolute =
@@ -65,14 +69,16 @@ let read_channel_lines ic =
     try
       let line = input_line ic in
       readall (line :: lines)
-    with End_of_file -> List.rev lines
+    with
+    | End_of_file -> List.rev lines
   in
   readall []
 
 let read_file_lines file =
   let ic = open_in file in
   let lines = read_channel_lines ic in
-  close_in ic; lines
+  close_in ic;
+  lines
 
 let read_in_channel ic = read_channel_lines ic |> String.concat "\n"
 
