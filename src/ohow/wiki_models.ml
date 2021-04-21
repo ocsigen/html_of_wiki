@@ -16,10 +16,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *)
-(**
-   @author Vincent Balat
-   @author Boris Yakobowski
-*)
+(** @author Vincent Balat
+    @author Boris Yakobowski *)
 
 type wiki_preprocessor = (module Wiki_syntax_types.Preprocessor)
 
@@ -32,16 +30,13 @@ let identity_preprocessor =
   (module Identity_preprocessor : Wiki_syntax_types.Preprocessor)
 
 let preparse_string ?href_action ?link_action wpp p c =
-  let module Preprocessor = (val wpp : Wiki_syntax_types.Preprocessor)
-  in
+  let module Preprocessor = (val wpp : Wiki_syntax_types.Preprocessor) in
   Preprocessor.preparse_string ?href_action ?link_action p c
 
 let desugar_string ?href_action ?link_action wpp p c =
-  let module Preprocessor = (val wpp : Wiki_syntax_types.Preprocessor)
-  in
+  let module Preprocessor = (val wpp : Wiki_syntax_types.Preprocessor) in
   Preprocessor.desugar_string ?href_action ?link_action p c
 
-type +'res wiki_parser =
-  Wiki_widgets_interface.box_info -> string -> 'res
+type +'res wiki_parser = Wiki_widgets_interface.box_info -> string -> 'res
 
 (* pretty printer *)

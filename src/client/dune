@@ -1,8 +1,12 @@
-(executables
-  (names client)
-  (libraries js_of_ocaml tyxml common reason)
-  (preprocess (pps js_of_ocaml-ppx))
-  (js_of_ocaml)
-)
+(executable
+ (name client)
+ (libraries common js_of_ocaml reason tyxml)
+ (preprocess
+  (pps js_of_ocaml-ppx))
+ (modes js))
 
-(rule (copy client.bc.js client.js))
+(rule
+ (target client.js)
+ (deps client.bc.js)
+ (action
+  (copy %{deps} %{target})))

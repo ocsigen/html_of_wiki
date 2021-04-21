@@ -1,6 +1,6 @@
 .PHONY: all
 all:
-	dune build src/wit/wit.exe src/ohow/ohow.exe
+	dune build @all
 
 .PHONY: client
 client:

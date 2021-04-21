@@ -1,18 +1,19 @@
 let spaces = Re.rep1 Re.blank |> Re.compile
 
-let seps = Re.rep1 (Re.alt [Re.blank; Re.char '\n']) |> Re.compile
+let seps = Re.rep1 (Re.alt [ Re.blank; Re.char '\n' ]) |> Re.compile
 
 let dot = Re.char '.' |> Re.compile
 
 let get_opt args name =
-  try Some (List.assoc name args) with Not_found -> None
+  try Some (List.assoc name args) with
+  | Not_found -> None
 
 let get ?default args name =
-  try List.assoc name args
-  with Not_found -> (
+  try List.assoc name args with
+  | Not_found -> (
     match default with
     | None -> raise (Error.Error ("no \"" ^ name ^ "\" option."))
-    | Some d -> d )
+    | Some d -> d)
 
 module String = struct
   include String
@@ -25,10 +26,13 @@ module String = struct
 end
 
 let list_assoc_opt a l =
-  try Some (List.assoc a l) with Not_found -> None
+  try Some (List.assoc a l) with
+  | Not_found -> None
 
 let list_assoc_default a l default =
-  try List.assoc a l with Not_found -> default
+  try List.assoc a l with
+  | Not_found -> default
 
 let list_assoc_exn a l exn =
-  try List.assoc a l with Not_found -> raise exn
+  try List.assoc a l with
+  | Not_found -> raise exn

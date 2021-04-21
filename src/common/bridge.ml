@@ -2,7 +2,8 @@
 
 type elem =
   [ `Id of string
-  | `Container ]
+  | `Container
+  ]
 [@@deriving json]
 
 type outline_params =
@@ -11,5 +12,6 @@ type outline_params =
   ; depth : int option
   ; ignore : string list
   ; nav : string
-  ; div : bool }
+  ; div : bool
+  }
 [@@deriving json]

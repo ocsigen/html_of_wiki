@@ -1,6 +1,6 @@
 (* Ocsimore
  * Copyright (C) 2008
- * Laboratoire PPS - Université Paris Diderot - CNRS
+ * Laboratoire PPS - Universitï¿½ Paris Diderot - CNRS
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -16,15 +16,14 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *)
-(**
-   Parser for Wikicreole
-   @author Jérôme Vouillon
-   @author Vincent Balat
-   @author Boris Yakobowski
-*)
+(** Parser for Wikicreole
 
-type attribs = (string * string) list
+    @author Jerome Vouillon
+    @author Vincent Balat
+    @author Boris Yakobowski *)
+
 (** Xml-like attributes for the extension (eg val='foo') *)
+type attribs = (string * string) list
 
 module type RawBuilder = sig
   type href
@@ -43,23 +42,19 @@ module type RawBuilder = sig
 
   val chars : string -> phrasing_without_interactive
 
-  val strong_elem :
-    attribs -> phrasing list -> phrasing_without_interactive
+  val strong_elem : attribs -> phrasing list -> phrasing_without_interactive
 
   val em_elem : attribs -> phrasing list -> phrasing_without_interactive
 
   val br_elem : attribs -> phrasing_without_interactive
 
-  val img_elem :
-    attribs -> href -> string -> phrasing_without_interactive
+  val img_elem : attribs -> href -> string -> phrasing_without_interactive
 
   val tt_elem : attribs -> phrasing list -> phrasing_without_interactive
 
-  val monospace_elem :
-    attribs -> phrasing list -> phrasing_without_interactive
+  val monospace_elem : attribs -> phrasing list -> phrasing_without_interactive
 
-  val underlined_elem :
-    attribs -> phrasing list -> phrasing_without_interactive
+  val underlined_elem : attribs -> phrasing list -> phrasing_without_interactive
 
   val linethrough_elem :
     attribs -> phrasing list -> phrasing_without_interactive
@@ -79,8 +74,7 @@ module type RawBuilder = sig
   val a_elem_phrasing :
     attribs -> href -> phrasing_without_interactive list -> phrasing
 
-  val a_elem_flow :
-    attribs -> href -> flow_without_interactive list -> flow
+  val a_elem_flow : attribs -> href -> flow_without_interactive list -> flow
 
   val make_href : param -> string -> string option -> href
 
@@ -107,19 +101,13 @@ module type RawBuilder = sig
   val section_elem : attribs -> flow list -> flow_without_interactive
 
   val ul_elem :
-       attribs
-    -> (phrasing list * uo_list option * attribs) list
-    -> uo_list
+    attribs -> (phrasing list * uo_list option * attribs) list -> uo_list
 
   val ol_elem :
-       attribs
-    -> (phrasing list * uo_list option * attribs) list
-    -> uo_list
+    attribs -> (phrasing list * uo_list option * attribs) list -> uo_list
 
   val dl_elem :
-       attribs
-    -> (bool * phrasing list * attribs) list
-    -> flow_without_interactive
+    attribs -> (bool * phrasing list * attribs) list -> flow_without_interactive
 
   val hr_elem : attribs -> flow_without_interactive
 
@@ -137,9 +125,8 @@ module type RawBuilder = sig
   val error : string -> phrasing_without_interactive
 end
 
-type (-'param, +'res) plugin =
-  'param -> attribs -> string option -> 'res
 (** *)
+type (-'param, +'res) plugin = 'param -> attribs -> string option -> 'res
 
 type plugin_resolver = Resolver of (string -> plugin_resolver option)
 
@@ -150,10 +137,10 @@ module type Builder = sig
     [ `Flow5_link of href * attribs * flow_without_interactive
     | `Phrasing_link of href * attribs * phrasing_without_interactive
     | `Flow5 of flow
-    | `Phrasing_without_interactive of phrasing_without_interactive ]
+    | `Phrasing_without_interactive of phrasing_without_interactive
+    ]
 
-  val plugin :
-    string -> plugin_resolver option * (param, plugin_content) plugin
+  val plugin : string -> plugin_resolver option * (param, plugin_content) plugin
 
   val plugin_action : string -> int -> int -> (param, unit) plugin
 
@@ -168,8 +155,4 @@ type ('param, 'res) builder =
   (module Builder with type param = 'param and type flow = 'res)
 
 val from_string :
-     ?sectioning:bool
-  -> 'param
-  -> ('param, 'res) builder
-  -> string
-  -> 'res list
+  ?sectioning:bool -> 'param -> ('param, 'res) builder -> string -> 'res list

@@ -123,7 +123,8 @@ OPTIONS
        -r, --hl, --headless
            Produces raw HTML without head tag and not inside a body tag.
 
-       --root=DIR (absent=/home/hugo/l/html_of_wiki/_build/default)
+       --root=DIR
+       (absent=/home/smorimoto/src/github.com/ocsigen/html_of_wiki/_build/default)
            Use the given root directory.
 
        -t FILE, --template=FILE

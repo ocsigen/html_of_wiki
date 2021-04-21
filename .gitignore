@@ -1,6 +1,4 @@
 _build/
-*.byte
-*.native
-*.swp
-.merlin
-html_of_wiki.install
+_opam/
+.vscode/
+*.install

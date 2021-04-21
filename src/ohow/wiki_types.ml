@@ -8,4 +8,4 @@ let string_of_wikibox _ = ""
 
 type wiki_rights = unit
 
-type wiki_info = {wiki_descr : string}
+type wiki_info = { wiki_descr : string }
