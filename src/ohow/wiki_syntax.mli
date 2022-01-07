@@ -202,7 +202,8 @@ val register_raw_wiki_extension :
       -> ('a, 'b, 'c) plugin_content)
   -> unit
 
-(* Add a "flow" syntax extension to all predefined parser (that accept flow !) *)
+(* Add a "flow" syntax extension to all predefined parser (that accept flow
+   !) *)
 
 val register_simple_flow_extension :
      name:string

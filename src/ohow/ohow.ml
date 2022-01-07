@@ -69,7 +69,6 @@ let pprint oc html =
   Format.pp_print_flush fmt ()
 
 let infer_wiki_name = Filename.remove_extension
-
 let infer_output_file file = infer_wiki_name file ^ ".html"
 
 let ohow file oc =
@@ -79,10 +78,9 @@ let ohow file oc =
         Utils.read_file template |> Wiki_syntax.compile_with_content wiki
       | None -> Wiki_syntax.compile wiki )
   |> fun c ->
-    if (Global.options ()).headless then
-      List.iter (pprint oc) c
-    else
-      pprint oc (build_page (Filename.basename (infer_wiki_name file)) c) );
+    if (Global.options ()).headless
+    then List.iter (pprint oc) c
+    else pprint oc (build_page (Filename.basename (infer_wiki_name file)) c) );
   close_out oc
 
 let get_output_channel output_channel file =
@@ -127,8 +125,7 @@ let main
   init_extensions ();
   let root = Paths.realpath root in
   let relative_to_root p =
-    try Paths.path_rm_prefix root @@ Paths.realpath p with
-    | Failure _ -> p
+    try Paths.path_rm_prefix root @@ Paths.realpath p with Failure _ -> p
   in
   let manual = manual <$> relative_to_root in
   let api = api <$> relative_to_root in

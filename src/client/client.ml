@@ -20,15 +20,14 @@ let () =
              , None )
            | `Container ->
              let fragment =
-               if div then
+               if div
+               then
                  try
                    HTML5outliner.find_previous_heading nav
                    |> Js.Opt.to_option
                    |> Option.bind ~f:HTML5outliner.get_fragment
-                 with
-                 | Not_found -> None
-               else
-                 None
+                 with Not_found -> None
+               else None
              in
              (HTML5outliner.find_container nav, fragment)
          in
@@ -57,12 +56,12 @@ let () =
 
 let to_list l =
   let rec f acc i =
-    if i < l##.length then
+    if i < l##.length
+    then
       match Js.Opt.to_option (l##item i) with
       | None -> f acc (i + 1)
       | Some x -> f (x :: acc) (i + 1)
-    else
-      List.rev acc
+    else List.rev acc
   in
   f [] 0
 
@@ -81,11 +80,11 @@ let to_reason s =
   (try
      Lexing.from_string clean |> Reason_toolchain.ML.interface_with_comments
      |> Reason_toolchain.RE.print_interface_with_comments Format.str_formatter
-   with
-  | _ ->
-    Lexing.from_string clean |> Reason_toolchain.ML.implementation_with_comments
-    |> Reason_toolchain.RE.print_implementation_with_comments
-         Format.str_formatter);
+   with _ ->
+     Lexing.from_string clean
+     |> Reason_toolchain.ML.implementation_with_comments
+     |> Reason_toolchain.RE.print_implementation_with_comments
+          Format.str_formatter);
   Format.flush_str_formatter ()
 
 (* let has_class e c = e##.classList##contains (Js.string c) |> Js.to_bool *)
@@ -111,8 +110,7 @@ let translate existing =
       highlight_element code';
       (* remove translatable, so that we only do this once *)
       existing##.className := Js.string "language-ocaml"
-    with
-    | _e -> existing##.className := Js.string "language-ocaml error")
+    with _e -> existing##.className := Js.string "language-ocaml error")
 
 let convert pre =
   let code = Dom_html.(createCode document) in
@@ -124,11 +122,9 @@ let convert pre =
 
 let remove_error_message n =
   let p = Js.Unsafe.coerce n in
-  if
-    Js.string p##.firstChild == Js.string "[object Text]"
-    && p##.firstChild##.data == Js.string reason_error
-  then
-    Js.Opt.iter n##.firstChild (fun c -> ignore (n##removeChild c))
+  if Js.string p##.firstChild == Js.string "[object Text]"
+     && p##.firstChild##.data == Js.string reason_error
+  then Js.Opt.iter n##.firstChild (fun c -> ignore (n##removeChild c))
 
 let add_error_message n =
   let t = Dom_html.document##createTextNode (Js.string reason_error) in
@@ -140,12 +136,13 @@ let toggle_reason () =
   to_list (Dom_html.document##getElementsByTagName n)
   |> List.iter (fun body ->
          let class_list = body##.classList in
-         if Js.to_bool (class_list##contains (Js.string "reason")) then (
+         if Js.to_bool (class_list##contains (Js.string "reason"))
+         then (
            let t = Js.string "language-ocaml error" in
            to_list (Dom_html.document##getElementsByClassName t)
            |> List.iter remove_error_message;
-           class_list##remove (Js.string "reason")
-         ) else
+           class_list##remove (Js.string "reason"))
+         else
            let t = Js.string "translatable" in
            to_list (Dom_html.document##getElementsByClassName t)
            |> List.iter translate;

@@ -40,7 +40,6 @@ let process_script args c =
   | _ -> failwith "script: both src and content are provided"
 
 let do_script _ args c = `Flow5 [ process_script args c |> make_script ]
-
 let head_scripts : script_kind list ref = ref []
 
 let do_head_script _ args c =
@@ -99,10 +98,7 @@ let do_wip_inline _bi args xml =
        | Some c -> (c :> Html_types.phrasing Html.elt list)
        | None -> []
      in
-     let t =
-       try List.assoc "title" args with
-       | Not_found -> "WIP: "
-     in
+     let t = try List.assoc "title" args with Not_found -> "WIP: " in
      Html.[ span ~a:[ a_class [ "wip" ] ] (strong [ txt t ] :: xml) ])
 
 (*****************************************************************************)
@@ -125,8 +121,7 @@ let do_concepts _bi args xml =
 (* Concept *)
 
 let get_title _bi args =
-  try List.assoc "title" args with
-  | Not_found -> "Concept"
+  try List.assoc "title" args with Not_found -> "Concept"
 
 let do_concept bi args xml =
   `Flow5
@@ -146,7 +141,7 @@ let do_concept bi args xml =
                   ; txt t
                   ]
               ]
-            :: xml)
+           :: xml)
        ])
 
 (*****************************************************************************)
@@ -183,12 +178,7 @@ let do_client_server_switch _ args _ =
       | Some other ->
         let html = Filename.chop_extension wiki ^ Global.suffix () in
         let href = Paths.(rewind (root +/+ api) file +/+ other +/+ html) in
-        let checked =
-          if other = server then
-            [ Html.a_checked () ]
-          else
-            []
-        in
+        let checked = if other = server then [ Html.a_checked () ] else [] in
         let onchange = "location = '" ^ href ^ "';" in
         Html.
           [ label

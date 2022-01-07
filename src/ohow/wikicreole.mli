@@ -27,33 +27,20 @@ type attribs = (string * string) list
 
 module type RawBuilder = sig
   type href
-
   type param
-
   type phrasing_without_interactive
-
   type phrasing
-
   type flow
-
   type flow_without_interactive
-
   type uo_list
 
   val chars : string -> phrasing_without_interactive
-
   val strong_elem : attribs -> phrasing list -> phrasing_without_interactive
-
   val em_elem : attribs -> phrasing list -> phrasing_without_interactive
-
   val br_elem : attribs -> phrasing_without_interactive
-
   val img_elem : attribs -> href -> string -> phrasing_without_interactive
-
   val tt_elem : attribs -> phrasing list -> phrasing_without_interactive
-
   val monospace_elem : attribs -> phrasing list -> phrasing_without_interactive
-
   val underlined_elem : attribs -> phrasing list -> phrasing_without_interactive
 
   val linethrough_elem :
@@ -66,38 +53,26 @@ module type RawBuilder = sig
     attribs -> phrasing list -> phrasing_without_interactive
 
   val nbsp : phrasing_without_interactive
-
   val endash : phrasing_without_interactive
-
   val emdash : phrasing_without_interactive
 
   val a_elem_phrasing :
     attribs -> href -> phrasing_without_interactive list -> phrasing
 
   val a_elem_flow : attribs -> href -> flow_without_interactive list -> flow
-
   val make_href : param -> string -> string option -> href
 
   (* the string option is the fragment part of the URL (#...)*)
 
   val string_of_href : href -> string
-
   val p_elem : attribs -> phrasing list -> flow_without_interactive
-
   val pre_elem : attribs -> string list -> flow_without_interactive
-
   val h1_elem : attribs -> phrasing list -> flow_without_interactive
-
   val h2_elem : attribs -> phrasing list -> flow_without_interactive
-
   val h3_elem : attribs -> phrasing list -> flow_without_interactive
-
   val h4_elem : attribs -> phrasing list -> flow_without_interactive
-
   val h5_elem : attribs -> phrasing list -> flow_without_interactive
-
   val h6_elem : attribs -> phrasing list -> flow_without_interactive
-
   val section_elem : attribs -> flow list -> flow_without_interactive
 
   val ul_elem :
@@ -117,11 +92,8 @@ module type RawBuilder = sig
     -> flow_without_interactive
 
   val phrasing : phrasing_without_interactive -> phrasing
-
   val flow : flow_without_interactive -> flow
-
   val list : uo_list -> flow_without_interactive
-
   val error : string -> phrasing_without_interactive
 end
 
@@ -141,7 +113,6 @@ module type Builder = sig
     ]
 
   val plugin : string -> plugin_resolver option * (param, plugin_content) plugin
-
   val plugin_action : string -> int -> int -> (param, unit) plugin
 
   val link_action :

@@ -110,7 +110,6 @@ module rec ExtParser : sig
     include Parser
 
     type res_without_interactive
-
     type link_content
 
     type wikiparser =
@@ -159,9 +158,7 @@ module rec ExtParser : sig
        Could be replaced by a GADT with Ocaml 3.13. *)
     module type WikiPlugin = sig
       type rec_res
-
       type rec_res_without_interactive
-
       type rec_link_content
 
       val wikiparser :
@@ -176,15 +173,12 @@ module rec ExtParser : sig
         -> Wiki_widgets_interface.box_info
 
       val plugin : rec_res wiki_plugin
-
       val ni_plugin : rec_res_without_interactive wiki_ni_plugin option
     end
 
     module type LinkPlugin = sig
       type rec_res
-
       type rec_res_without_interactive
-
       type rec_link_content
 
       val wikiparser :
@@ -203,9 +197,7 @@ module rec ExtParser : sig
 
     module type RawWikiPlugin = sig
       type rec_res
-
       type rec_res_without_interactive
-
       type rec_link_content
 
       val wikiparser :

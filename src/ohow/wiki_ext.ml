@@ -21,16 +21,13 @@ open Tyxml
 let do_outline wp bi args c =
   `Flow5
     (let elem =
-       try `Id (List.assoc "target" args) with
-       | Not_found -> `Container
+       try `Id (List.assoc "target" args) with Not_found -> `Container
      in
      let restrict =
-       try Some (List.assoc "restrict" args) with
-       | Not_found -> None
+       try Some (List.assoc "restrict" args) with Not_found -> None
      in
      let depth =
-       try Some (int_of_string (List.assoc "depth" args)) with
-       | _ -> None
+       try Some (int_of_string (List.assoc "depth" args)) with _ -> None
      in
      let content =
        match c with
@@ -53,13 +50,7 @@ let do_outline wp bi args c =
        Html.a_id id
        :: Wiki_syntax.parse_common_attribs ~classes:[ "ocsimore_outline" ] args
      in
-     let nav =
-       (if div then
-         Html.div
-       else
-         Html.nav)
-         ~a content
-     in
+     let nav = (if div then Html.div else Html.nav) ~a content in
      let script =
        let params =
          { Common.Bridge.elem; restrict; depth; ignore; nav = id; div }
@@ -134,27 +125,22 @@ let do_when_project _ _ args c =
   in
   (Global.options ()).project
   >>= (fun current ->
-        if predicate project current then
-          Some (`Flow5 (c <$> Wiki_syntax.compile |? []))
-        else
-          None)
+        if predicate project current
+        then Some (`Flow5 (c <$> Wiki_syntax.compile |? []))
+        else None)
   |? `Flow5 []
 
 let do_when_local _ _ _ c =
   let open Utils.Operators in
   `Flow5
-    (if (Global.options ()).local then
-      c <$> Wiki_syntax.compile |? []
-    else
-      [])
+    (if (Global.options ()).local then c <$> Wiki_syntax.compile |? [] else [])
 
 let do_unless_local _ _ _ c =
   let open Utils.Operators in
   `Flow5
-    (if not (Global.options ()).local then
-      c <$> Wiki_syntax.compile |? []
-    else
-      [])
+    (if not (Global.options ()).local
+    then c <$> Wiki_syntax.compile |? []
+    else [])
 
 let init () =
   Wiki_syntax.register_raw_wiki_extension ~name:"outline"

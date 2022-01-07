@@ -31,9 +31,7 @@ let ref_menu_file : menu_file option ref = ref None
 let with_menu_file mf k =
   ignore
     ( (!ref_menu_file >>= function
-       | Manual s
-       | Api s ->
-         Some s)
+       | Manual s | Api s -> Some s)
     >>= fun s -> failwith @@ "menu_file " ^ s ^ "already set. Abort." );
   ref_menu_file := Some mf;
   let r = k () in
@@ -41,7 +39,6 @@ let with_menu_file mf k =
   r
 
 let using_menu_file k = !ref_menu_file <$> k
-
 let menu_file () = !ref_menu_file
 
 let manual_menu_file () =
@@ -88,7 +85,6 @@ let using_options k =
   | None -> failwith "Global.options isn't properly intialized."
 
 let options () = using_options Utils.id
-
 let suffix () = (options ()).suffix
 
 let the_manual () =
@@ -113,11 +109,7 @@ let the_assets () =
 
 (* Preserve absolute path *)
 let root () = (options ()).root
-
 let version_dir = root
-
 let project_dir () = version_dir () |> Filename.dirname
-
 let all_projects_dir () = project_dir () |> Filename.dirname
-
 let root_to_site = ref ""

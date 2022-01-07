@@ -7,8 +7,7 @@ let doctree _ args _ =
   let find_menus p =
     try
       p >>= (fun p -> Some (root +/+ p)) <$> Utils.find_files "menu.wiki" |? []
-    with
-    | Sys_error _ -> []
+    with Sys_error _ -> []
   in
   let pman_menus = find_menus manual in
   let papi_menus = find_menus api in
@@ -42,9 +41,7 @@ let doctree _ args _ =
     let f =
       Global.(
         match mf with
-        | Manual f
-        | Api f ->
-          f)
+        | Manual f | Api f -> f)
     in
     let bi = bi_of_menu_file mf in
     Global.(with_menu_file mf (fun () -> compile bi f))
@@ -77,10 +74,7 @@ let docversion _bi args _contents =
              Paths.(rewind root file +/+ up +/+ v +/+ current_wiki_path)
            in
            let selected =
-             if Filename.basename root = v then
-               Some (a_selected ())
-             else
-               None
+             if Filename.basename root = v then Some (a_selected ()) else None
            in
            option
              ~a:(a_value dst :: (selected <$> (fun s -> [ s ]) |? []))
@@ -91,7 +85,8 @@ let docversion _bi args _contents =
     ; select
         ~a:
           (a_class [ "how-versions" ]
-           :: a_onchange "location = this.value;" :: attrs)
+          :: a_onchange "location = this.value;"
+          :: attrs)
         links
     ]
 

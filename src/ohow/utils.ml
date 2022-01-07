@@ -18,15 +18,10 @@ module Operators = struct
 end
 
 let id x = x
-
 let zipk f g k = f (fun fk -> g (fun gk -> k fk gk))
 
 let check_errors =
-  List.iter (fun (err, b) ->
-      if Lazy.force b then
-        ()
-      else
-        failwith err)
+  List.iter (fun (err, b) -> if Lazy.force b then () else failwith err)
 
 let is_some = function
   | Some _ -> true
@@ -46,9 +41,7 @@ let trim char string =
   trim string
 
 let sorted_dir_files sort dir = Sys.readdir dir |> Array.to_list |> sort
-
 let dir_files = sorted_dir_files id
-
 let a'_sorted_dir_files = sorted_dir_files (List.sort compare)
 
 let rec find_files name = function
@@ -69,8 +62,7 @@ let read_channel_lines ic =
     try
       let line = input_line ic in
       readall (line :: lines)
-    with
-    | End_of_file -> List.rev lines
+    with End_of_file -> List.rev lines
   in
   readall []
 
@@ -81,5 +73,4 @@ let read_file_lines file =
   lines
 
 let read_in_channel ic = read_channel_lines ic |> String.concat "\n"
-
 let read_file file = read_file_lines file |> String.concat "\n"

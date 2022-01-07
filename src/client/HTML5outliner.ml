@@ -8,7 +8,6 @@ let sectionning_root =
   [ "blockquote"; "body"; "details"; "fieldset"; "figure"; "td" ]
 
 let sectionning_tag = sectionning_root @ sectionning_content
-
 let heading_content = [ "h1"; "h2"; "h3"; "h4"; "h5"; "h6"; "hgroup" ]
 
 (* The h1 element is said to have the highest rank, the h6 element has the
@@ -23,7 +22,6 @@ type rank =
   | Top
 
 type outline = section list
-
 and section = Section of Dom.node Js.t list * string option * outline
 
 (* FIXME heading_content *)
@@ -44,16 +42,15 @@ exception FoundNode of Dom.node Js.t
 let find_first_heading node =
   let rec find node =
     let tag = String.lowercase_ascii (Js.to_string node##.nodeName) in
-    if List.mem tag [ "h1"; "h2"; "h3"; "h4"; "h5"; "h6" ] then
-      raise (FoundNode node)
-    else if not (List.mem tag sectionning_tag) then
-      List.iter find (Dom.list_of_nodeList node##.childNodes)
+    if List.mem tag [ "h1"; "h2"; "h3"; "h4"; "h5"; "h6" ]
+    then raise (FoundNode node)
+    else if not (List.mem tag sectionning_tag)
+    then List.iter find (Dom.list_of_nodeList node##.childNodes)
   in
   try
     find node;
     raise Not_found
-  with
-  | FoundNode t -> t
+  with FoundNode t -> t
 
 let find_previous_heading node =
   let rec previous node =
@@ -64,12 +61,12 @@ let find_previous_heading node =
   in
   let rec find node =
     let tag = String.lowercase_ascii (Js.to_string node##.nodeName) in
-    if List.mem tag [ "h1"; "h2"; "h3"; "h4"; "h5"; "h6" ] then
-      raise (FoundNode node)
-    else if not (List.mem tag sectionning_tag) then (
+    if List.mem tag [ "h1"; "h2"; "h3"; "h4"; "h5"; "h6" ]
+    then raise (FoundNode node)
+    else if not (List.mem tag sectionning_tag)
+    then (
       List.iter find (List.rev (Dom.list_of_nodeList node##.childNodes));
-      find (previous node)
-    )
+      find (previous node))
   in
   try
     find (previous node);
@@ -133,23 +130,19 @@ let rec insert_heading st ((rank, _, _) as node) =
   match st.heading with
   | Unnamed _ -> assert false
   | Named ((candidate_rank, _, _) as candidate) ->
-    if candidate_rank > rank then
+    if candidate_rank > rank
+    then
       { st with
         heading = Named node
       ; outline = []
       ; context = (candidate, st.outline) :: st.context
       }
-    else
-      insert_heading (step_up st) node
+    else insert_heading (step_up st) node
 
 let rec rebuild st =
   match (st.context, st.heading) with
-  | [], _
-  | [ ((Top, [], None), []) ], Unnamed _ ->
-    st.outline
-  | _, Named _
-  | _, Unnamed _ ->
-    rebuild (step_up st)
+  | [], _ | [ ((Top, [], None), []) ], Unnamed _ -> st.outline
+  | _, Named _ | _, Unnamed _ -> rebuild (step_up st)
 
 let init_st ?(ignore = fun _ -> false) tag =
   { heading = Unnamed tag
@@ -160,9 +153,10 @@ let init_st ?(ignore = fun _ -> false) tag =
 
 let rec walk st node =
   let tag = String.lowercase_ascii (Js.to_string node##.nodeName) in
-  if st.ignore node then
-    st
-  else if List.mem tag heading_content then
+  if st.ignore node
+  then st
+  else if List.mem tag heading_content
+  then
     let node = find_first_heading node in
     let childrens =
       List.map
@@ -180,15 +174,13 @@ let rec walk st node =
       }
     | Unnamed _ -> assert false
     | Named _ -> insert_heading st candidate
-  else if List.mem tag sectionning_root then
-    st
-  (* ignore these nodes... *)
-  else if List.mem tag sectionning_content then
+  else if List.mem tag sectionning_root
+  then st (* ignore these nodes... *)
+  else if List.mem tag sectionning_content
+  then
     let st =
       match st.context with
-      | []
-      | [ ((Top, _, _), _) ] ->
-        st
+      | [] | [ ((Top, _, _), _) ] -> st
       | _ -> step_up st
     in
     let nodes = Dom.list_of_nodeList node##.childNodes in
@@ -197,8 +189,7 @@ let rec walk st node =
       @ st.outline
     in
     { st with outline }
-  else
-    List.fold_left walk st (Dom.list_of_nodeList node##.childNodes)
+  else List.fold_left walk st (Dom.list_of_nodeList node##.childNodes)
 
 let outline ?ignore (nodes : Dom.node Js.t list) =
   List.rev (rebuild (List.fold_left walk (init_st ?ignore "toplevel") nodes))
@@ -218,19 +209,18 @@ exception FoundFragment of outline
 
 let find_fragment fragment outline =
   let rec find (Section (_, f, outline)) =
-    if f = Some fragment then
-      raise (FoundFragment outline)
-    else
-      List.iter find outline
+    if f = Some fragment
+    then raise (FoundFragment outline)
+    else List.iter find outline
   in
   try
     List.iter find outline;
     []
-  with
-  | FoundFragment outline -> outline
+  with FoundFragment outline -> outline
 
 let rec build_ol ?(depth = 0) outline =
-  (* depth = 0 means as deep as infinity (for a value of infinity equal to 2^32) *)
+  (* depth = 0 means as deep as infinity (for a value of infinity equal to
+     2^32) *)
   let ol = Dom_html.createOl Dom_html.document in
   List.iter
     (fun s -> Dom.appendChild ol (build_li ~depth:(pred depth) s))
@@ -246,6 +236,6 @@ and build_li ~depth (Section (heading, fragment, outline)) =
     a##setAttribute (Js.string "href") (Js.string @@ "#" ^ fragment);
     List.iter (Dom.appendChild a) heading;
     Dom.appendChild li a);
-  if outline <> [] && depth <> 0 then
-    Dom.appendChild li (build_ol ~depth outline);
+  if outline <> [] && depth <> 0
+  then Dom.appendChild li (build_ol ~depth outline);
   li

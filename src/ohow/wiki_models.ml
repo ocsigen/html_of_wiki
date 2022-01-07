@@ -24,7 +24,6 @@ type wiki_preprocessor = (module Wiki_syntax_types.Preprocessor)
 let identity_preprocessor =
   let module Identity_preprocessor = struct
     let preparse_string ?href_action:_ ?link_action:_ _ s = s
-
     let desugar_string ?href_action:_ ?link_action:_ _ s = s
   end in
   (module Identity_preprocessor : Wiki_syntax_types.Preprocessor)

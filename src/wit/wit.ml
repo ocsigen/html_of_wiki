@@ -3,16 +3,14 @@ let replace_content_tag tmpl content =
   try
     ignore @@ Re.Str.search_forward regexp tmpl 0;
     Some (Re.Str.substitute_first regexp (fun _ -> content) tmpl)
-  with
-  | Not_found -> None
+  with Not_found -> None
 
 let read_channel_lines ic =
   let rec readall lines =
     try
       let line = input_line ic in
       readall (line :: lines)
-    with
-    | End_of_file -> List.rev lines
+    with End_of_file -> List.rev lines
   in
   readall []
 
@@ -23,7 +21,6 @@ let read_file_lines file =
   lines
 
 let read_in_channel ic = read_channel_lines ic |> String.concat "\n"
-
 let read_file file = read_file_lines file |> String.concat "\n"
 
 let main template =
