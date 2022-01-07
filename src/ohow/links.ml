@@ -52,8 +52,8 @@ let api_link prefix contents = function
         Paths.(rewind root file +/+ api +/+ s)
       | None, None, None -> Paths.rewind root file +/+ api
     in
-    let uri = Filename.concat base @@ Api.path_of_id ?prefix id in
-    let fragment = Api.fragment_of_id id in
+    let uri = Filename.concat base @@ Api.Ocamldoc.path_of_id ?prefix id in
+    let fragment = Api.Ocamldoc.fragment_of_id id in
     let body = text |? Api.string_of_id ~spacer:"." id in
     [ a_link_of_uri ?fragment (Some (Global.suffix ())) uri (Some body) ]
   | _ -> assert false
