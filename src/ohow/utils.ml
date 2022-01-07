@@ -1,19 +1,24 @@
-module Operators = struct
-  let ( >>= ) x f =
+module Option = struct
+  let bind x f =
     match x with
     | Some x -> f x
     | None -> None
 
-  let ( <$> ) x f =
+  let map x f =
     match x with
     | Some x -> Some (f x)
     | None -> None
 
-  let ( |? ) x default =
+  let value x ~default =
     match x with
     | Some x -> x
     | None -> default
+end
 
+module Operators = struct
+  let ( >>= ) = Option.bind
+  let ( <$> ) = Option.map
+  let ( |? ) x default = Option.value x ~default
   let ( +/+ ) p q = Paths.(p +/+ q)
 end
 
