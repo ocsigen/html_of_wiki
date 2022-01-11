@@ -48,8 +48,7 @@ let api_link prefix contents = function
       | Some p, None, _ ->
         Paths.(
           rewind root file +/+ !Global.root_to_site +/+ p +/+ version +/+ api)
-      | None, Some s, _
-      | None, None, Some s ->
+      | None, Some s, _ | None, None, Some s ->
         Paths.(rewind root file +/+ api +/+ s)
       | None, None, None -> Paths.rewind root file +/+ api
     in

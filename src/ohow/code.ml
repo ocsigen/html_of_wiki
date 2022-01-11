@@ -8,13 +8,12 @@ let attrs args =
   | None -> ([], [])
   | Some lang ->
     let pre_classes, code_classes =
-      if get_opt args "translated" = None && lang = "ocaml" then
-        ([], [ "translatable" ])
-      else
-        ([ "manually-translated" ], [])
+      if get_opt args "translated" = None && lang = "ocaml"
+      then ([], [ "translatable" ])
+      else ([ "manually-translated" ], [])
     in
     ( attrs @ [ Html.a_class pre_classes ]
-    , [ Html.a_class @@ ("language-" ^ lang) :: code_classes ] )
+    , [ Html.a_class @@ (("language-" ^ lang) :: code_classes) ] )
 
 let code _bi args contents =
   `Flow5

@@ -11,8 +11,8 @@ let is_capitalized s =
 let check_capitalized_path path =
   List.iter
     (fun name ->
-      if not (is_capitalized name) then
-        raise (Error (Printf.sprintf "%S is not a valid module name" name)))
+      if not (is_capitalized name)
+      then raise (Error (Printf.sprintf "%S is not a valid module name" name)))
     path
 
 let parse_lid id =
@@ -40,9 +40,7 @@ let parse_method id =
 
 let parse_contents contents =
   match contents with
-  | None
-  | Some "" ->
-    raise (Error "contents must be an Ocaml id")
+  | None | Some "" -> raise (Error "contents must be an Ocaml id")
   | Some def -> (
     let def = Re.split seps def in
     match def with
@@ -57,8 +55,7 @@ let parse_contents contents =
     | "index" :: "class" :: "types" :: _ -> ([], `IndexClassTypes)
     | "index" :: "modules" :: _ -> ([], `IndexModules)
     | "index" :: "module" :: "types" :: _ -> ([], `IndexModuleTypes)
-    | "val" :: lid
-    | "value" :: lid ->
+    | "val" :: lid | "value" :: lid ->
       let path, id = parse_lid lid in
       (path, `Value id)
     | "type" :: lid ->
@@ -70,20 +67,16 @@ let parse_contents contents =
     | "class" :: lid ->
       let path, id = parse_lid lid in
       (path, `Class id)
-    | "module" :: "type" :: uid
-    | "mod" :: "type" :: uid ->
+    | "module" :: "type" :: uid | "mod" :: "type" :: uid ->
       let path, id = parse_uid uid in
       (path, `ModType id)
-    | "module" :: uid
-    | "mod" :: uid ->
+    | "module" :: uid | "mod" :: uid ->
       let path, id = parse_uid uid in
       (path, `Mod id)
-    | "exception" :: uid
-    | "exc" :: uid ->
+    | "exception" :: uid | "exc" :: uid ->
       let path, id = parse_uid uid in
       (path, `Exc id)
-    | "attribute" :: lid
-    | "attr" :: lid ->
+    | "attribute" :: lid | "attr" :: lid ->
       let path, id = parse_lid lid in
       let id, did = parse_method id in
       (path, `Attr (id, did))
@@ -139,23 +132,16 @@ let path_of_id ?prefix id =
   | _path, `IndexClassTypes -> add_prefix "index_class_types"
   | _path, `IndexModules -> add_prefix "index_modules"
   | _path, `IndexModuleTypes -> add_prefix "index_module_types"
-  | path, `ModType name
-  | path, `Mod name ->
-    String.concat "." (path @ [ name ])
-  | path, `ClassType name
-  | path, `Class name -> (
+  | path, `ModType name | path, `Mod name -> String.concat "." (path @ [ name ])
+  | path, `ClassType name | path, `Class name -> (
     match prefix with
     | None -> String.concat "." (path @ [ name ]) ^ "-c"
     | Some p -> p ^ String.concat "." (path @ [ name ]))
-  | path, `Attr (cl, _)
-  | path, `Method (cl, _) -> (
+  | path, `Attr (cl, _) | path, `Method (cl, _) -> (
     match prefix with
     | None -> String.concat "." (path @ [ cl ]) ^ "-c"
     | Some p -> p ^ String.concat "." (path @ [ cl ]))
-  | path, `Value _
-  | path, `Type _
-  | path, `Exc _
-  | path, `Section _ ->
+  | path, `Value _ | path, `Type _ | path, `Exc _ | path, `Section _ ->
     add_prefix (String.concat "." path)
 
 let fragment_of_id : id -> string option = function
@@ -177,8 +163,7 @@ let string_of_id ?(spacer = ".") : id -> string = function
       | `ClassType name
       | `Value name
       | `Type name
-      | `Exc name ) ) ->
-    String.concat spacer (path @ [ name ])
+      | `Exc name ) ) -> String.concat spacer (path @ [ name ])
   | _, `Index -> "Api introduction"
   | _, `IndexTypes
   | _, `IndexExceptions
@@ -189,5 +174,4 @@ let string_of_id ?(spacer = ".") : id -> string = function
   | _, `IndexClassTypes
   | _, `IndexModules
   | _, `IndexModuleTypes
-  | _, `Section _ ->
-    ""
+  | _, `Section _ -> ""

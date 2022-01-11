@@ -158,12 +158,7 @@ let info_cmd =
 let register_options k print headless outfile project root manual api
     default_subproject images assets template csw docversions local files =
   let open Utils.Operators in
-  let suffix =
-    if local then
-      ".html"
-    else
-      ""
-  in
+  let suffix = if local then ".html" else "" in
   let csw = csw <$> Utils.read_file_lines |? [] in
   let docversions = docversions <$> Utils.read_file_lines |? [] in
   let opts =

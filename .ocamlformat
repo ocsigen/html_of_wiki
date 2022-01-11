@@ -1,13 +1,13 @@
-version=0.18.0
+version=0.20.0
 profile=conventional
-break-cases=all
+break-cases=fit-or-vertical
 break-separators=before
 break-sequences=true
 cases-exp-indent=2
 doc-comments=before
 dock-collection-brackets=false
 field-space=loose
-if-then-else=k-r
+if-then-else=keyword-first
 indicate-nested-or-patterns=unsafe-no
 let-and=sparse
 let-and=sparse

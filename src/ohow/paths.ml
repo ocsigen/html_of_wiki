@@ -1,9 +1,6 @@
 let up = ".."
-
 let here = "."
-
 let ( +/+ ) = Filename.concat
-
 let path_of_list = List.fold_left Filename.concat ""
 
 let list_of_path p =
@@ -20,14 +17,8 @@ let realpath = function
 
 let rec path_eql p p' =
   match (p, p') with
-  | ".", "."
-  | "/", "/" ->
-    true
-  | ".", _
-  | _, "."
-  | "/", _
-  | _, "/" ->
-    false
+  | ".", "." | "/", "/" -> true
+  | ".", _ | _, "." | "/", _ | _, "/" -> false
   | _, _ when Filename.(basename p <> basename p') -> false
   | _, _ -> path_eql (Filename.dirname p) (Filename.dirname p')
 
@@ -35,8 +26,7 @@ let rewind dir file =
   let dir = realpath dir in
   let rec rew = function
     | p when path_eql p dir -> "."
-    | "."
-    | "/" ->
+    | "." | "/" ->
       failwith @@ "rewind: " ^ file ^ " cannot be rewinded to dir " ^ dir
     | p -> Filename.concat ".." @@ rew @@ Filename.dirname p
   in
@@ -49,9 +39,7 @@ let is_inside_dir dir file =
 
 let rec remove_prefixl l l' =
   match (l, l') with
-  | l, []
-  | [], l ->
-    l
+  | l, [] | [], l -> l
   | x :: l, y :: l' when x = y -> remove_prefixl l l'
   | _, _ -> failwith "remove_prefixl: no list is a prefix of the other"
 
@@ -75,9 +63,7 @@ let apply_path =
     match Filename.basename path with
     | "/" -> "/"
     | "." when path = "" || path = "." -> ""
-    | ""
-    | "." ->
-      loop n (Filename.dirname path)
+    | "" | "." -> loop n (Filename.dirname path)
     | ".." -> loop (n + 1) (Filename.dirname path)
     | _ when n > 0 -> loop (n - 1) (Filename.dirname path)
     | b -> loop n (Filename.dirname path) +/+ b
