@@ -37,7 +37,7 @@ shift 2
 } || true
 
 docversions() {
-    find "$1" -maxdepth 1 -type d -exec basename {} \; | grep -E '[0-9.]+|dev' | sort
+    find "$1" -maxdepth 1 -type d -exec basename {} \; | grep -E '[0-9.]+|dev' | sort -Vr
 }
 
 dv="$(docversions "$project")"
