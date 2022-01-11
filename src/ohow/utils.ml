@@ -17,12 +17,6 @@ module Operators = struct
   let ( +/+ ) p q = Paths.(p +/+ q)
 end
 
-let id x = x
-let zipk f g k = f (fun fk -> g (fun gk -> k fk gk))
-
-let check_errors =
-  List.iter (fun (err, b) -> if Lazy.force b then () else failwith err)
-
 let is_some = function
   | Some _ -> true
   | None -> false
@@ -40,16 +34,11 @@ let trim char string =
   in
   trim string
 
-let sorted_dir_files sort dir = Sys.readdir dir |> Array.to_list |> sort
-let dir_files = sorted_dir_files id
-let a'_sorted_dir_files = sorted_dir_files (List.sort compare)
-
 let rec find_files name = function
   | file when Filename.basename file = name -> [ file ]
   | dir when Sys.is_directory dir ->
-    dir_files dir
-    |> List.map (fun f -> Paths.(dir +/+ f))
-    |> List.map (find_files name)
+    Sys.readdir dir |> Array.to_list
+    |> List.map (fun f -> find_files name Paths.(dir +/+ f))
     |> List.concat
   | _ -> []
 

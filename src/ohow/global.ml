@@ -15,12 +15,10 @@ let with_current_file file k =
   ref_current_file := None;
   r
 
-let using_current_file k =
+let current_file () =
   match !ref_current_file with
-  | Some file -> k file
-  | None -> failwith "Links.using_current_file: current_file is not set."
-
-let current_file () = using_current_file Utils.id
+  | Some file -> file
+  | None -> failwith "current_file is not set."
 
 type menu_file =
   | Manual of string
@@ -79,12 +77,11 @@ let with_options opts k =
   ref_options := old;
   r
 
-let using_options k =
+let options () =
   match !ref_options with
-  | Some options -> k options
+  | Some options -> options
   | None -> failwith "Global.options isn't properly intialized."
 
-let options () = using_options Utils.id
 let suffix () = (options ()).suffix
 
 let the_manual () =

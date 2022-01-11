@@ -2,9 +2,6 @@
     Unsets the [current_file] after [k] finishes and returns its value. *)
 val with_current_file : string -> (unit -> 'a) -> 'a
 
-(** [using_current_file k] calls [k @@ current_file ()] and returns its value. *)
-val using_current_file : (string -> 'a) -> 'a
-
 (** Returns the current file path. *)
 val current_file : unit -> string
 
@@ -54,9 +51,6 @@ type cli_options =
 (** [with_options opts k] sets the [options] fo [opts] and calls [k ()]. Unsets
     the [options] after [k] finishes and returns its value. *)
 val with_options : cli_options -> (unit -> 'a) -> 'a
-
-(** [using_options k] calls [k @@ options ()] and returns its value. *)
-val using_options : (cli_options -> 'a) -> 'a
 
 (** Returns the more recently set [cli_options]. *)
 val options : unit -> cli_options

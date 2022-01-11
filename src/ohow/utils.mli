@@ -13,17 +13,6 @@ module Operators : sig
   val ( +/+ ) : string -> string -> string
 end
 
-(** The identity function. *)
-val id : 'a -> 'a
-
-(** Continuation argument zipper. [f (fun a -> g (fun b -> ...))] =
-    [zipk f g (fun a b -> ...)] *)
-val zipk : (('a -> 'b) -> 'c) -> (('d -> 'e) -> 'b) -> ('a -> 'd -> 'e) -> 'c
-
-(** [check_errors \[(msg, exp); ...\]] evaluates in order each [exp] and raises
-    [Failure msg] with the [msg] of the first [exp] to return [false], if any. *)
-val check_errors : (string * bool lazy_t) list -> unit
-
 (** [is_some x] returns whether [x] is [Some y]. *)
 val is_some : 'a option -> bool
 
@@ -32,18 +21,6 @@ val is_none : 'a option -> bool
 
 (** [trim c s] returns [s] with the trailing occurences of [c] removed. *)
 val trim : char -> string -> string
-
-(** [sorted_dir_files sort dir] returns the list of the files inside [dir]
-    sorted using the given [sort] function. *)
-val sorted_dir_files : (string list -> string list) -> string -> string list
-
-(** [dir_files dir] retuns the list of the files inside dir in the order
-    [readdir] returns them (i.e: no order guaranteed). *)
-val dir_files : string -> string list
-
-(** [a'_sorted_dir_files dir] returns the list of the files inside [dir]
-    (alpha)betically sorted. *)
-val a'_sorted_dir_files : string -> string list
 
 (** [find_files name dir] returns the paths to all the files with [name]
     recursively found inside [dir]. *)
