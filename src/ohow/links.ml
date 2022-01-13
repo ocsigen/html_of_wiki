@@ -127,7 +127,7 @@ let init () =
       manual_link;
     register "a_api"
       [ "project"; "subproject"; "text"; "version"; "kind" ]
-      ~defaults:[ None; None; None; Some "latest"; Some "ocamldoc" ]
+      ~defaults:[ None; None; None; Some "latest"; None ]
       (api_link None);
     [ "type"; "code" ]
     |> List.iter (fun p ->
