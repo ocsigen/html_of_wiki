@@ -37,13 +37,11 @@ let api_link prefix contents = function
   | project :: subproject :: text :: Some version :: (([] | [ _ ]) as kind_opt)
     ->
     let kind =
-      match (prefix, kind_opt) with
-      | None, [ Some "odoc" ] -> `Odoc
-      | None, [ Some "ocamldoc" ] -> `Ocamldoc
-      | None, [ Some _ ] -> `Ocamldoc
-      | None, [ None ] -> assert false
-      | None, [] -> assert false
-      | Some _, [] -> (
+      match kind_opt with
+      | [ Some "odoc" ] -> `Odoc
+      | [ Some "ocamldoc" ] -> `Ocamldoc
+      | [ Some _ ] -> `Ocamldoc
+      | [ None ] | [] -> (
         let target_project =
           match project with
           | None -> Filename.basename (Global.project_dir ())
@@ -59,8 +57,12 @@ let api_link prefix contents = function
             then `Ocamldoc
             else `Odoc)
         | _ -> `Ocamldoc)
-      | Some _, [ _ ] -> assert false
-      | _, _ :: _ :: _ -> assert false
+      | _ :: _ :: _ -> assert false
+    in
+    let prefix =
+      match kind with
+      | `Odoc -> None
+      | `Ocamldoc -> prefix
     in
     let file = Global.current_file () in
     let root, api = Global.(root (), the_api ()) in
