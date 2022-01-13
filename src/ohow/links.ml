@@ -43,7 +43,22 @@ let api_link prefix contents = function
       | None, [ Some _ ] -> `Ocamldoc
       | None, [ None ] -> assert false
       | None, [] -> assert false
-      | Some _, [] -> `Ocamldoc
+      | Some _, [] -> (
+        let target_project =
+          match project with
+          | None -> Filename.basename (Global.project_dir ())
+          | Some p -> p
+        in
+        match target_project with
+        | "js_of_ocaml" -> (
+          match version with
+          | "latest" | "dev" -> `Odoc
+          | v ->
+            let v = Version.parse v in
+            if Version.compare v (Version.parse "3.5.0") < 0
+            then `Ocamldoc
+            else `Odoc)
+        | _ -> `Ocamldoc)
       | Some _, [ _ ] -> assert false
       | _, _ :: _ :: _ -> assert false
     in
