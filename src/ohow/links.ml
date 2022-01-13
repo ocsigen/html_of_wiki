@@ -67,17 +67,21 @@ let api_link prefix contents = function
     let id = Api.parse_contents (contents <$> String.trim) in
     let dsp = (Global.options ()).default_subproject in
     let base =
-      match (project, subproject, dsp) with
-      | Some p, Some s, _ ->
+      match (project, subproject, dsp, kind) with
+      | Some p, Some s, _, _ ->
         Paths.(
           rewind root file +/+ !Global.root_to_site +/+ p +/+ version +/+ api
           +/+ s)
-      | Some p, None, _ ->
+      | Some p, None, _, `Ocamldoc ->
         Paths.(
           rewind root file +/+ !Global.root_to_site +/+ p +/+ version +/+ api)
-      | None, Some s, _ | None, None, Some s ->
+      | Some p, None, _, `Odoc ->
+        Paths.(
+          rewind root file +/+ !Global.root_to_site +/+ p +/+ version +/+ api
+          +/+ p)
+      | None, Some s, _, _ | None, None, Some s, _ ->
         Paths.(rewind root file +/+ api +/+ s)
-      | None, None, None -> Paths.rewind root file +/+ api
+      | None, None, None, _ -> Paths.rewind root file +/+ api
     in
     let path_of_id =
       match (kind, prefix) with
