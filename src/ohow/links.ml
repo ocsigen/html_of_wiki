@@ -34,26 +34,68 @@ let manual_link contents = function
   | _ -> assert false
 
 let api_link prefix contents = function
-  | [ project; subproject; text; Some version ] ->
+  | project :: subproject :: text :: Some version :: (([] | [ _ ]) as kind_opt)
+    ->
+    let kind =
+      match (prefix, kind_opt) with
+      | None, [ Some "odoc" ] -> `Odoc
+      | None, [ Some "ocamldoc" ] -> `Ocamldoc
+      | None, [ Some _ ] -> `Ocamldoc
+      | None, [ None ] -> assert false
+      | None, [] -> assert false
+      | Some _, [] -> (
+        let target_project =
+          match project with
+          | None -> Filename.basename (Global.project_dir ())
+          | Some p -> p
+        in
+        match target_project with
+        | "js_of_ocaml" -> (
+          match version with
+          | "latest" | "dev" -> `Odoc
+          | v ->
+            let v = Version.parse v in
+            if Version.compare v (Version.parse "3.5.0") < 0
+            then `Ocamldoc
+            else `Odoc)
+        | _ -> `Ocamldoc)
+      | Some _, [ _ ] -> assert false
+      | _, _ :: _ :: _ -> assert false
+    in
     let file = Global.current_file () in
     let root, api = Global.(root (), the_api ()) in
     let id = Api.parse_contents (contents <$> String.trim) in
     let dsp = (Global.options ()).default_subproject in
     let base =
-      match (project, subproject, dsp) with
-      | Some p, Some s, _ ->
+      match (project, subproject, dsp, kind) with
+      | Some p, Some s, _, _ ->
         Paths.(
           rewind root file +/+ !Global.root_to_site +/+ p +/+ version +/+ api
           +/+ s)
-      | Some p, None, _ ->
+      | Some p, None, _, `Ocamldoc ->
         Paths.(
           rewind root file +/+ !Global.root_to_site +/+ p +/+ version +/+ api)
-      | None, Some s, _ | None, None, Some s ->
+      | Some p, None, _, `Odoc ->
+        Paths.(
+          rewind root file +/+ !Global.root_to_site +/+ p +/+ version +/+ api
+          +/+ p)
+      | None, Some s, _, _ | None, None, Some s, _ ->
         Paths.(rewind root file +/+ api +/+ s)
-      | None, None, None -> Paths.rewind root file +/+ api
+      | None, None, None, _ -> Paths.rewind root file +/+ api
     in
-    let uri = Filename.concat base @@ Api.path_of_id ?prefix id in
-    let fragment = Api.fragment_of_id id in
+    let path_of_id =
+      match (kind, prefix) with
+      | `Ocamldoc, ((None | Some _) as prefix) ->
+        Api.Ocamldoc.path_of_id ?prefix id
+      | `Odoc, None -> Api.Odoc.path_of_id id
+      | `Odoc, Some _ -> assert false
+    in
+    let uri = Filename.concat base @@ path_of_id in
+    let fragment =
+      match kind with
+      | `Ocamldoc -> Api.Ocamldoc.fragment_of_id id
+      | `Odoc -> Api.Odoc.fragment_of_id id
+    in
     let body = text |? Api.string_of_id ~spacer:"." id in
     [ a_link_of_uri ?fragment (Some (Global.suffix ())) uri (Some body) ]
   | _ -> assert false
@@ -83,13 +125,15 @@ let init () =
       [ "project"; "chapter"; "fragment"; "version" ]
       ~defaults:[ None; None; None; Some "latest" ]
       manual_link;
-    [ None; Some "type"; Some "code" ]
+    register "a_api"
+      [ "project"; "subproject"; "text"; "version"; "kind" ]
+      ~defaults:[ None; None; None; Some "latest"; None ]
+      (api_link None);
+    [ "type"; "code" ]
     |> List.iter (fun p ->
-           let name = "a_api" ^ (p <$> (fun p -> "_" ^ p) |? "") in
-           let prefix = p <$> fun p -> p ^ "_" in
-           register name
+           register ("a_api_" ^ p)
              [ "project"; "subproject"; "text"; "version" ]
              ~defaults:[ None; None; None; Some "latest" ]
-             (api_link prefix));
+             (api_link (Some (p ^ "_"))));
     register "a_img" [ "src" ] img_link;
     register "a_file" [ "src" ] file_link)

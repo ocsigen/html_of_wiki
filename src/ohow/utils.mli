@@ -1,3 +1,13 @@
+module Option : sig
+  (** Bind operator for the Maybe monad *)
+  val bind : 'a option -> ('a -> 'b option) -> 'b option
+
+  (** Map operator for the Maybe monad *)
+  val map : 'a option -> ('a -> 'b) -> 'b option
+
+  val value : 'a option -> default:'a -> 'a
+end
+
 (** Defines general purpose operators. *)
 module Operators : sig
   (** Bind operator for the Maybe monad *)

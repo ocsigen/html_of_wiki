@@ -38,6 +38,31 @@ let parse_method id =
     (id, mid)
   | _ -> raise (Error (Printf.sprintf "invalid method name %S" id))
 
+(** OCaml identifier *)
+type id =
+  string list
+  * [ `Mod of string
+    | `ModType of string
+    | `Value of string
+    | `Type of string
+    | `Class of string
+    | `ClassType of string
+    | `Exc of string
+    | `Method of string * string
+    | `Attr of string * string
+    | `Section of string
+    | `Index
+    | `IndexTypes
+    | `IndexExceptions
+    | `IndexValues
+    | `IndexAttributes
+    | `IndexMethods
+    | `IndexClasses
+    | `IndexClassTypes
+    | `IndexModules
+    | `IndexModuleTypes
+    ]
+
 let parse_contents contents =
   match contents with
   | None | Some "" -> raise (Error "contents must be an Ocaml id")
@@ -90,69 +115,6 @@ let parse_contents contents =
     | x :: _ -> raise (Error ("invalid contents: " ^ x))
     | [] -> raise (Error "empty contents"))
 
-(** OCaml identifier *)
-type id =
-  string list
-  * [ `Mod of string
-    | `ModType of string
-    | `Value of string
-    | `Type of string
-    | `Class of string
-    | `ClassType of string
-    | `Exc of string
-    | `Method of string * string
-    | `Attr of string * string
-    | `Section of string
-    | `Index
-    | `IndexTypes
-    | `IndexExceptions
-    | `IndexValues
-    | `IndexAttributes
-    | `IndexMethods
-    | `IndexClasses
-    | `IndexClassTypes
-    | `IndexModules
-    | `IndexModuleTypes
-    ]
-
-let path_of_id ?prefix id =
-  let add_prefix s =
-    match prefix with
-    | None -> s
-    | Some p -> p ^ s
-  in
-  match id with
-  | _path, `Index -> add_prefix "index"
-  | _path, `IndexTypes -> add_prefix "index_types"
-  | _path, `IndexExceptions -> add_prefix "index_exceptions"
-  | _path, `IndexValues -> add_prefix "index_values"
-  | _path, `IndexAttributes -> add_prefix "index_attributes"
-  | _path, `IndexMethods -> add_prefix "index_methods"
-  | _path, `IndexClasses -> add_prefix "index_classes"
-  | _path, `IndexClassTypes -> add_prefix "index_class_types"
-  | _path, `IndexModules -> add_prefix "index_modules"
-  | _path, `IndexModuleTypes -> add_prefix "index_module_types"
-  | path, `ModType name | path, `Mod name -> String.concat "." (path @ [ name ])
-  | path, `ClassType name | path, `Class name -> (
-    match prefix with
-    | None -> String.concat "." (path @ [ name ]) ^ "-c"
-    | Some p -> p ^ String.concat "." (path @ [ name ]))
-  | path, `Attr (cl, _) | path, `Method (cl, _) -> (
-    match prefix with
-    | None -> String.concat "." (path @ [ cl ]) ^ "-c"
-    | Some p -> p ^ String.concat "." (path @ [ cl ]))
-  | path, `Value _ | path, `Type _ | path, `Exc _ | path, `Section _ ->
-    add_prefix (String.concat "." path)
-
-let fragment_of_id : id -> string option = function
-  | _, `Value name -> Some ("VAL" ^ name)
-  | _, `Type name -> Some ("TYPE" ^ name)
-  | _, `Exc name -> Some ("EXCEPTION" ^ name)
-  | _, `Attr (_, name) -> Some ("ATTR" ^ name)
-  | _, `Method (_, name) -> Some ("METHOD" ^ name)
-  | _, `Section name -> Some name
-  | _ -> None
-
 let string_of_id ?(spacer = ".") : id -> string = function
   | path, (`Method (cl, name) | `Attr (cl, name)) ->
     name ^ " [" ^ String.concat spacer (path @ [ cl ]) ^ "]"
@@ -175,3 +137,142 @@ let string_of_id ?(spacer = ".") : id -> string = function
   | _, `IndexModules
   | _, `IndexModuleTypes
   | _, `Section _ -> ""
+
+module Ocamldoc = struct
+  let path_of_id ?prefix id =
+    let add_prefix s =
+      match prefix with
+      | None -> s
+      | Some p -> p ^ s
+    in
+    match id with
+    | _path, `Index -> add_prefix "index"
+    | _path, `IndexTypes -> add_prefix "index_types"
+    | _path, `IndexExceptions -> add_prefix "index_exceptions"
+    | _path, `IndexValues -> add_prefix "index_values"
+    | _path, `IndexAttributes -> add_prefix "index_attributes"
+    | _path, `IndexMethods -> add_prefix "index_methods"
+    | _path, `IndexClasses -> add_prefix "index_classes"
+    | _path, `IndexClassTypes -> add_prefix "index_class_types"
+    | _path, `IndexModules -> add_prefix "index_modules"
+    | _path, `IndexModuleTypes -> add_prefix "index_module_types"
+    | path, `ModType name | path, `Mod name ->
+      String.concat "." (path @ [ name ])
+    | path, `ClassType name | path, `Class name -> (
+      match prefix with
+      | None -> String.concat "." (path @ [ name ]) ^ "-c"
+      | Some p -> p ^ String.concat "." (path @ [ name ]))
+    | path, `Attr (cl, _) | path, `Method (cl, _) -> (
+      match prefix with
+      | None -> String.concat "." (path @ [ cl ]) ^ "-c"
+      | Some p -> p ^ String.concat "." (path @ [ cl ]))
+    | path, `Value _ | path, `Type _ | path, `Exc _ | path, `Section _ ->
+      add_prefix (String.concat "." path)
+
+  let fragment_of_id : id -> string option = function
+    | _, `Value name -> Some ("VAL" ^ name)
+    | _, `Type name -> Some ("TYPE" ^ name)
+    | _, `Exc name -> Some ("EXCEPTION" ^ name)
+    | _, `Attr (_, name) -> Some ("ATTR" ^ name)
+    | _, `Method (_, name) -> Some ("METHOD" ^ name)
+    | _, `Section name -> Some name
+    | _ -> None
+end
+
+module Odoc = struct
+  type path_kind =
+    [ `Module
+    | `Page
+    | `LeafPage
+    | `ModuleType
+    | `Argument
+    | `Class
+    | `ClassType
+    | `File
+    ]
+
+  let string_of_path_kind : path_kind -> string = function
+    | `Page -> "page"
+    | `Module -> "module"
+    | `LeafPage -> "leaf-page"
+    | `ModuleType -> "module-type"
+    | `Argument -> "argument"
+    | `Class -> "class"
+    | `ClassType -> "class-type"
+    | `File -> "file"
+
+  let path_of_id id =
+    let k kind name = string_of_path_kind kind ^ "-" ^ name in
+    match id with
+    | _path, `Index -> ""
+    | _path, `IndexTypes -> ""
+    | _path, `IndexExceptions -> ""
+    | _path, `IndexValues -> ""
+    | _path, `IndexAttributes -> ""
+    | _path, `IndexMethods -> ""
+    | _path, `IndexClasses -> ""
+    | _path, `IndexClassTypes -> ""
+    | _path, `IndexModules -> ""
+    | _path, `IndexModuleTypes -> ""
+    | path, `Mod name -> String.concat "/" (path @ [ name ])
+    | path, `ModType name -> String.concat "/" (path @ [ k `ModuleType name ])
+    | path, `ClassType name -> String.concat "/" (path @ [ k `ClassType name ])
+    | path, `Class name -> String.concat "/" (path @ [ k `Class name ])
+    | path, `Attr (cl, _) ->
+      String.concat "/" (path @ [ k `Class cl ]) (* XXX *)
+    | path, `Method (cl, _) ->
+      String.concat "/" (path @ [ k `Class cl ]) (* XXX *)
+    | path, `Value _ -> String.concat "/" path
+    | path, `Type _ -> String.concat "/" path
+    | path, `Exc _ -> String.concat "/" path
+    | path, `Section _ -> String.concat "/" path
+
+  type anchor_kind =
+    [ path_kind
+    | `Section
+    | `Type
+    | `Extension
+    | `ExtensionDecl
+    | `Exception
+    | `Method
+    | `Val
+    | `Constructor
+    | `Field
+    ]
+
+  let string_of_kind : anchor_kind -> string = function
+    | #path_kind as x -> string_of_path_kind x
+    | `Section -> "section"
+    | `Type -> "type"
+    | `Extension -> "extension"
+    | `ExtensionDecl -> "extension-decl"
+    | `Exception -> "exception"
+    | `Method -> "method"
+    | `Val -> "val"
+    | `Constructor -> "constructor"
+    | `Field -> "field"
+
+  let frag kind name = Some (string_of_kind kind ^ "-" ^ name)
+
+  let fragment_of_id : id -> string option = function
+    | _, `Section name -> frag `Section name
+    | _, `Value name -> frag `Val name
+    | _, `Type name -> frag `Type name
+    | _, `Exc name -> frag `Exception name
+    | _, `Method (_, name) -> frag `Method name
+    | _, `ModType name -> frag `ModuleType name
+    | _, `Mod name -> frag `Module name
+    | _, `Class name -> frag `Class name
+    | _, `ClassType name -> frag `ClassType name
+    | _, `Attr _
+    | _, `Index
+    | _, `IndexTypes
+    | _, `IndexExceptions
+    | _, `IndexValues
+    | _, `IndexAttributes
+    | _, `IndexMethods
+    | _, `IndexClasses
+    | _, `IndexClassTypes
+    | _, `IndexModules
+    | _, `IndexModuleTypes -> None
+end
