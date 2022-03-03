@@ -51,7 +51,7 @@ let a'_sorted_dir_files = sorted_dir_files (List.sort compare)
 
 let rec find_files name = function
   | file when Filename.basename file = name -> [ file ]
-  | dir when Sys.is_directory dir ->
+  | dir when try Sys.is_directory dir with Sys_error _ -> false ->
     dir_files dir
     |> List.map (fun f -> Paths.(dir +/+ f))
     |> List.map (find_files name)

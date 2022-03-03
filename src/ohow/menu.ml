@@ -5,9 +5,7 @@ let doctree _ args _ =
   let attrs = Wiki_syntax.parse_common_attribs args in
   let { Global.root; manual; api; _ } = Global.options () in
   let find_menus p =
-    try
-      p >>= (fun p -> Some (root +/+ p)) <$> Utils.find_files "menu.wiki" |? []
-    with Sys_error _ -> []
+    p >>= (fun p -> Some (root +/+ p)) <$> Utils.find_files "menu.wiki" |? []
   in
   let pman_menus = find_menus manual in
   let papi_menus = find_menus api in
