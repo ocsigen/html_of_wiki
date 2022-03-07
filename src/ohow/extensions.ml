@@ -1,5 +1,7 @@
+open Utils
+
 let get_opts ?defaults opts args : string option list =
-  let values = List.map (Ocsimore_lib.get_opt args) opts in
+  let values = List.map (List.Assoc.get_opt args) opts in
   match defaults with
   | None -> values
   | Some defaults ->

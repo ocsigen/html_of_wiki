@@ -25,6 +25,40 @@ module Option = struct
     | None -> true
 end
 
+module String = struct
+  include String
+
+  let sep char s =
+    let len = String.length s in
+    try
+      let seppos = String.index s char in
+      Some
+        ( String.trim (String.sub s 0 seppos)
+        , String.trim (String.sub s (seppos + 1) (len - seppos - 1)) )
+    with Not_found -> None
+
+  let spaces = Re.rep1 Re.blank |> Re.compile
+  let split_on_blank s = Re.split spaces s
+end
+
+module List = struct
+  include List
+
+  module Assoc = struct
+    type 'a t = (string * 'a) list
+
+    let get_opt args name =
+      try Some (List.assoc name args) with Not_found -> None
+
+    let get ?default args name =
+      try List.assoc name args
+      with Not_found -> (
+        match default with
+        | None -> raise (Error.Error ("no \"" ^ name ^ "\" option."))
+        | Some d -> d)
+  end
+end
+
 module Operators = struct
   let ( >>= ) = Option.bind
   let ( <$> ) = Option.map

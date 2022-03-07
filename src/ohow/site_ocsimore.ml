@@ -214,12 +214,12 @@ let do_client_server_switch _ args _ =
 
 let do_google_search _ args _ =
   let image =
-    match Ocsimore_lib.get_opt args "icon" with
+    match List.Assoc.get_opt args "icon" with
     | Some i -> i
     | None -> failwith "googlesearch: must provide an \"icon\" path to use"
   in
   let domain =
-    match Ocsimore_lib.get_opt args "domain" with
+    match List.Assoc.get_opt args "domain" with
     | Some d -> d
     | None -> failwith "googlesearch: must provide an \"domain\""
   in

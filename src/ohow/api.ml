@@ -1,5 +1,3 @@
-open Ocsimore_lib
-
 exception Error of string
 
 let is_capitalized s =
@@ -16,7 +14,7 @@ let check_capitalized_path path =
     path
 
 let parse_lid id =
-  match List.rev (Re.split dot (String.concat "" id)) with
+  match List.rev (String.split_on_char '.' (String.concat "" id)) with
   | id :: rpath when not (is_capitalized id) ->
     check_capitalized_path rpath;
     (List.rev rpath, id)
@@ -24,7 +22,7 @@ let parse_lid id =
     raise (Error (Printf.sprintf "invalid ocaml id %S" (String.concat "" id)))
 
 let parse_uid id =
-  match List.rev (Re.split dot (String.concat "" id)) with
+  match List.rev (String.split_on_char '.' (String.concat "" id)) with
   | id :: rpath when is_capitalized id ->
     check_capitalized_path rpath;
     (List.rev rpath, id)
@@ -32,8 +30,7 @@ let parse_uid id =
     raise (Error (Printf.sprintf "invalid ocaml id %S" (String.concat "" id)))
 
 let parse_method id =
-  let re = Re.char '#' |> Re.compile in
-  match Re.split re id with
+  match String.split_on_char '#' id with
   | [ id; mid ] when (not (is_capitalized id)) && not (is_capitalized mid) ->
     (id, mid)
   | _ -> raise (Error (Printf.sprintf "invalid method name %S" id))
@@ -64,6 +61,7 @@ type t =
     ]
 
 let index : t = ([], `Index)
+let seps = Re.rep1 (Re.alt [ Re.blank; Re.char '\n' ]) |> Re.compile
 
 let parse_contents contents =
   match contents with

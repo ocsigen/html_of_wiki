@@ -16,6 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *)
+open Utils
 open Tyxml
 
 let do_outline wp bi args c =
@@ -36,7 +37,7 @@ let do_outline wp bi args c =
          (Wiki_syntax.xml_of_wiki wp bi c :> Html_types.flow5 Html.elt list)
      in
      let ignore =
-       Ocsimore_lib.get ~default:"nav aside" args "ignore"
+       List.Assoc.get ~default:"nav aside" args "ignore"
        |> String.split_on_char ' '
        |> List.map (fun x -> String.trim x |> String.lowercase_ascii)
      in
@@ -65,12 +66,17 @@ let do_outline wp bi args c =
      in
      [ nav; script ])
 
+let list_assoc_opt a l = try Some (List.assoc a l) with Not_found -> None
+
+let list_assoc_default a l default =
+  try List.assoc a l with Not_found -> default
+
 (* TODO: support for extended link syntax (wiki(toto):titi etc.) *)
 let f_link _bi args c =
-  let wiki = Ocsimore_lib.list_assoc_default "wiki" args "" in
-  let page = Ocsimore_lib.list_assoc_default "page" args "" in
-  let href = Ocsimore_lib.list_assoc_opt "href" args in
-  let fragment = Ocsimore_lib.list_assoc_opt "fragment" args in
+  let wiki = list_assoc_default "wiki" args "" in
+  let page = list_assoc_default "page" args "" in
+  let href = list_assoc_opt "href" args in
+  let fragment = list_assoc_opt "fragment" args in
   let content =
     match c with
     | Some c -> c

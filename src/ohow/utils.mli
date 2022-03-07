@@ -14,6 +14,28 @@ module Option : sig
   val is_none : 'a option -> bool
 end
 
+module String : sig
+  include module type of struct
+    include String
+  end
+
+  val sep : char -> string -> (string * string) option
+  val split_on_blank : string -> string list
+end
+
+module List : sig
+  include module type of struct
+    include List
+  end
+
+  module Assoc : sig
+    type nonrec 'a t = (string * 'a) t
+
+    val get : ?default:'a -> 'a t -> string -> 'a
+    val get_opt : 'a t -> string -> 'a option
+  end
+end
+
 (** Defines general purpose operators. *)
 module Operators : sig
   (** Bind operator for the Maybe monad *)

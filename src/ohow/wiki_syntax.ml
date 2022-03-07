@@ -21,7 +21,7 @@
     @author Vincent Balat
     @author Boris Yakobowski *)
 
-open Ocsimore_lib
+open Utils
 open Wiki_types
 open Wiki_syntax_types
 open Wiki_widgets_interface
@@ -59,7 +59,8 @@ let parse_common_attribs ?classes attribs =
     try
       Some
         (Html.a_class
-           (Re.split spaces (List.assoc "class" attribs) @ unopt ~def:[] classes))
+           (String.split_on_blank (List.assoc "class" attribs)
+           @ unopt ~def:[] classes))
     with Not_found -> Option.map ~f:Html.a_class classes
   and at2 =
     try Some (Html.a_id (List.assoc "id" attribs)) with Not_found -> None
@@ -862,7 +863,9 @@ module MakeParser (B : RawParser) :
               | "item", it ->
                 let it' =
                   let link, text =
-                    try String.sep '|' it with Not_found -> (it, it)
+                    match String.sep '|' it with
+                    | Some x -> x
+                    | None -> (it, it)
                   in
                   match !normalize_href_ref (0, 0) link None wb with
                   | Some link' -> link' ^ "|" ^ text
