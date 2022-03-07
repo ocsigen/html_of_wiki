@@ -1183,17 +1183,14 @@ module FlowBuilder = struct
     ]
 
   let add_backref attribs r =
-    if !Ocsimore_config.wiki_headings_backref
-    then
-      try
-        let id = List.assoc "id" attribs in
-        let open Html in
-        r
-        @ [ txt " "
-          ; a ~a:[ a_class [ "backref" ]; a_href ("#" ^ id) ] [ entity "#182" ]
-          ]
-      with Not_found -> r
-    else r
+    try
+      let id = List.assoc "id" attribs in
+      let open Html in
+      r
+      @ [ txt " "
+        ; a ~a:[ a_class [ "backref" ]; a_href ("#" ^ id) ] [ entity "#182" ]
+        ]
+    with Not_found -> r
 
   let h1_elem attribs content =
     let a = opt_of_list (parse_common_attribs attribs) in
