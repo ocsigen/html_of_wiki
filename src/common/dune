@@ -1,4 +1,4 @@
 (library
  (name common)
  (preprocess
-  (pps js_of_ocaml-ppx_deriving_json ppx_deriving.std)))
+  (pps js_of_ocaml-ppx_deriving_json)))

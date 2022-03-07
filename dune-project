@@ -35,7 +35,6 @@
   "js_of_ocaml-ppx_deriving_json"
   "js_of_ocaml-ppx"
   "ocamlfind"
-  "ppx_deriving"
   "re"
   "reason"
   "tyxml"))

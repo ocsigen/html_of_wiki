@@ -1,7 +1,6 @@
 type t =
   | Dev
   | V of string * int list * string option
-[@@deriving show]
 
 let split_char sep p =
   let len = String.length p in
