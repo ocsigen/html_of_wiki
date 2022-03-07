@@ -228,7 +228,8 @@ let link_kind _bi addr =
       let root = Global.root () in
       Absolute
         Paths.(
-          rewind root file +/+ !Global.root_to_site +/+ Utils.trim '/' page)
+          rewind root file +/+ !Global.root_to_site
+          +/+ Utils.remove_leading '/' page)
     | p when starts_with "wiki(" p -> wiki_kind p page
     | p when starts_with "wiki" p -> this_wiki_kind p page
     | _ -> failwith @@ "unknown prototype: '" ^ p ^ "'")

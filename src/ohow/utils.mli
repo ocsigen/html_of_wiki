@@ -6,6 +6,12 @@ module Option : sig
   val map : 'a option -> ('a -> 'b) -> 'b option
 
   val value : 'a option -> default:'a -> 'a
+
+  (** [is_some x] returns whether [x] is [Some y]. *)
+  val is_some : 'a option -> bool
+
+  (** [is_none x] returns whether [x] is [None]. *)
+  val is_none : 'a option -> bool
 end
 
 (** Defines general purpose operators. *)
@@ -34,14 +40,9 @@ val zipk : (('a -> 'b) -> 'c) -> (('d -> 'e) -> 'b) -> ('a -> 'd -> 'e) -> 'c
     [Failure msg] with the [msg] of the first [exp] to return [false], if any. *)
 val check_errors : (string * bool lazy_t) list -> unit
 
-(** [is_some x] returns whether [x] is [Some y]. *)
-val is_some : 'a option -> bool
-
-(** [is_none x] returns whether [x] is [None]. *)
-val is_none : 'a option -> bool
-
-(** [trim c s] returns [s] with the trailing occurences of [c] removed. *)
-val trim : char -> string -> string
+(** [remove_leading c s] returns [s] with the trailing occurences of [c]
+    removed. *)
+val remove_leading : char -> string -> string
 
 (** [sorted_dir_files sort dir] returns the list of the files inside [dir]
     sorted using the given [sort] function. *)

@@ -1,4 +1,6 @@
 module Option = struct
+  include Option
+
   let bind x f =
     match x with
     | Some x -> f x
@@ -13,6 +15,14 @@ module Option = struct
     match x with
     | Some x -> x
     | None -> default
+
+  let is_some = function
+    | Some _ -> true
+    | None -> false
+
+  let is_none = function
+    | Some _ -> false
+    | None -> true
 end
 
 module Operators = struct
@@ -28,22 +38,15 @@ let zipk f g k = f (fun fk -> g (fun gk -> k fk gk))
 let check_errors =
   List.iter (fun (err, b) -> if Lazy.force b then () else failwith err)
 
-let is_some = function
-  | Some _ -> true
-  | None -> false
-
-let is_none = function
-  | Some _ -> false
-  | None -> true
-
-let trim char string =
-  let rem_first s = String.sub s 1 (String.length s - 1) in
-  let rec trim = function
-    | "" -> ""
-    | s when s.[0] = char -> trim @@ rem_first s
-    | s -> s
+let remove_leading char s =
+  let rec loop p =
+    if p >= String.length s
+    then ""
+    else if String.get s p = char
+    then loop (succ p)
+    else String.sub s p (String.length s - p)
   in
-  trim string
+  loop 0
 
 let sorted_dir_files sort dir = Sys.readdir dir |> Array.to_list |> sort
 let dir_files = sorted_dir_files id
