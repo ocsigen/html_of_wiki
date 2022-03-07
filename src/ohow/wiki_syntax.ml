@@ -1,4 +1,3 @@
-(* FIXME indentation *)
 (* Ocsimore
  * Copyright (C) 2008
  * Laboratoire PPS - Université Paris Diderot - CNRS
