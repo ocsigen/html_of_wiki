@@ -1,19 +1,13 @@
-let output = ref "../ocsigen.org-repositories/"
-let pp_exn _ _ = ()
-
-(* don't care *)
-
 type t =
   | Site of string
   | Project of
-      { page : t'
+      { page : project_page
       ; version : Version.t
       ; project : string
       }
   | Deadlink of exn
-[@@deriving show]
 
-and t' =
+and project_page =
   | Static of string * [ `File | `Folder ]
   | Template
   | Page of string
@@ -22,7 +16,6 @@ and t' =
       { subproject : string
       ; file : string
       }
-[@@deriving show]
 
 let to_string src with_html d =
   let src, ext =
@@ -44,40 +37,9 @@ let to_string src with_html d =
     project ^ "/" ^ (v |> Version.to_string) ^ "/" ^ p
   | Deadlink e -> Printexc.to_string e
 
-let to_source = function
-  | Project { page = Page _; _ } -> None
-  | d -> Some (to_string true false d)
-
-let to_output d = !output ^ to_string false true d
-
 let to_uri ?fragment x =
   "/" ^ to_string false false x
   ^
   match fragment with
   | None -> ""
   | Some f -> "#" ^ f
-
-let compare a b = String.compare (to_output a) (to_output b)
-
-(* FIXME use Tyre to convert both ways? *)
-let parse_filename fn =
-  if Filename.check_suffix fn ".wiki"
-  then Site (Filename.chop_extension fn)
-  else failwith ("not a .wiki input: " ^ fn)
-
-let read_file ?(buffer_size = 4096) filename =
-  let ch = open_in filename in
-  let buf = Buffer.create buffer_size in
-  (try
-     while true do
-       Buffer.add_string buf (input_line ch);
-       Buffer.add_char buf '\n'
-     done
-   with End_of_file -> ());
-  close_in ch;
-  Buffer.to_bytes buf |> Bytes.to_string
-
-let read d =
-  match to_source d with
-  | None -> raise Not_found
-  | Some x -> read_file x
