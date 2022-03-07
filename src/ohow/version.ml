@@ -31,11 +31,6 @@ let parse s =
       V (s, l, extra)
     with _ -> assert false)
 
-let major = function
-  | Dev -> "dev"
-  | V (_, x :: _, _) -> string_of_int x
-  | V (_, [], _) -> assert false
-
 let compint (a : int) b = compare a b
 
 let compare v v' =
@@ -56,32 +51,6 @@ let compare v v' =
         | n -> n)
     in
     cmp v v'
-
-let match_ pattern v =
-  match (pattern, v) with
-  | "dev", Dev -> true
-  | "dev", _ -> false
-  | "*", Dev -> true
-  | _, Dev -> false
-  | s, V (_s, l, _e) ->
-    let s', _extra =
-      match split_char '+' s with
-      | [] -> assert false
-      | [ _ ] -> (s, None)
-      | [ x; extra ] -> (x, Some extra)
-      | _ -> assert false
-    in
-    let lpat = split_char '.' s' in
-    let rec cmp pat v =
-      match (pat, v) with
-      | [], [] -> true
-      | [], _ -> true
-      | "*" :: _, _ -> true
-      | _, [] -> false
-      | x :: xs, y :: ys when x = string_of_int y -> cmp xs ys
-      | _ -> false
-    in
-    cmp lpat l
 
 let to_string = function
   | Dev -> "dev"
