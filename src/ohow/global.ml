@@ -20,7 +20,7 @@ let using_current_file k =
   | Some file -> k file
   | None -> failwith "Links.using_current_file: current_file is not set."
 
-let current_file () = using_current_file Utils.id
+let current_file () = using_current_file (fun x -> x)
 
 type menu_file =
   | Manual of string
@@ -84,7 +84,7 @@ let using_options k =
   | Some options -> k options
   | None -> failwith "Global.options isn't properly intialized."
 
-let options () = using_options Utils.id
+let options () = using_options (fun x -> x)
 let suffix () = (options ()).suffix
 
 let the_manual () =

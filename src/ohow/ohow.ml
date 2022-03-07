@@ -118,10 +118,8 @@ let main
     ; local
     ; files
     } =
-  Utils.check_errors
-    [ ( "Some input files doesn't exist..."
-      , lazy (List.for_all Sys.file_exists files) )
-    ];
+  if not (List.for_all Sys.file_exists files)
+  then failwith "Some input files doesn't exist...";
   init_extensions ();
   let root = Paths.realpath root in
   let relative_to_root p =

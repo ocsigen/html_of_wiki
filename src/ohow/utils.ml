@@ -39,6 +39,16 @@ module String = struct
 
   let spaces = Re.rep1 Re.blank |> Re.compile
   let split_on_blank s = Re.split spaces s
+
+  let remove_leading char s =
+    let rec loop p =
+      if p >= String.length s
+      then ""
+      else if String.get s p = char
+      then loop (succ p)
+      else String.sub s p (String.length s - p)
+    in
+    loop 0
 end
 
 module List = struct
@@ -66,25 +76,8 @@ module Operators = struct
   let ( +/+ ) p q = Paths.(p +/+ q)
 end
 
-let id x = x
-let zipk f g k = f (fun fk -> g (fun gk -> k fk gk))
-
-let check_errors =
-  List.iter (fun (err, b) -> if Lazy.force b then () else failwith err)
-
-let remove_leading char s =
-  let rec loop p =
-    if p >= String.length s
-    then ""
-    else if String.get s p = char
-    then loop (succ p)
-    else String.sub s p (String.length s - p)
-  in
-  loop 0
-
 let sorted_dir_files sort dir = Sys.readdir dir |> Array.to_list |> sort
-let dir_files = sorted_dir_files id
-let a'_sorted_dir_files = sorted_dir_files (List.sort compare)
+let dir_files = sorted_dir_files (fun x -> x)
 
 let rec find_files name = function
   | file when Filename.basename file = name -> [ file ]
@@ -114,7 +107,6 @@ let read_file_lines file =
   close_in ic;
   lines
 
-let read_in_channel ic = read_channel_lines ic |> String.concat "\n"
 let read_file file = read_file_lines file |> String.concat "\n"
 
 let cut char s =
