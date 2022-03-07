@@ -23,9 +23,10 @@ let () =
                if div
                then
                  try
-                   HTML5outliner.find_previous_heading nav
-                   |> Js.Opt.to_option
-                   |> Option.bind ~f:HTML5outliner.get_fragment
+                   Js.Opt.case
+                     (HTML5outliner.find_previous_heading nav)
+                     (fun () -> None)
+                     (fun x -> HTML5outliner.get_fragment x)
                  with Not_found -> None
                else None
              in

@@ -1,12 +1,12 @@
 module Option = struct
   include Option
 
-  let bind x f =
+  let bind ~f x =
     match x with
     | Some x -> f x
     | None -> None
 
-  let map x f =
+  let map ~f x =
     match x with
     | Some x -> Some (f x)
     | None -> None
@@ -63,8 +63,8 @@ module List = struct
 end
 
 module Operators = struct
-  let ( >>= ) = Option.bind
-  let ( <$> ) = Option.map
+  let ( >>= ) x f = Option.bind ~f x
+  let ( <$> ) x f = Option.map ~f x
   let ( |? ) x default = Option.value x ~default
   let ( +/+ ) p q = Paths.(p +/+ q)
 end

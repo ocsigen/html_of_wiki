@@ -1,9 +1,9 @@
 module Option : sig
   (** Bind operator for the Maybe monad *)
-  val bind : 'a option -> ('a -> 'b option) -> 'b option
+  val bind : f:('a -> 'b option) -> 'a option -> 'b option
 
   (** Map operator for the Maybe monad *)
-  val map : 'a option -> ('a -> 'b) -> 'b option
+  val map : f:('a -> 'b) -> 'a option -> 'b option
 
   val value : 'a option -> default:'a -> 'a
 

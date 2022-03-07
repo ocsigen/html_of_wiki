@@ -26,7 +26,6 @@ open Wiki_types
 open Wiki_syntax_types
 open Wiki_widgets_interface
 open Tyxml
-open Common
 
 let class_wikibox wb = Printf.sprintf "wikiboxcontent%s" (string_of_wikibox wb)
 
