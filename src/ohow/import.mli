@@ -35,7 +35,6 @@ module List : sig
   module Assoc : sig
     type nonrec 'a t = (string * 'a) t
 
-    val get : ?default:'a -> 'a t -> string -> 'a
     val get_opt : 'a t -> string -> 'a option
   end
 end
@@ -67,5 +66,3 @@ val read_file_lines : string -> string list
 
 (** Read all the content of file and returns it as a string. *)
 val read_file : string -> string
-
-val cut : char -> string -> (string * string) option

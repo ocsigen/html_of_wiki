@@ -2,7 +2,9 @@
 
    Converts a wikicreole file into an HTML file. See README.md for build
    instructions. *)
-open Utils.Operators
+
+open Import
+open Operators
 
 let build_page file content =
   let rec flatten elt =
@@ -72,10 +74,10 @@ let infer_wiki_name = Filename.remove_extension
 let infer_output_file file = infer_wiki_name file ^ ".html"
 
 let ohow file oc =
-  ( ( file |> Utils.read_file |> fun wiki ->
+  ( ( file |> read_file |> fun wiki ->
       match (Global.options ()).template with
       | Some template ->
-        Utils.read_file template |> Wiki_syntax.compile_with_content wiki
+        read_file template |> Wiki_syntax.compile_with_content wiki
       | None -> Wiki_syntax.compile wiki )
   |> fun c ->
     if (Global.options ()).headless

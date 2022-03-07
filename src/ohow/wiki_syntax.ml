@@ -21,7 +21,7 @@
     @author Vincent Balat
     @author Boris Yakobowski *)
 
-open Utils
+open Import
 open Wiki_types
 open Wiki_syntax_types
 open Wiki_widgets_interface
@@ -199,7 +199,7 @@ let link_kind _bi addr =
     | "href" ->
       let menu_page =
         Global.using_menu_file (fun mf ->
-            let open Utils.Operators in
+            let open Operators in
             let { Global.root; manual; api; _ } = Global.options () in
             let file = Global.current_file () in
             let is_manual =
@@ -222,7 +222,7 @@ let link_kind _bi addr =
               Paths.(rewind root file +/+ api +/+ page))
       in
       Absolute
-        (let open Utils.Operators in
+        (let open Operators in
         menu_page |? page)
     | "site" ->
       let file = Global.current_file () in
@@ -239,7 +239,7 @@ let link_kind _bi addr =
 let href_of_link_kind bi addr fragment =
   match link_kind bi addr with
   | Absolute a as h ->
-    let open Utils.Operators in
+    let open Operators in
     fragment <$> (fun f -> Absolute Paths.(a +/+ ("#" ^ f))) |? h
   | _ -> assert false
 
@@ -1126,10 +1126,10 @@ module FlowBuilder = struct
     let address, text =
       match addr with
       | Absolute "" -> (Some "", Some ".")
-      | Absolute a when Utils.uri_absolute a -> (Some a, None)
+      | Absolute a when uri_absolute a -> (Some a, None)
       | Absolute a when ends_with "/" a -> (Some a, None)
       | Absolute a -> (
-        match Utils.cut '#' a with
+        match String.sep '#' a with
         | Some ("", hash) -> (Some ("#" ^ hash), None)
         | Some (a, hash) -> (Some (a ^ Global.suffix () ^ "#" ^ hash), None)
         | None -> (Some (a ^ Global.suffix ()), None))
@@ -1138,14 +1138,14 @@ module FlowBuilder = struct
     let c = List.flatten c in
     [ (Html.a
          ~a:
-           ( (let open Utils.Operators in
+           ( (let open Operators in
              (* NOTE address is always Some x for now but one could add another
                 case to the matching above in which the original address is to
                 be used. *)
              address <$> (fun a -> Absolute a) |? addr)
            |> uri_of_href |> Html.a_href
            |> fun x -> x :: a )
-         (let open Utils.Operators in
+         (let open Operators in
          text >>= (fun t -> Some [ Html.txt t ]) |? c)
         :> Html_types.phrasing Html.elt)
     ]
@@ -2279,14 +2279,14 @@ let () =
         match (Global.options ()).template with
         | Some template ->
           let template_dir = Filename.dirname template in
-          Utils.Operators.(template_dir +/+ wiki)
+          Operators.(template_dir +/+ wiki)
         | None ->
           failwith "include: extension requires --template to be provided")
       | Some wiki, None ->
         let current_dir = Global.current_file () |> Filename.dirname in
-        Utils.Operators.(current_dir +/+ wiki)
+        Operators.(current_dir +/+ wiki)
     in
-    file |> Utils.read_file |> compile |> fun c -> `Flow5 c
+    file |> read_file |> compile |> fun c -> `Flow5 c
   in
   let wp = wikicreole_parser in
   register_wiki_extension ~name:"include" ~wp ~wp_rec:wp

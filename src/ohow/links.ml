@@ -1,4 +1,5 @@
-open Utils.Operators
+open Import
+open Operators
 open Tyxml
 
 let a_link_of_uri ?fragment suffix uri contents =

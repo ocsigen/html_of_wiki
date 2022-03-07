@@ -1,3 +1,5 @@
+open Import
+
 let file_cmd =
   let doc = "A wikicreole file to convert to HTML." in
   Cmdliner.Arg.(non_empty & pos_all file [] & info [] ~docv:"FILE" ~doc)
@@ -157,10 +159,10 @@ let info_cmd =
 
 let register_options k print headless outfile project root manual api
     default_subproject images assets template csw docversions local files =
-  let open Utils.Operators in
+  let open Operators in
   let suffix = if local then ".html" else "" in
   let read_lines f =
-    Utils.read_file_lines f
+    read_file_lines f
     |> List.filter_map (fun s ->
            match String.trim s with
            | "" -> None

@@ -16,7 +16,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *)
-open Utils
+open Import
 open Tyxml
 
 let do_outline wp bi args c =
@@ -37,9 +37,11 @@ let do_outline wp bi args c =
          (Wiki_syntax.xml_of_wiki wp bi c :> Html_types.flow5 Html.elt list)
      in
      let ignore =
-       List.Assoc.get ~default:"nav aside" args "ignore"
-       |> String.split_on_char ' '
-       |> List.map (fun x -> String.trim x |> String.lowercase_ascii)
+       match List.Assoc.get_opt args "ignore" with
+       | None -> [ "nav"; "aside" ]
+       | Some x ->
+         String.split_on_char ' ' x
+         |> List.map (fun x -> String.trim x |> String.lowercase_ascii)
      in
      let div =
        (elem = `Container && not bi.Wiki_widgets_interface.bi_sectioning)
@@ -116,7 +118,7 @@ let do_drawer wp bi args c =
      [ elt ])
 
 let do_when_project _ _ args c =
-  let open Utils.Operators in
+  let open Operators in
   let fail e = failwith @@ "when_project: " ^ e in
   let opts = Extensions.get_opts [ "when"; "unless" ] args in
   let project, predicate =
@@ -137,12 +139,12 @@ let do_when_project _ _ args c =
   |? `Flow5 []
 
 let do_when_local _ _ _ c =
-  let open Utils.Operators in
+  let open Operators in
   `Flow5
     (if (Global.options ()).local then c <$> Wiki_syntax.compile |? [] else [])
 
 let do_unless_local _ _ _ c =
-  let open Utils.Operators in
+  let open Operators in
   `Flow5
     (if not (Global.options ()).local
     then c <$> Wiki_syntax.compile |? []

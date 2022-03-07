@@ -59,13 +59,6 @@ module List = struct
 
     let get_opt args name =
       try Some (List.assoc name args) with Not_found -> None
-
-    let get ?default args name =
-      try List.assoc name args
-      with Not_found -> (
-        match default with
-        | None -> raise (Error.Error ("no \"" ^ name ^ "\" option."))
-        | Some d -> d)
   end
 end
 
@@ -108,12 +101,3 @@ let read_file_lines file =
   lines
 
 let read_file file = read_file_lines file |> String.concat "\n"
-
-let cut char s =
-  let len = String.length s in
-  match String.index s char with
-  | seppos ->
-    Some
-      ( String.trim (String.sub s 0 seppos)
-      , String.trim (String.sub s (seppos + 1) (len - seppos - 1)) )
-  | exception Not_found -> None

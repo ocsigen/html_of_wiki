@@ -1,3 +1,4 @@
+open! Import
 open Tyxml
 
 exception Error of string
