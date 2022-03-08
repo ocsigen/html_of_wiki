@@ -13,7 +13,7 @@ and project_page =
   | Page of string
   | Manual of string
   | Api of
-      { subproject : string
+      { subproject : string option
       ; file : string
       }
 

@@ -23,7 +23,7 @@ let doctree _ args _ =
             { page = Manual ""; project = ""; version = Version.Dev }
         | Api _ ->
           Document.Project
-            { page = Api { subproject = ""; file = "" }
+            { page = Api { subproject = None; file = "" }
             ; project = ""
             ; version = Version.Dev
             })

@@ -13,7 +13,7 @@ and project_page =
   | Page of string
   | Manual of string
   | Api of
-      { subproject : string
+      { subproject : string option
       ; file : string
       }
 
@@ -27,7 +27,11 @@ let to_string d =
       | Page p -> p
       | Manual m -> "manual/" ^ m
       | Api { subproject; file } ->
-        "api/" ^ (if subproject = "" then "" else subproject ^ "/") ^ file
+        "api/"
+        ^ (match subproject with
+          | None -> ""
+          | Some subproject -> subproject ^ "/")
+        ^ file
       | Template -> assert false (* handled above... *)
       | Static (p, `File) | Static (p, `Folder) -> "manual/files/" ^ p
     in
