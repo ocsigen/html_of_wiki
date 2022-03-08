@@ -1,31 +1,22 @@
+open Import
+
 type t =
   | Dev
   | V of string * int list * string option
 
-let split_char sep p =
-  let len = String.length p in
-  let rec split beg cur =
-    if cur >= len
-    then if cur - beg > 0 then [ String.sub p beg (cur - beg) ] else []
-    else if p.[cur] = sep
-    then String.sub p beg (cur - beg) :: split (cur + 1) (cur + 1)
-    else split beg (cur + 1)
-  in
-  split 0 0
-
 let parse s =
-  match String.lowercase_ascii s with
+  match s with
   | "dev" -> Dev
   | s -> (
     try
       let s', extra =
-        match split_char '+' s with
+        match String.split_on_char '+' s with
         | [] -> assert false
         | [ _ ] -> (s, None)
         | [ x; extra ] -> (x, Some extra)
         | _ -> assert false
       in
-      let l = split_char '.' s' in
+      let l = String.split_on_char '.' s' in
       let l = List.map int_of_string l in
       V (s, l, extra)
     with _ -> assert false)
