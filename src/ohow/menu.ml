@@ -19,13 +19,12 @@ let doctree _ args _ =
       Global.(
         match mf with
         | Manual _ ->
-          Document.Project
-            { page = Manual ""; project = ""; version = Version.Dev }
+          Document.Project { page = Manual ""; project = ""; version = None }
         | Api _ ->
           Document.Project
             { page = Api { subproject = None; file = "" }
             ; project = ""
-            ; version = Version.Dev
+            ; version = None
             })
     in
     Wiki_widgets_interface.
@@ -54,30 +53,33 @@ let doctree _ args _ =
     (let r = List.concat menus in
      [ nav ~a:(a_class [ "how-doctree" ] :: attrs) r ])
 
-let path_from_versions_dir file =
-  let { Global.root; _ } = Global.options () in
-  file |> Paths.realpath |> Paths.path_rm_prefix root
-
 let docversion _bi args _contents =
   let attrs = Wiki_syntax.parse_common_attribs args in
-  let file = Global.current_file () in
-  let { Global.root; docversions; suffix; _ } = Global.options () in
-  let current_wiki_path =
-    path_from_versions_dir file |> Filename.chop_extension |> fun p ->
-    p ^ suffix
-  in
+  let { Global.docversions; _ } = Global.options () in
   let links =
-    docversions
+    docversions |> List.map Version.parse
     |> List.map (fun v ->
-           let dst =
-             Paths.(rewind root file +/+ up +/+ v +/+ current_wiki_path)
+           let old : Document.t = assert false in
+           let new_ =
+             match old with
+             | Site _ as x -> x
+             | Deadlink _ as x -> x
+             | Project { page; version = _; project } ->
+               Project { page; version = Some v; project }
            in
-           let selected =
-             if Filename.basename root = v then Some (a_selected ()) else None
+           let is_curr =
+             match old with
+             | Site _ -> fun _ -> false
+             | Deadlink _ -> fun _ -> false
+             | Project { version = None; _ } -> fun _ -> false
+             | Project { version = Some v; _ } ->
+               fun x -> Version.compare v x = 0
            in
+           let dst = Document.to_relative_uri ~from:old new_ in
+           let selected = if is_curr v then Some (a_selected ()) else None in
            option
              ~a:(a_value dst :: (selected <$> (fun s -> [ s ]) |? []))
-             (txt v))
+             (txt (Version.to_string v)))
   in
   `Flow5
     [ txt "Version "

@@ -1,6 +1,6 @@
 (executables
- (names ohow)
- (public_names ohow)
+ (names ohow html_of_wiki)
+ (public_names ohow html_of_wiki)
  (package html_of_wiki)
  (libraries tyxml tyxml.functor re cmdliner unix common)
  (modules_without_implementation wiki_syntax_types))

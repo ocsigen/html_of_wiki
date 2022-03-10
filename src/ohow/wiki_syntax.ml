@@ -138,17 +138,14 @@ type href = Wiki_syntax_types.href
 
 let uri_of_href = function
   | Absolute s -> s
-  | Document { document; fragment } -> Document.to_uri ?fragment document
+  | Document { document; fragment } ->
+    Document.to_absolute_uri ?fragment document
 
 let normalize_link _ _ _ _ = None
 
 let starts_with prefix s =
   let p = String.length prefix in
   String.length s >= p && String.sub s 0 p = prefix
-
-let ends_with suffix s =
-  let l = String.length suffix in
-  String.length s >= l && String.sub s (String.length s - l) l = suffix
 
 let rec deabbrev_address = function
   (* [[]], [[#anchor]] *)
@@ -179,68 +176,62 @@ let wiki_kind prot page =
     | id when is_number id -> failwith "ids not supported anymore"
     | wiki ->
       let wiki = extract_wiki_name wiki in
-      let file = Global.current_file () in
-      let root = Global.root () in
-      Absolute
-        Paths.(rewind root file +/+ !Global.root_to_site +/+ wiki +/+ page))
+      Document
+        { document = Document.parse_page' ~project:wiki page; fragment = None })
 
-let this_wiki_kind _prot page =
-  let file = Global.current_file () in
-  let root = Global.root () in
-  Absolute Paths.(rewind root file +/+ page)
+let this_wiki_kind page =
+  let project = (Global.options ()).project in
+  match project with
+  | Some project ->
+    Document { document = Document.parse_page' ~project page; fragment = None }
+  | None -> failwith "not project found"
 
 let link_kind _bi addr =
-  match deabbrev_address addr |> String.split_on_char ':' with
-  | p :: rest -> (
-    let page = String.concat ":" rest in
-    (* the page may contain ':' *)
-    match p with
-    | "href" ->
+  let p, page =
+    let page = deabbrev_address addr in
+    match String.cut ':' page with
+    | Some (p, rest) -> (p, rest)
+    | None -> (page, "")
+  in
+  match p with
+  | "href" -> (
+    if uri_absolute page
+    then Absolute page
+    else
       let menu_page =
         Global.using_menu_file (fun mf ->
-            let open Operators in
-            let { Global.root; manual; api; _ } = Global.options () in
-            let file = Global.current_file () in
-            let is_manual =
-              manual
-              <$> (fun m -> Paths.(is_inside_dir (root +/+ m) file))
-              |? false
-            in
-            let is_api =
-              api
-              <$> (fun a -> Paths.(is_inside_dir (root +/+ a) file))
-              |? false
-            in
-            let manual, api = (manual |? "", api |? "") in
-            match mf with
-            | Manual _ when is_manual -> page
-            | Api _ when is_api -> Paths.(rewind root file +/+ api +/+ page)
-            | Manual _ when is_api ->
-              Paths.(rewind root file +/+ manual +/+ page)
-            | _ (* api when is_manual *) ->
-              Paths.(rewind root file +/+ api +/+ page))
+            let project = (Global.options ()).project in
+            match (mf, project) with
+            | Manual _, Some project ->
+              let document =
+                Document.Project { project; version = None; page = Manual page }
+              in
+              Document { document; fragment = None }
+            | Api _, Some project ->
+              let document =
+                Document.Project
+                  { project
+                  ; version = None
+                  ; page = Api { subproject = None; file = page }
+                  }
+              in
+              Document { document; fragment = None }
+            | _, None -> Absolute page)
       in
-      Absolute
-        (let open Operators in
-        menu_page |? page)
-    | "site" ->
-      let file = Global.current_file () in
-      let root = Global.root () in
-      Absolute
-        Paths.(
-          rewind root file +/+ !Global.root_to_site
-          +/+ String.remove_leading '/' page)
-    | p when starts_with "wiki(" p -> wiki_kind p page
-    | p when starts_with "wiki" p -> this_wiki_kind p page
-    | _ -> failwith @@ "unknown prototype: '" ^ p ^ "'")
-  | _ -> failwith @@ "ill formed link: '" ^ addr ^ "'"
+      match menu_page with
+      | Some x -> x
+      | None -> Absolute page)
+  | "site" -> Document { document = Site page; fragment = None }
+  | p when starts_with "wiki(" p -> wiki_kind p page
+  | "wiki" -> this_wiki_kind page
+  | _ -> failwith @@ "unknown prototype: '" ^ p ^ "'"
 
 let href_of_link_kind bi addr fragment =
-  match link_kind bi addr with
-  | Absolute a as h ->
-    let open Operators in
-    fragment <$> (fun f -> Absolute Paths.(a +/+ ("#" ^ f))) |? h
-  | _ -> assert false
+  match (link_kind bi addr, fragment) with
+  | Absolute a, Some fragment -> Absolute (a ^ "#" ^ fragment)
+  | (Absolute _ as a), None -> a
+  | Document { document; fragment = _ }, fragment ->
+    Document { document; fragment }
 
 (** **)
 
@@ -862,7 +853,7 @@ module MakeParser (B : RawParser) :
               | "item", it ->
                 let it' =
                   let link, text =
-                    match String.sep '|' it with
+                    match String.cut '|' it with
                     | Some x -> x
                     | None -> (it, it)
                   in
@@ -1122,28 +1113,14 @@ module FlowBuilder = struct
     let a =
       parse_common_attribs ~classes:[ "ocsimore_phrasing_link" ] attribs
     in
-    let address, text =
+    let text =
       match addr with
-      | Absolute "" -> (Some "", Some ".")
-      | Absolute a when uri_absolute a -> (Some a, None)
-      | Absolute a when ends_with "/" a -> (Some a, None)
-      | Absolute a -> (
-        match String.sep '#' a with
-        | Some ("", hash) -> (Some ("#" ^ hash), None)
-        | Some (a, hash) -> (Some (a ^ Global.suffix () ^ "#" ^ hash), None)
-        | None -> (Some (a ^ Global.suffix ()), None))
-      | _ -> assert false
+      | Absolute "" -> Some "." (* WHY *)
+      | _ -> None
     in
     let c = List.flatten c in
     [ (Html.a
-         ~a:
-           ( (let open Operators in
-             (* NOTE address is always Some x for now but one could add another
-                case to the matching above in which the original address is to
-                be used. *)
-             address <$> (fun a -> Absolute a) |? addr)
-           |> uri_of_href |> Html.a_href
-           |> fun x -> x :: a )
+         ~a:(addr |> uri_of_href |> Html.a_href |> fun x -> x :: a)
          (let open Operators in
          text >>= (fun t -> Some [ Html.txt t ]) |? c)
         :> Html_types.phrasing Html.elt)

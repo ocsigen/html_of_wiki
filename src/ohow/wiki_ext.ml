@@ -70,26 +70,39 @@ let do_outline wp bi args c =
 
 let list_assoc_opt a l = try Some (List.assoc a l) with Not_found -> None
 
-let list_assoc_default a l default =
-  try List.assoc a l with Not_found -> default
-
 (* TODO: support for extended link syntax (wiki(toto):titi etc.) *)
 let f_link _bi args c =
-  let wiki = list_assoc_default "wiki" args "" in
-  let page = list_assoc_default "page" args "" in
+  let wiki = list_assoc_opt "wiki" args in
+  let page = list_assoc_opt "page" args in
   let href = list_assoc_opt "href" args in
   let fragment = list_assoc_opt "fragment" args in
   let content =
     match c with
     | Some c -> c
-    | None -> [ Html.txt page ]
+    | None -> [ Html.txt (Option.value ~default:"" page) ]
   in
   (* class and id attributes will be taken by Wiki_syntax.a_elem *)
-  ( Wiki_syntax_types.Absolute
-      (match (href, fragment) with
-      | Some href, _ -> href
-      | _, None -> Printf.sprintf "/%s/%s" wiki page
-      | _, Some fragment -> Printf.sprintf "/%s/%s#%s" wiki page fragment)
+  ( (match href with
+    | Some href ->
+      if wiki <> None || page <> None
+      then
+        failwith
+          "extension:link: wiki and page argument cannot be used together with \
+           href";
+      Wiki_syntax_types.Absolute href
+    | None -> (
+      match wiki with
+      | Some project -> (
+        match page with
+        | None ->
+          Wiki_syntax_types.Document
+            { fragment; document = Document.Site project }
+        | Some page ->
+          let document = Document.parse_page' ~project page in
+          Wiki_syntax_types.Document { fragment; document })
+      | None ->
+        let document = Document.Site (Option.value ~default:"" page) in
+        Wiki_syntax_types.Document { fragment; document }))
   , args
   , content )
 
