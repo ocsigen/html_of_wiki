@@ -1,5 +1,6 @@
 type t =
   | Site of string
+  | Site_static of string * [ `File | `Folder ]
   | Project of
       { page : project_page
       ; version : Version.t option

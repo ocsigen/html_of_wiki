@@ -6,10 +6,13 @@ let path_of_list = List.fold_left Filename.concat ""
 let list_of_path p =
   let rec list_of_path = function
     | "." -> []
+    | "" -> []
     | ("/" | "..") as p -> [ p ]
     | p -> Filename.basename p :: list_of_path (Filename.dirname p)
   in
-  list_of_path p |> List.rev
+  let rev_path = list_of_path p in
+  let rev_path = if p <> "" && String.get p (String.length p - 1) = '/' then "" :: rev_path else rev_path in
+  List.rev rev_path
 
 let realpath = function
   | p when Filename.is_relative p -> Filename.concat (Sys.getcwd ()) p

@@ -69,13 +69,14 @@ let docversion _bi args _contents =
                    (Filename.chop_extension
                       (Paths.path_rm_prefix (Global.root ())
                          (Paths.realpath (Global.current_file ())))
-                   ^ Global.suffix ())
+                   )
                | exception _ -> Site (Global.current_file ()))
            in
 
            let new_ =
              match old with
              | Site _ as x -> x
+             | Site_static _ as x -> x
              | Deadlink _ as x -> x
              | Project { page; version = _; project } ->
                Project { page; version = Some v; project }
@@ -83,6 +84,7 @@ let docversion _bi args _contents =
            let is_curr =
              match old with
              | Site _ -> fun _ -> false
+             | Site_static _ -> fun _ -> false
              | Deadlink _ -> fun _ -> false
              | Project { version = None; _ } -> fun _ -> false
              | Project { version = Some v; _ } ->

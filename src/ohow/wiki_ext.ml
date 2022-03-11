@@ -89,19 +89,25 @@ let f_link _bi args c =
         failwith
           "extension:link: wiki and page argument cannot be used together with \
            href";
-      Wiki_syntax_types.Absolute href
+      if uri_absolute href
+      then Wiki_syntax_types.Absolute href
+      else if Filename.extension href = ""
+      then Wiki_syntax_types.Document {document = Site href; fragment = None}
+      else Wiki_syntax_types.Document {document = Site_static (href, `File); fragment = None}
     | None -> (
       match wiki with
       | Some project -> (
         match page with
         | None ->
           Wiki_syntax_types.Document
-            { fragment; document = Document.Site project }
+            { fragment; document = Document.Site_static (project, `Folder) }
         | Some page ->
           let document = Document.parse_page' ~project page in
           Wiki_syntax_types.Document { fragment; document })
       | None ->
-        let document = Document.Site (Option.value ~default:"" page) in
+        let document = match page with
+          | None -> Document.Site_static ("/",`Folder)
+          | Some page -> Document.Site page in
         Wiki_syntax_types.Document { fragment; document }))
   , args
   , content )

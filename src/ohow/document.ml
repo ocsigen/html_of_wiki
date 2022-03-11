@@ -2,6 +2,7 @@ open Import
 
 type t =
   | Site of string
+  | Site_static of string * [ `File | `Folder ]
   | Project of
       { page : project_page
       ; version : Version.t option
@@ -35,11 +36,21 @@ let parse_page ~project ~version page =
 
 let parse_page' ~project page =
   match String.cut '/' page with
-  | None -> Site (project ^ "/" ^ page)
+  | None ->
+    if page = ""
+    then Site_static (project ^ "/", `Folder)
+    else if Filename.extension page = ""
+    then Site (project ^ "/" ^ page)
+    else Site_static (project ^ "/" ^ page, `File)
   | Some (v, rest) -> (
     match Version.parse v with
     | version -> parse_page ~project ~version rest
-    | exception _ -> Site (project ^ "/" ^ page))
+    | exception _ ->
+      if page = ""
+      then Site_static (project ^ "/", `Folder)
+      else if Filename.extension page = ""
+      then Site (project ^ "/" ^ page)
+      else Site_static (project ^ "/" ^ page, `File))
 
 let page_to_parts page =
   match page with
@@ -54,23 +65,28 @@ let page_to_parts page =
 
 let to_string d =
   match d with
-  | Site s -> s
+  | Site "" | Site "/" -> ""
+  | Site s ->
+    let s = if String.get s 0 = '/' then String.sub s 1 (String.length s - 1) else s
+    in
+    s ^ Global.suffix ()
+  | Site_static (s,_) ->
+    let s = if String.get s 0 = '/' then String.sub s 1 (String.length s - 1) else s
+    in
+    s
   | Project { page = Template; project; _ } ->
     String.concat "/" [ project; "template" ]
   | Project { page; version = Some v; project } ->
     let p = page_to_parts page in
-    String.concat "/" (project :: Version.to_string v :: p)
+    String.concat "/" (project :: Version.to_string v :: p) ^ Global.suffix ()
   | Project { page; version = None; project } ->
     let p = page_to_parts page in
-    String.concat "/" (project :: "latest" :: p)
+    String.concat "/" (project :: "latest" :: p) ^ Global.suffix ()
   | Deadlink e -> "data:text/plain;" ^ encode (Printexc.to_string e)
 
 let to_absolute_uri ?fragment x =
   let s = to_string x in
   "/" ^ s
-  ^ (if s <> "" && String.get s (String.length s - 1) <> '/'
-    then Global.suffix ()
-    else "")
   ^
   match fragment with
   | None -> ""

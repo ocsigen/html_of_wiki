@@ -137,11 +137,22 @@ let descr_builder l = List.map ddt_builder l
 type href = Wiki_syntax_types.href
 
 let uri_of_href = function
-  | Absolute "" -> ""
-  | Absolute s when String.get s (String.length s - 1) = '/' -> s
-  | Absolute s -> s ^ Global.suffix ()
+  | Absolute s -> s
   | Document { document; fragment } ->
-    Document.to_absolute_uri ?fragment document
+    let old : Document.t =
+      match (Global.options ()).project with
+      | None -> Site (Global.current_file ())
+      | Some project -> (
+          match Version.parse (Filename.basename (Global.root ())) with
+          | version ->
+            Document.parse_page ~project ~version
+              (Filename.chop_extension
+                 (Paths.path_rm_prefix (Global.root ())
+                    (Paths.realpath (Global.current_file ())))
+               ^ Global.suffix ())
+          | exception _ -> Site (Global.current_file ()))
+    in
+    Document.to_relative_uri ~from:old ?fragment document
 
 let normalize_link _ _ _ _ = None
 
@@ -223,12 +234,15 @@ let link_kind _bi addr =
                   }
               in
               Document { document; fragment = None }
-            | _, None -> Absolute page)
+            | _, None -> Document {document = Site page; fragment = None})
       in
       match menu_page with
       | Some x -> x
-      | None -> Absolute page)
-  | "site" -> Document { document = Site page; fragment = None }
+      | None -> Document {document = Site page; fragment = None})
+  | "site" ->
+    if Filename.extension page = ""
+    then Document { document = Site page; fragment = None }
+    else Document { document = Site_static (page,`File); fragment = None }
   | p when starts_with "wiki(" p -> wiki_kind p page
   | "wiki" -> this_wiki_kind page
   | _ -> failwith @@ "unknown prototype: '" ^ p ^ "'"
