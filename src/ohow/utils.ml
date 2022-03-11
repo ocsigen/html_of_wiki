@@ -79,3 +79,12 @@ let read_file_lines file =
 
 let read_in_channel ic = read_channel_lines ic |> String.concat "\n"
 let read_file file = read_file_lines file |> String.concat "\n"
+
+let cut char s =
+  let len = String.length s in
+  match String.index s char with
+  | seppos ->
+    Some
+      ( String.trim (String.sub s 0 seppos)
+      , String.trim (String.sub s (seppos + 1) (len - seppos - 1)) )
+  | exception Not_found -> None

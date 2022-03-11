@@ -73,3 +73,5 @@ val read_file_lines : string -> string list
 
 (** Read all the content of file and returns it as a string. *)
 val read_file : string -> string
+
+val cut : char -> string -> (string * string) option

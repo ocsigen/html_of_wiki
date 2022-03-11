@@ -1125,7 +1125,11 @@ module FlowBuilder = struct
       | Absolute "" -> (Some "", Some ".")
       | Absolute a when Utils.uri_absolute a -> (Some a, None)
       | Absolute a when ends_with "/" a -> (Some a, None)
-      | Absolute a -> (Some (a ^ Global.suffix ()), None)
+      | Absolute a -> (
+        match Utils.cut '#' a with
+        | Some ("", hash) -> (Some ("#" ^ hash), None)
+        | Some (a, hash) -> (Some (a ^ Global.suffix () ^ "#" ^ hash), None)
+        | None -> (Some (a ^ Global.suffix ()), None))
       | _ -> assert false
     in
     let c = List.flatten c in
