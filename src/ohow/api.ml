@@ -201,31 +201,30 @@ module Odoc = struct
     | `ClassType -> "class-type"
     | `File -> "file"
 
-  let path_of_id id =
+  let path_of_id (path, v) =
     let k kind name = string_of_path_kind kind ^ "-" ^ name in
-    match id with
-    | _path, `Index -> ""
-    | _path, `IndexTypes -> ""
-    | _path, `IndexExceptions -> ""
-    | _path, `IndexValues -> ""
-    | _path, `IndexAttributes -> ""
-    | _path, `IndexMethods -> ""
-    | _path, `IndexClasses -> ""
-    | _path, `IndexClassTypes -> ""
-    | _path, `IndexModules -> ""
-    | _path, `IndexModuleTypes -> ""
-    | path, `Mod name -> String.concat "/" (path @ [ name ])
-    | path, `ModType name -> String.concat "/" (path @ [ k `ModuleType name ])
-    | path, `ClassType name -> String.concat "/" (path @ [ k `ClassType name ])
-    | path, `Class name -> String.concat "/" (path @ [ k `Class name ])
-    | path, `Attr (cl, _) ->
-      String.concat "/" (path @ [ k `Class cl ]) (* XXX *)
-    | path, `Method (cl, _) ->
-      String.concat "/" (path @ [ k `Class cl ]) (* XXX *)
-    | path, `Value _ -> String.concat "/" path
-    | path, `Type _ -> String.concat "/" path
-    | path, `Exc _ -> String.concat "/" path
-    | path, `Section _ -> String.concat "/" path
+    let mk l = String.concat "/" (path @ l @ [ "" ]) in
+    match v with
+    | `Index -> ""
+    | `IndexTypes -> ""
+    | `IndexExceptions -> ""
+    | `IndexValues -> ""
+    | `IndexAttributes -> ""
+    | `IndexMethods -> ""
+    | `IndexClasses -> ""
+    | `IndexClassTypes -> ""
+    | `IndexModules -> ""
+    | `IndexModuleTypes -> ""
+    | `Mod name -> mk [ name ]
+    | `ModType name -> mk [ k `ModuleType name ]
+    | `ClassType name -> mk [ k `ClassType name ]
+    | `Class name -> mk [ k `Class name ]
+    | `Attr (cl, _) -> mk [ k `Class cl ] (* XXX *)
+    | `Method (cl, _) -> mk [ k `Class cl ] (* XXX *)
+    | `Value _ -> mk []
+    | `Type _ -> mk []
+    | `Exc _ -> mk []
+    | `Section _ -> mk []
 
   type anchor_kind =
     [ path_kind
