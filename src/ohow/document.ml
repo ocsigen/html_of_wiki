@@ -35,11 +35,11 @@ let parse_page ~project ~version page =
 
 let parse_page' ~project page =
   match String.cut '/' page with
-  | None -> Site page
+  | None -> Site (project ^ "/" ^ page)
   | Some (v, rest) -> (
     match Version.parse v with
     | version -> parse_page ~project ~version rest
-    | exception _ -> Site page)
+    | exception _ -> Site (project ^ "/" ^ page))
 
 let page_to_parts page =
   match page with
@@ -62,11 +62,15 @@ let to_string d =
     String.concat "/" (project :: Version.to_string v :: p)
   | Project { page; version = None; project } ->
     let p = page_to_parts page in
-    String.concat "/" (project :: "fixme" :: p)
+    String.concat "/" (project :: "latest" :: p)
   | Deadlink e -> "data:text/plain;" ^ encode (Printexc.to_string e)
 
 let to_absolute_uri ?fragment x =
-  "/" ^ to_string x
+  let s = to_string x in
+  "/" ^ s
+  ^ (if s <> "" && String.get s (String.length s - 1) <> '/'
+    then Global.suffix ()
+    else "")
   ^
   match fragment with
   | None -> ""
@@ -81,6 +85,7 @@ let to_relative_uri ~from ?fragment x =
     let rec up t1 t2 =
       match t1 with
       | [] -> t2
+      | [ _ ] -> t2
       | _ :: t1 -> up t1 (Paths.up :: t2)
     in
     let rec loop x1 x2 =

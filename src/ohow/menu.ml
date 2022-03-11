@@ -59,7 +59,20 @@ let docversion _bi args _contents =
   let links =
     docversions |> List.map Version.parse
     |> List.map (fun v ->
-           let old : Document.t = assert false in
+           let old : Document.t =
+             match (Global.options ()).project with
+             | None -> Site (Global.current_file ())
+             | Some project -> (
+               match Version.parse (Filename.basename (Global.root ())) with
+               | version ->
+                 Document.parse_page ~project ~version
+                   (Filename.chop_extension
+                      (Paths.path_rm_prefix (Global.root ())
+                         (Paths.realpath (Global.current_file ())))
+                   ^ Global.suffix ())
+               | exception _ -> Site (Global.current_file ()))
+           in
+
            let new_ =
              match old with
              | Site _ as x -> x

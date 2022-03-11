@@ -17,9 +17,14 @@ let parse s =
         | _ -> assert false
       in
       let l = String.split_on_char '.' s' in
+      let l =
+        match List.rev l with
+        | "x" :: l -> List.rev l
+        | _ -> l
+      in
       let l = List.map int_of_string l in
       V (s, l, extra)
-    with _ -> assert false)
+    with _ -> failwith (Printf.sprintf "%s is not a valid version" s))
 
 let compint (a : int) b = compare a b
 

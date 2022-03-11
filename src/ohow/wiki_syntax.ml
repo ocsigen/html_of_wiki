@@ -137,7 +137,9 @@ let descr_builder l = List.map ddt_builder l
 type href = Wiki_syntax_types.href
 
 let uri_of_href = function
-  | Absolute s -> s
+  | Absolute "" -> ""
+  | Absolute s when String.get s (String.length s - 1) = '/' -> s
+  | Absolute s -> s ^ Global.suffix ()
   | Document { document; fragment } ->
     Document.to_absolute_uri ?fragment document
 
@@ -201,17 +203,22 @@ let link_kind _bi addr =
       let menu_page =
         Global.using_menu_file (fun mf ->
             let project = (Global.options ()).project in
+            let version =
+              match Version.parse (Filename.basename (Global.root ())) with
+              | version -> Some version
+              | exception _ -> None
+            in
             match (mf, project) with
             | Manual _, Some project ->
               let document =
-                Document.Project { project; version = None; page = Manual page }
+                Document.Project { project; version; page = Manual page }
               in
               Document { document; fragment = None }
             | Api _, Some project ->
               let document =
                 Document.Project
                   { project
-                  ; version = None
+                  ; version
                   ; page = Api { subproject = None; file = page }
                   }
               in

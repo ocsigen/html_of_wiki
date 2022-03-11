@@ -45,7 +45,13 @@ let rec remove_prefixl l l' =
 
 let path_rm_prefix prefix p =
   (* works the other way round ;) *)
-  remove_prefixl (list_of_path prefix) (list_of_path p) |> path_of_list
+  try remove_prefixl (list_of_path prefix) (list_of_path p) |> path_of_list
+  with _e ->
+    failwith
+      (Printf.sprintf
+         "remove_prefixl: no list is a prefix of the other, %s is not a prefix \
+          of %s"
+         prefix p)
 
 let is_visible = function
   | "" -> false
