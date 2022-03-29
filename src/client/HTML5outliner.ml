@@ -1,7 +1,5 @@
 open Js_of_ocaml
 
-exception Not_implemented
-
 let sectionning_content = [ "article"; "aside"; "nav"; "section" ]
 
 let sectionning_root =
@@ -205,18 +203,20 @@ let find_container n =
   in
   find n##.parentNode
 
-exception FoundFragment of outline
-
 let find_fragment fragment outline =
-  let rec find (Section (_, f, outline)) =
-    if f = Some fragment
-    then raise (FoundFragment outline)
-    else List.iter find outline
+  let rec find = function
+    | Section (_, Some f, outline) when f = fragment -> Some outline
+    | Section (_, _, outline) -> find_l outline
+  and find_l = function
+    | [] -> None
+    | x :: xs -> (
+      match find x with
+      | None -> find_l xs
+      | Some _ as x -> x)
   in
-  try
-    List.iter find outline;
-    []
-  with FoundFragment outline -> outline
+  match find_l outline with
+  | None -> []
+  | Some x -> x
 
 let rec build_ol ?(depth = 0) outline =
   (* depth = 0 means as deep as infinity (for a value of infinity equal to

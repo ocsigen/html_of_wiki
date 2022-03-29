@@ -23,7 +23,6 @@
    @author Vincent Balat
 *)
 
-open Ocsimore_lib
 exception Eof
 exception Unrecognized_char
 

@@ -1,4 +1,3 @@
-(* FIXME indentation *)
 (* Ocsimore
  * Copyright (C) 2008
  * Laboratoire PPS - Université Paris Diderot - CNRS
@@ -22,12 +21,11 @@
     @author Vincent Balat
     @author Boris Yakobowski *)
 
-open Ocsimore_lib
+open Import
 open Wiki_types
 open Wiki_syntax_types
 open Wiki_widgets_interface
 open Tyxml
-open Common
 
 let class_wikibox wb = Printf.sprintf "wikiboxcontent%s" (string_of_wikibox wb)
 
@@ -60,7 +58,8 @@ let parse_common_attribs ?classes attribs =
     try
       Some
         (Html.a_class
-           (Re.split spaces (List.assoc "class" attribs) @ unopt ~def:[] classes))
+           (String.split_on_blank (List.assoc "class" attribs)
+           @ unopt ~def:[] classes))
     with Not_found -> Option.map ~f:Html.a_class classes
   and at2 =
     try Some (Html.a_id (List.assoc "id" attribs)) with Not_found -> None
@@ -199,7 +198,7 @@ let link_kind _bi addr =
     | "href" ->
       let menu_page =
         Global.using_menu_file (fun mf ->
-            let open Utils.Operators in
+            let open Operators in
             let { Global.root; manual; api; _ } = Global.options () in
             let file = Global.current_file () in
             let is_manual =
@@ -222,14 +221,15 @@ let link_kind _bi addr =
               Paths.(rewind root file +/+ api +/+ page))
       in
       Absolute
-        (let open Utils.Operators in
+        (let open Operators in
         menu_page |? page)
     | "site" ->
       let file = Global.current_file () in
       let root = Global.root () in
       Absolute
         Paths.(
-          rewind root file +/+ !Global.root_to_site +/+ Utils.trim '/' page)
+          rewind root file +/+ !Global.root_to_site
+          +/+ String.remove_leading '/' page)
     | p when starts_with "wiki(" p -> wiki_kind p page
     | p when starts_with "wiki" p -> this_wiki_kind p page
     | _ -> failwith @@ "unknown prototype: '" ^ p ^ "'")
@@ -238,7 +238,7 @@ let link_kind _bi addr =
 let href_of_link_kind bi addr fragment =
   match link_kind bi addr with
   | Absolute a as h ->
-    let open Utils.Operators in
+    let open Operators in
     fragment <$> (fun f -> Absolute Paths.(a +/+ ("#" ^ f))) |? h
   | _ -> assert false
 
@@ -862,7 +862,9 @@ module MakeParser (B : RawParser) :
               | "item", it ->
                 let it' =
                   let link, text =
-                    try String.sep '|' it with Not_found -> (it, it)
+                    match String.sep '|' it with
+                    | Some x -> x
+                    | None -> (it, it)
                   in
                   match !normalize_href_ref (0, 0) link None wb with
                   | Some link' -> link' ^ "|" ^ text
@@ -1123,10 +1125,10 @@ module FlowBuilder = struct
     let address, text =
       match addr with
       | Absolute "" -> (Some "", Some ".")
-      | Absolute a when Utils.uri_absolute a -> (Some a, None)
+      | Absolute a when uri_absolute a -> (Some a, None)
       | Absolute a when ends_with "/" a -> (Some a, None)
       | Absolute a -> (
-        match Utils.cut '#' a with
+        match String.sep '#' a with
         | Some ("", hash) -> (Some ("#" ^ hash), None)
         | Some (a, hash) -> (Some (a ^ Global.suffix () ^ "#" ^ hash), None)
         | None -> (Some (a ^ Global.suffix ()), None))
@@ -1135,14 +1137,14 @@ module FlowBuilder = struct
     let c = List.flatten c in
     [ (Html.a
          ~a:
-           ( (let open Utils.Operators in
+           ( (let open Operators in
              (* NOTE address is always Some x for now but one could add another
                 case to the matching above in which the original address is to
                 be used. *)
              address <$> (fun a -> Absolute a) |? addr)
            |> uri_of_href |> Html.a_href
            |> fun x -> x :: a )
-         (let open Utils.Operators in
+         (let open Operators in
          text >>= (fun t -> Some [ Html.txt t ]) |? c)
         :> Html_types.phrasing Html.elt)
     ]
@@ -1184,17 +1186,14 @@ module FlowBuilder = struct
     ]
 
   let add_backref attribs r =
-    if !Ocsimore_config.wiki_headings_backref
-    then
-      try
-        let id = List.assoc "id" attribs in
-        let open Html in
-        r
-        @ [ txt " "
-          ; a ~a:[ a_class [ "backref" ]; a_href ("#" ^ id) ] [ entity "#182" ]
-          ]
-      with Not_found -> r
-    else r
+    try
+      let id = List.assoc "id" attribs in
+      let open Html in
+      r
+      @ [ txt " "
+        ; a ~a:[ a_class [ "backref" ]; a_href ("#" ^ id) ] [ entity "#182" ]
+        ]
+    with Not_found -> r
 
   let h1_elem attribs content =
     let a = opt_of_list (parse_common_attribs attribs) in
@@ -2279,14 +2278,14 @@ let () =
         match (Global.options ()).template with
         | Some template ->
           let template_dir = Filename.dirname template in
-          Utils.Operators.(template_dir +/+ wiki)
+          Operators.(template_dir +/+ wiki)
         | None ->
           failwith "include: extension requires --template to be provided")
       | Some wiki, None ->
         let current_dir = Global.current_file () |> Filename.dirname in
-        Utils.Operators.(current_dir +/+ wiki)
+        Operators.(current_dir +/+ wiki)
     in
-    file |> Utils.read_file |> compile |> fun c -> `Flow5 c
+    file |> read_file |> compile |> fun c -> `Flow5 c
   in
   let wp = wikicreole_parser in
   register_wiki_extension ~name:"include" ~wp ~wp_rec:wp

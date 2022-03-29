@@ -15,9 +15,9 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA 02111-1307, USA.
  *)
-
+open Import
 open Tyxml
-open Utils.Operators
+open Operators
 
 (*****************************************************************************)
 (** Extension script *)
@@ -36,7 +36,7 @@ let make_script = function
 let process_script args c =
   match List.assoc "src" args with
   | exception Not_found -> Js (c |? "")
-  | src when Utils.is_none c -> Src src
+  | src when Option.is_none c -> Src src
   | _ -> failwith "script: both src and content are provided"
 
 let do_script _ args c = `Flow5 [ process_script args c |> make_script ]
@@ -61,7 +61,7 @@ let make_css = function
 let process_css args c =
   match List.assoc "href" args with
   | exception Not_found -> Css (c |? "")
-  | href when Utils.is_none c -> Href href
+  | href when Option.is_none c -> Href href
   | _ -> failwith "css: both href and content are provided"
 
 let css_links : css_kind list ref = ref []
@@ -213,12 +213,12 @@ let do_client_server_switch _ args _ =
 
 let do_google_search _ args _ =
   let image =
-    match Ocsimore_lib.get_opt args "icon" with
+    match List.Assoc.get_opt args "icon" with
     | Some i -> i
     | None -> failwith "googlesearch: must provide an \"icon\" path to use"
   in
   let domain =
-    match Ocsimore_lib.get_opt args "domain" with
+    match List.Assoc.get_opt args "domain" with
     | Some d -> d
     | None -> failwith "googlesearch: must provide an \"domain\""
   in

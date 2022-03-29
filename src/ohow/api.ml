@@ -1,5 +1,3 @@
-open Ocsimore_lib
-
 exception Error of string
 
 let is_capitalized s =
@@ -16,7 +14,7 @@ let check_capitalized_path path =
     path
 
 let parse_lid id =
-  match List.rev (Re.split dot (String.concat "" id)) with
+  match List.rev (String.split_on_char '.' (String.concat "" id)) with
   | id :: rpath when not (is_capitalized id) ->
     check_capitalized_path rpath;
     (List.rev rpath, id)
@@ -24,7 +22,7 @@ let parse_lid id =
     raise (Error (Printf.sprintf "invalid ocaml id %S" (String.concat "" id)))
 
 let parse_uid id =
-  match List.rev (Re.split dot (String.concat "" id)) with
+  match List.rev (String.split_on_char '.' (String.concat "" id)) with
   | id :: rpath when is_capitalized id ->
     check_capitalized_path rpath;
     (List.rev rpath, id)
@@ -32,14 +30,13 @@ let parse_uid id =
     raise (Error (Printf.sprintf "invalid ocaml id %S" (String.concat "" id)))
 
 let parse_method id =
-  let re = Re.char '#' |> Re.compile in
-  match Re.split re id with
+  match String.split_on_char '#' id with
   | [ id; mid ] when (not (is_capitalized id)) && not (is_capitalized mid) ->
     (id, mid)
   | _ -> raise (Error (Printf.sprintf "invalid method name %S" id))
 
 (** OCaml identifier *)
-type id =
+type t =
   string list
   * [ `Mod of string
     | `ModType of string
@@ -62,6 +59,9 @@ type id =
     | `IndexModules
     | `IndexModuleTypes
     ]
+
+let index : t = ([], `Index)
+let seps = Re.rep1 (Re.alt [ Re.blank; Re.char '\n' ]) |> Re.compile
 
 let parse_contents contents =
   match contents with
@@ -115,7 +115,7 @@ let parse_contents contents =
     | x :: _ -> raise (Error ("invalid contents: " ^ x))
     | [] -> raise (Error "empty contents"))
 
-let string_of_id ?(spacer = ".") : id -> string = function
+let string_of_id ?(spacer = ".") : t -> string = function
   | path, (`Method (cl, name) | `Attr (cl, name)) ->
     name ^ " [" ^ String.concat spacer (path @ [ cl ]) ^ "]"
   | ( path
@@ -169,7 +169,7 @@ module Ocamldoc = struct
     | path, `Value _ | path, `Type _ | path, `Exc _ | path, `Section _ ->
       add_prefix (String.concat "." path)
 
-  let fragment_of_id : id -> string option = function
+  let fragment_of_id : t -> string option = function
     | _, `Value name -> Some ("VAL" ^ name)
     | _, `Type name -> Some ("TYPE" ^ name)
     | _, `Exc name -> Some ("EXCEPTION" ^ name)
@@ -253,7 +253,7 @@ module Odoc = struct
 
   let frag kind name = Some (string_of_kind kind ^ "-" ^ name)
 
-  let fragment_of_id : id -> string option = function
+  let fragment_of_id : t -> string option = function
     | _, `Section name -> frag `Section name
     | _, `Value name -> frag `Val name
     | _, `Type name -> frag `Type name

@@ -1,14 +1,14 @@
+open Import
 open Tyxml
 
 let attrs args =
-  let open Ocsimore_lib in
   let attrs = Wiki_syntax.parse_common_attribs args in
-  let lang = get_opt args "language" in
+  let lang = List.Assoc.get_opt args "language" in
   match lang with
   | None -> ([], [])
   | Some lang ->
     let pre_classes, code_classes =
-      if get_opt args "translated" = None && lang = "ocaml"
+      if List.Assoc.get_opt args "translated" = None && lang = "ocaml"
       then ([], [ "translatable" ])
       else ([ "manually-translated" ], [])
     in
