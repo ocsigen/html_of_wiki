@@ -19,7 +19,7 @@ module String : sig
     include String
   end
 
-  val sep : char -> string -> (string * string) option
+  val cut : char -> string -> (string * string) option
   val split_on_blank : string -> string list
 
   (** [remove_leading c s] returns [s] with the trailing occurences of [c]

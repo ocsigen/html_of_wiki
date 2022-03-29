@@ -28,7 +28,7 @@ end
 module String = struct
   include String
 
-  let sep char s =
+  let cut char s =
     let len = String.length s in
     try
       let seppos = String.index s char in

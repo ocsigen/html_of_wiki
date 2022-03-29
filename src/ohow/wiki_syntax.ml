@@ -862,7 +862,7 @@ module MakeParser (B : RawParser) :
               | "item", it ->
                 let it' =
                   let link, text =
-                    match String.sep '|' it with
+                    match String.cut '|' it with
                     | Some x -> x
                     | None -> (it, it)
                   in
@@ -1128,7 +1128,7 @@ module FlowBuilder = struct
       | Absolute a when uri_absolute a -> (Some a, None)
       | Absolute a when ends_with "/" a -> (Some a, None)
       | Absolute a -> (
-        match String.sep '#' a with
+        match String.cut '#' a with
         | Some ("", hash) -> (Some ("#" ^ hash), None)
         | Some (a, hash) -> (Some (a ^ Global.suffix () ^ "#" ^ hash), None)
         | None -> (Some (a ^ Global.suffix ()), None))
