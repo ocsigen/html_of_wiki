@@ -118,7 +118,7 @@ OPTIONS
            Print the HTML to stdout.
 
        --project=NAME
-           The name of the project. Only useful for <<when-project>>.
+           The name of the project.
 
        -r, --hl, --headless
            Produces raw HTML without head tag and not inside a body tag.
