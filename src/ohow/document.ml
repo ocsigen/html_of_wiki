@@ -32,7 +32,9 @@ let to_string d =
       | Static (p, `File) | Static (p, `Folder) -> "manual/files/" ^ p
     in
     project ^ "/" ^ (v |> Version.to_string) ^ "/" ^ p
-  | Deadlink e -> Printexc.to_string e
+  | Deadlink e ->
+    Printf.eprintf "Deadlink: %s\n" (Printexc.to_string e);
+    "data:text/plain;base64," ^ Base64.encode_string (Printexc.to_string e)
 
 let to_uri ?fragment x =
   "/" ^ to_string x

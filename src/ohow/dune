@@ -2,7 +2,7 @@
  (names ohow)
  (public_names ohow)
  (package html_of_wiki)
- (libraries tyxml tyxml.functor re cmdliner unix common)
+ (libraries tyxml tyxml.functor re cmdliner unix common base64)
  (modules_without_implementation wiki_syntax_types))
 
 (ocamllex
