@@ -64,16 +64,16 @@ let build_page file content =
          @ Site_ocsimore.(List.map make_script @@ List.rev !head_scripts)))
       (body ~a:[ a_class a_cl ] content))
 
-let pprint oc html =
+let pprint ~indent oc html =
   let fmt = Format.formatter_of_out_channel oc in
-  Tyxml.Html.pp_elt () fmt html;
+  Tyxml.Html.pp_elt ~indent () fmt html;
   Format.pp_force_newline fmt ();
   Format.pp_print_flush fmt ()
 
 let infer_wiki_name = Filename.remove_extension
 let infer_output_file file = infer_wiki_name file ^ ".html"
 
-let ohow file oc =
+let ohow ~indent file oc =
   ( ( file |> read_file |> fun wiki ->
       match (Global.options ()).template with
       | Some template ->
@@ -81,8 +81,10 @@ let ohow file oc =
       | None -> Wiki_syntax.compile wiki )
   |> fun c ->
     if (Global.options ()).headless
-    then List.iter (pprint oc) c
-    else pprint oc (build_page (Filename.basename (infer_wiki_name file)) c) );
+    then List.iter (pprint ~indent oc) c
+    else
+      pprint ~indent oc
+        (build_page (Filename.basename (infer_wiki_name file)) c) );
   close_out oc
 
 let get_output_channel output_channel file =
@@ -90,9 +92,10 @@ let get_output_channel output_channel file =
   | Some out -> out
   | None -> open_out @@ infer_output_file file
 
-let process_file _opts output_channel file =
+let process_file opts output_channel file =
   Global.with_current_file file (fun () ->
-      get_output_channel output_channel file |> ohow file)
+      get_output_channel output_channel file
+      |> ohow ~indent:opts.Global.pretty file)
 
 let init_extensions () =
   Wiki_ext.init ();
@@ -104,6 +107,7 @@ let init_extensions () =
 
 let main
     { Global.print
+    ; pretty
     ; headless
     ; outfile
     ; suffix
@@ -133,6 +137,7 @@ let main
   let assets = assets <$> relative_to_root in
   let opts =
     { Global.print
+    ; pretty
     ; headless
     ; outfile
     ; suffix

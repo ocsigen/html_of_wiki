@@ -161,6 +161,7 @@ let register_options k print headless outfile project root manual api
     default_subproject images assets template csw docversions local files =
   let open Operators in
   let suffix = if local then ".html" else "" in
+  let pretty = local in
   let read_lines f =
     read_file_lines f
     |> List.filter_map (fun s ->
@@ -172,6 +173,7 @@ let register_options k print headless outfile project root manual api
   let docversions = docversions <$> read_lines |? [] in
   let opts =
     { Global.print
+    ; pretty
     ; headless
     ; outfile
     ; suffix

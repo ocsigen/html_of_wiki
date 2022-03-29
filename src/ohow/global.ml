@@ -55,6 +55,7 @@ let api_menu_file () =
 type cli_options =
   { files : string list
   ; print : bool
+  ; pretty : bool
   ; headless : bool
   ; local : bool
   ; outfile : string option
