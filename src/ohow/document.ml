@@ -17,20 +17,17 @@ and project_page =
       ; file : string
       }
 
-let to_string src with_html d =
-  let src, ext =
-    if src then ("src/", ".wiki") else ("", if with_html then ".html" else "")
-  in
+let to_string d =
   match d with
-  | Site s -> s ^ ext
-  | Project { page = Template; project; _ } -> project ^ "/template" ^ ext
+  | Site s -> s
+  | Project { page = Template; project; _ } -> project ^ "/template"
   | Project { page; version = v; project } ->
     let p =
       match page with
-      | Page p -> p ^ ext
-      | Manual m -> "manual/" ^ src ^ m ^ ext
+      | Page p -> p
+      | Manual m -> "manual/" ^ m
       | Api { subproject; file } ->
-        "api/" ^ (if subproject = "" then "" else subproject ^ "/") ^ file ^ ext
+        "api/" ^ (if subproject = "" then "" else subproject ^ "/") ^ file
       | Template -> assert false (* handled above... *)
       | Static (p, `File) | Static (p, `Folder) -> "manual/files/" ^ p
     in
@@ -38,7 +35,7 @@ let to_string src with_html d =
   | Deadlink e -> Printexc.to_string e
 
 let to_uri ?fragment x =
-  "/" ^ to_string false false x
+  "/" ^ to_string x
   ^
   match fragment with
   | None -> ""
