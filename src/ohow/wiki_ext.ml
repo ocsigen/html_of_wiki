@@ -70,26 +70,45 @@ let do_outline wp bi args c =
 
 let list_assoc_opt a l = try Some (List.assoc a l) with Not_found -> None
 
-let list_assoc_default a l default =
-  try List.assoc a l with Not_found -> default
-
 (* TODO: support for extended link syntax (wiki(toto):titi etc.) *)
 let f_link _bi args c =
-  let wiki = list_assoc_default "wiki" args "" in
-  let page = list_assoc_default "page" args "" in
+  let wiki = list_assoc_opt "wiki" args in
+  let page = list_assoc_opt "page" args in
   let href = list_assoc_opt "href" args in
   let fragment = list_assoc_opt "fragment" args in
   let content =
     match c with
     | Some c -> c
-    | None -> [ Html.txt page ]
+    | None -> (
+      match page with
+      | Some page -> [ Html.txt page ]
+      | None -> failwith "extension:link: cannot infer text for link")
   in
   (* class and id attributes will be taken by Wiki_syntax.a_elem *)
   ( Wiki_syntax_types.Absolute
-      (match (href, fragment) with
-      | Some href, _ -> href
-      | _, None -> Printf.sprintf "/%s/%s" wiki page
-      | _, Some fragment -> Printf.sprintf "/%s/%s#%s" wiki page fragment)
+      (match href with
+      | Some href ->
+        (match (wiki, page, fragment) with
+        | None, None, None -> ()
+        | _ ->
+          failwith
+            "extension:link: wiki, page and fragment arguments cannot be used \
+             together with href");
+        href
+      | None ->
+        let fragment =
+          match fragment with
+          | None -> ""
+          | Some f -> "#" ^ f
+        in
+        let url =
+          match (wiki, page) with
+          | None, None -> "/"
+          | Some wiki, Some page -> Printf.sprintf "/%s/%s" wiki page
+          | Some wiki, None -> Printf.sprintf "/%s/" wiki
+          | None, Some page -> Printf.sprintf "/%s" page
+        in
+        url ^ fragment)
   , args
   , content )
 
