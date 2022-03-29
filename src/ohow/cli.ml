@@ -21,7 +21,7 @@ let outfile_cmd =
     value & opt (some string) None & info [ "o"; "output" ] ~docv:"FILE" ~doc)
 
 let project_cmd =
-  let doc = "The name of the project. Only useful for <<when-project>>." in
+  let doc = "The name of the project." in
   Cmdliner.Arg.(
     value & opt (some string) None & info [ "project" ] ~docv:"NAME" ~doc)
 
