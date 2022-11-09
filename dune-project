@@ -31,7 +31,7 @@
  (description
   "html_of_wiki is a static website generator used by the Ocsigen project to manage its online documentation.")
  (depends
-  "cmdliner"
+  ("cmdliner" (>= 1.1.1))
   "js_of_ocaml-ppx_deriving_json"
   "js_of_ocaml-ppx"
   "ocamlfind"

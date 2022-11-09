@@ -155,7 +155,7 @@ let info_cmd =
            directory, the manual directory and the api directory."
       ]
     in
-    Term.info "ohow" ~version:"v2.0" ~doc ~exits:Term.default_exits ~man)
+    Cmd.info "ohow" ~version:"v2.0" ~doc ~man)
 
 let register_options k print headless outfile project root manual api
     default_subproject images assets template csw docversions local files =
@@ -201,4 +201,5 @@ let run main =
       $ manual_cmd $ api_cmd $ default_subproject_cmd $ img_cmd $ assets_cmd
       $ template_cmd $ csw_cmd $ docversions_cmd $ local_cmd $ file_cmd)
   in
-  Cmdliner.Term.(exit @@ eval (ohow_cmd, info_cmd))
+  let command = Cmdliner.Cmd.v info_cmd ohow_cmd in
+  exit Cmdliner.Cmd.(eval command)
