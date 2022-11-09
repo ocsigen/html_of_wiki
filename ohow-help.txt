@@ -2,7 +2,7 @@ NAME
        ohow - Converts a wikicreole file into an HTML file.
 
 SYNOPSIS
-       ohow [OPTION]... FILE...
+       ohow [OPTION]… FILE…
 
 DESCRIPTION
        ohow is a command line utility for compiling Wikicreole files into
@@ -95,11 +95,6 @@ OPTIONS
            Use the given list of versions to figure inside the docversion
            widget.
 
-       --help[=FMT] (default=auto)
-           Show this help in format FMT. The value FMT must be one of `auto',
-           `pager', `groff' or `plain'. With `auto', the format is `pager` or
-           `plain' whenever the TERM env var is `dumb' or undefined.
-
        --images=DIR
            Use the given image directory path.
 
@@ -129,6 +124,12 @@ OPTIONS
        -t FILE, --template=FILE
            Use the given template.
 
+COMMON OPTIONS
+       --help[=FMT] (default=auto)
+           Show this help in format FMT. The value FMT must be one of auto,
+           pager, groff or plain. With auto, the format is pager or plain
+           whenever the TERM env var is dumb or undefined.
+
        --version
            Show version information.
 
@@ -136,6 +137,8 @@ EXIT STATUS
        ohow exits with the following status:
 
        0   on success.
+
+       123 on indiscriminate errors reported on standard error.
 
        124 on command line parsing errors.
 

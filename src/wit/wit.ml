@@ -55,8 +55,9 @@ let info_cmd =
            recognized."
       ]
     in
-    Term.info "wit" ~version:"v0.0.0" ~doc ~exits:Term.default_exits ~man)
+    Cmd.info "wit" ~version:"v0.0.0" ~doc ~man)
 
 let () =
   let wit_cmd = Cmdliner.Term.(const main $ tmpl_cmd) in
-  Cmdliner.Term.(exit @@ eval (wit_cmd, info_cmd))
+  let command = Cmdliner.Cmd.v info_cmd wit_cmd in
+  exit Cmdliner.Cmd.(eval command)
