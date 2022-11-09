@@ -36,5 +36,6 @@
   "js_of_ocaml-ppx"
   "ocamlfind"
   "re"
+  "base64"
   "reason"
   "tyxml"))
