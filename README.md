@@ -14,7 +14,7 @@ markup language (almost :wink:) expressivity as HTML!
 
 ## Installation
 
-Requires OCaml 4.05 or greater (use `opam switch`) and the `opam` package
+Requires OCaml 4.08 or greater (use `opam switch`) and the `opam` package
 manager.
 
 ```bash
