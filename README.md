@@ -1,7 +1,6 @@
 # html_of_wiki
 
-`html_of_wiki` is a static website generator used to
-generate online documentation of software project.
+`html_of_wiki` is a static website generator for software projects.
 
 It is a powerful, language independant, wikicréole compiler, able to manage the
 documentation of several versions of multiple projects---all with a single
@@ -9,6 +8,9 @@ command line instruction! Its simplicity helps a lot for integrating this tool
 in a CI/CD process.
 
 Wikicréole is a wiki-like language that supports **extensions** written in
+
+html_of_wiki can manage API documentation and user manuals for several versions of your software.
+It can manage multi-projects sites with sub-projects, and inter-projects links.
 
 ## Installation
 
