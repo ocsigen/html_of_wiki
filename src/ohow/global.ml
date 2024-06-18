@@ -69,6 +69,7 @@ type cli_options =
   ; assets : string option
   ; template : string option
   ; csw : string list
+  ; out_language : string  
   ; docversions : string list
   }
 

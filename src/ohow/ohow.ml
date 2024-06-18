@@ -5,6 +5,7 @@
 
 open Import
 open Operators
+open Markdown_builder
 
 let build_page file content =
   let rec flatten elt =
@@ -94,8 +95,19 @@ let get_output_channel output_channel file =
 
 let process_file opts output_channel file =
   Global.with_current_file file (fun () ->
-      get_output_channel output_channel file
-      |> ohow ~indent:opts.Global.pretty file)
+      let oc = get_output_channel output_channel file in
+      match opts.Global.out_language with
+      | "md" -> 
+          let content = read_file file in
+          markdown_from_string content
+      | "html" -> 
+          ohow ~indent:opts.Global.pretty file oc
+      | _ -> 
+          ohow ~indent:opts.Global.pretty file oc
+      )
+  (* Global.with_current_file file (fun () ->
+   *     get_output_channel output_channel file
+   *     |> ohow ~indent:opts.Global.pretty file) *)
 
 let init_extensions () =
   Wiki_ext.init ();
@@ -122,6 +134,7 @@ let main
     ; csw
     ; docversions
     ; local
+    ; out_language   
     ; files
     } =
   if not (List.for_all Sys.file_exists files)
@@ -152,6 +165,7 @@ let main
     ; csw
     ; docversions
     ; local
+    ; out_language   
     ; files
     }
   in
