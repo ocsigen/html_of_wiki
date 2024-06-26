@@ -222,7 +222,7 @@ let link_kind _bi addr =
       in
       Absolute
         (let open Operators in
-        menu_page |? page)
+         menu_page |? page)
     | "site" ->
       let file = Global.current_file () in
       let root = Global.root () in
@@ -254,19 +254,23 @@ open Wiki_syntax_types.ExtParser
 
 (* cast ('a, 'b, 'c) ext_wikicreole_parser to 'a wikicreole_parser *)
 let cast_wp (type a b c) wp =
-  let module P = (val wp : ExtParser
-                    with type res = a
-                     and type res_without_interactive = b
-                     and type link_content = c)
+  let module P =
+    (val wp
+        : ExtParser
+        with type res = a
+         and type res_without_interactive = b
+         and type link_content = c)
   in
   (module P : Parser with type res = a)
 
 (* cast ('a, 'b, 'c) ext_wikicreole_parser to 'b wikicreole_parser *)
 let cast_niwp (type a b c) wp =
-  let module P = (val wp : ExtParser
-                    with type res = a
-                     and type res_without_interactive = b
-                     and type link_content = c)
+  let module P =
+    (val wp
+        : ExtParser
+        with type res = a
+         and type res_without_interactive = b
+         and type link_content = c)
   in
   (module struct
     type res = P.res_without_interactive
@@ -278,26 +282,32 @@ let cast_niwp (type a b c) wp =
     with type res = b)
 
 let get_plugin_resolver (type a b c) wp =
-  let module P = (val wp : ExtParser
-                    with type res = a
-                     and type res_without_interactive = b
-                     and type link_content = c)
+  let module P =
+    (val wp
+        : ExtParser
+        with type res = a
+         and type res_without_interactive = b
+         and type link_content = c)
   in
   P.plugin_resolver
 
 let preparse_string (type a b c) wp =
-  let module P = (val wp : ExtParser
-                    with type res = a
-                     and type res_without_interactive = b
-                     and type link_content = c)
+  let module P =
+    (val wp
+        : ExtParser
+        with type res = a
+         and type res_without_interactive = b
+         and type link_content = c)
   in
   P.preparse_string
 
 let desugar_string (type a b c) wp =
-  let module P = (val wp : ExtParser
-                    with type res = a
-                     and type res_without_interactive = b
-                     and type link_content = c)
+  let module P =
+    (val wp
+        : ExtParser
+        with type res = a
+         and type res_without_interactive = b
+         and type link_content = c)
   in
   P.desugar_string
 
@@ -1138,14 +1148,14 @@ module FlowBuilder = struct
     [ (Html.a
          ~a:
            ( (let open Operators in
-             (* NOTE address is always Some x for now but one could add another
-                case to the matching above in which the original address is to
-                be used. *)
-             address <$> (fun a -> Absolute a) |? addr)
+              (* NOTE address is always Some x for now but one could add another
+                 case to the matching above in which the original address is to
+                 be used. *)
+              address <$> (fun a -> Absolute a) |? addr)
            |> uri_of_href |> Html.a_href
            |> fun x -> x :: a )
          (let open Operators in
-         text >>= (fun t -> Some [ Html.txt t ]) |? c)
+          text >>= (fun t -> Some [ Html.txt t ]) |? c)
         :> Html_types.phrasing Html.elt)
     ]
 
@@ -1507,8 +1517,8 @@ end)
 let wikicreole_parser_without_header_footer =
   (module WikicreoleParserWithoutHeaderFooter : ExtParser
     with type res = WikicreoleParserWithoutHeaderFooter.res
-     and type res_without_interactive = WikicreoleParserWithoutHeaderFooter
-                                        .res_without_interactive
+     and type res_without_interactive =
+       WikicreoleParserWithoutHeaderFooter.res_without_interactive
      and type link_content = WikicreoleParserWithoutHeaderFooter.link_content)
 
 (* Reduced parsers. *)
@@ -1582,22 +1592,22 @@ end)
 let reduced_wikicreole_parser0 =
   (module ReducedWikicreoleParser0 : ExtParser
     with type res = ReducedWikicreoleParser0.res
-     and type res_without_interactive = ReducedWikicreoleParser0
-                                        .res_without_interactive
+     and type res_without_interactive =
+       ReducedWikicreoleParser0.res_without_interactive
      and type link_content = ReducedWikicreoleParser0.link_content)
 
 let reduced_wikicreole_parser1 =
   (module ReducedWikicreoleParser1 : ExtParser
     with type res = ReducedWikicreoleParser1.res
-     and type res_without_interactive = ReducedWikicreoleParser1
-                                        .res_without_interactive
+     and type res_without_interactive =
+       ReducedWikicreoleParser1.res_without_interactive
      and type link_content = ReducedWikicreoleParser1.link_content)
 
 let reduced_wikicreole_parser2 =
   (module ReducedWikicreoleParser2 : ExtParser
     with type res = ReducedWikicreoleParser2.res
-     and type res_without_interactive = ReducedWikicreoleParser2
-                                        .res_without_interactive
+     and type res_without_interactive =
+       ReducedWikicreoleParser2.res_without_interactive
      and type link_content = ReducedWikicreoleParser2.link_content)
 
 (* Phrasing parser. *)
@@ -1627,8 +1637,8 @@ end)
 let phrasing_wikicreole_parser =
   (module PhrasingWikicreoleParser : ExtParser
     with type res = PhrasingWikicreoleParser.res
-     and type res_without_interactive = PhrasingWikicreoleParser
-                                        .res_without_interactive
+     and type res_without_interactive =
+       PhrasingWikicreoleParser.res_without_interactive
      and type link_content = PhrasingWikicreoleParser.link_content)
 
 (* Menu builder *)
@@ -1717,10 +1727,12 @@ type +'without_interactive link_simple_plugin =
 
 let register_simple_extension (type a b c)
     ~(wp : (a, b, c) ext_wikicreole_parser) ~name ?preparser ?ni_plugin plugin =
-  let module Parser = (val wp : ExtParser
-                         with type res = a
-                          and type res_without_interactive = b
-                          and type link_content = c)
+  let module Parser =
+    (val wp
+        : ExtParser
+        with type res = a
+         and type res_without_interactive = b
+         and type link_content = c)
   in
   let open Parser in
   register_extension ~name ?preparser (SimplePlugin (plugin, ni_plugin))
@@ -1885,10 +1897,12 @@ type (-'content
 let register_wiki_extension (type a b c a' b' c') ~wp ~name ~wp_rec ?preparser
     ?(context = fun bi _ -> bi) ?(ni_plugin : (_, _, _) wiki_plugin option)
     (plugin : (_, _, _) wiki_plugin) =
-  let module Parser = (val wp : ExtParser
-                         with type res = a
-                          and type res_without_interactive = b
-                          and type link_content = c)
+  let module Parser =
+    (val wp
+        : ExtParser
+        with type res = a
+         and type res_without_interactive = b
+         and type link_content = c)
   in
   let module Plugin = struct
     type rec_res = a'
@@ -1919,10 +1933,12 @@ type (-'content
 
 let register_link_extension (type a b c a' b' c') ~wp ~name ~wp_rec ?preparser
     ?(context = fun bi _ -> bi) (plugin : (_, _, _) link_plugin) =
-  let module Parser = (val wp : ExtParser
-                         with type res = a
-                          and type res_without_interactive = b
-                          and type link_content = c)
+  let module Parser =
+    (val wp
+        : ExtParser
+        with type res = a
+         and type res_without_interactive = b
+         and type link_content = c)
   in
   let module Plugin = struct
     type rec_res = a'
@@ -1938,10 +1954,12 @@ let register_link_extension (type a b c a' b' c') ~wp ~name ~wp_rec ?preparser
 
 let register_raw_wiki_extension (type a b c a' b' c') ~wp ~name ~wp_rec
     ?preparser ?ni_plugin plugin =
-  let module Parser = (val wp : ExtParser
-                         with type res = a
-                          and type res_without_interactive = b
-                          and type link_content = c)
+  let module Parser =
+    (val wp
+        : ExtParser
+        with type res = a
+         and type res_without_interactive = b
+         and type link_content = c)
   in
   let open Parser in
   let module Plugin : RawWikiPlugin = struct
