@@ -166,8 +166,8 @@ let do_unless_local _ _ _ c =
   let open Operators in
   `Flow5
     (if not (Global.options ()).local
-    then c <$> Wiki_syntax.compile |? []
-    else [])
+     then c <$> Wiki_syntax.compile |? []
+     else [])
 
 let init () =
   Wiki_syntax.register_raw_wiki_extension ~name:"outline"
