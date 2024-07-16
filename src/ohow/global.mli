@@ -49,7 +49,7 @@ type cli_options =
   ; assets : string option
   ; template : string option
   ; csw : string list
-  ; out_language : string  
+  ; out_language : string
   ; docversions : string list
   }
 
@@ -93,6 +93,6 @@ val project_dir : unit -> string
 val all_projects_dir : unit -> string
 
 (** The path to take from the project's root to end up in the website root
-    (i.e., where the links [\[site:x\]] starts to). Defaults to [\[""\]]---the
+    (i.e., where the links [[site:x]] starts to). Defaults to [[""]]---the
     project's root is the website root. *)
 val root_to_site : string ref
