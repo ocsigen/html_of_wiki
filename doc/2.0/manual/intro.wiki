@@ -137,6 +137,7 @@ Here are some common, widely used by Ocsigen's documentation extensions:
 ==Basic usage
 {{{
 $ ohow file.wiki # generates file.html
+$ ohow --out-language=md file.wiki # generate file.md
 $ ohow -o somename.html file.wiki # generates somename.html
 $ ohow --help # shows help
 $ ohow --version # shows version
@@ -399,6 +400,7 @@ The command ##dop## accepts the following short options:
 |=Name      |=Option |=Value                   |=Default value|=Description|
 |Config     |{{{-c}}}|File                     |---|Configuration file|
 |Config type|{{{-t}}}|{{{json}}} or {{{plain}}}|{{{plain}}}|Configuration file type (format)|
+|Output type|{{{-g}}}|{{{md}}} or {{{html}}}   |{{{html}}}|Output file type|
 |Clean      |{{{-k}}}|Flag                     |---|Do not clean wikis after compilation|
 |Inferred   |{{{-i}}}|Flag                     |---|Print inferred configuration|
 |Used       |{{{-u}}}|Flag                     |---|Print used (final) configuration|
