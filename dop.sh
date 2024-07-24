@@ -13,7 +13,7 @@ EXIT_ENV=3
 EXIT_CONFIG=4
 
 usage() {
-    echo "Usage: dop [-c CONFIG] [-v] [-h] [-r DIR] [-t <json|plain>] [-g <md|html>] [-l] ROOT" >&2
+    echo "Usage: dop [-c CONFIG] [-v] [-h] [-r DIR] [-t <json|plain>] [-g <md|mld|html>] [-l] ROOT" >&2
     [ -z $1 ] && exit $EXIT_USAGE || exit $1
 }
 
@@ -65,6 +65,9 @@ process_options() {
     case $output_language in
         md|markdown)
             output_language=md
+            ;;
+        mld)
+            output_language=mld
             ;;
         html)
             output_language=html
