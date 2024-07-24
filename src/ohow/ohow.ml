@@ -6,6 +6,7 @@
 open Import
 open Operators
 open Markdown_builder
+open Mld_builder
 
 let build_page file content =
   let rec flatten elt =
@@ -100,12 +101,19 @@ let process_file opts output_channel file =
   Global.with_current_file file (fun () ->
       let oc =
         get_output_channel output_channel file
-          (if opts.Global.out_language = "md" then ".md" else ".html")
+          (match opts.Global.out_language with
+          | "md" -> ".md"
+          | "mld" -> ".mld"
+          | _ -> ".html")
       in
       match opts.Global.out_language with
       | "md" ->
         let content = read_file file in
         write_markdown oc content;
+        close_out oc (* Ensure oc is closed after markdown conversion *)
+      | "mld" ->
+        let content = read_file file in
+        write_mld oc content;
         close_out oc (* Ensure oc is closed after markdown conversion *)
       | "html" ->
         ohow ~indent:opts.Global.pretty file oc;
