@@ -26,7 +26,7 @@ COMMON OPTIONS
            Show version information.
 
 EXIT STATUS
-       wit exits with the following status:
+       wit exits with:
 
        0   on success.
 
