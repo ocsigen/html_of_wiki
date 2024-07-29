@@ -38,4 +38,4 @@
   "re"
   "base64"
   "reason"
-  "tyxml"))
+  ("tyxml"(>= 4.6.0))))
