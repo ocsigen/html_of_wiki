@@ -28,10 +28,8 @@ type script_kind =
 
 let make_script = function
   | Src src ->
-    Html.(
-      script ~a:[ a_mime_type "text/javascript"; a_src src ] (cdata_script ""))
-  | Js js ->
-    Html.(script ~a:[ a_mime_type "text/javascript" ] (cdata_script js))
+    Html.(script ~a:[ a_script_type `Javascript; a_src src ] (cdata_script ""))
+  | Js js -> Html.(script ~a:[ a_script_type `Javascript ] (cdata_script js))
 
 let process_script args c =
   match List.assoc "src" args with
