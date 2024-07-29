@@ -373,7 +373,7 @@ and MldBuilder :
           "{tr " ^ String.concat "" cells ^ "}\n")
         l
     in
-    "{table>\n " ^ String.concat "" rows ^ "}\n"
+    "{table \n " ^ String.concat "" rows ^ "}\n"
 
   let phrasing s = s
   let flow s = s
