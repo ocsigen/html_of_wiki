@@ -69,7 +69,7 @@ let rec plugin_res =
 let a_link_of_uri ?fragment suffix uri contents =
   let uri = suffix <$> (fun s -> Paths.concat_uri_suffix s uri) |? uri in
   let uri = uri ^ (fragment <$> (fun f -> "#" ^ f) |? "") in
-  "<a href=\"" ^ uri ^ "\">" ^ (contents |? uri) ^ "</a>"
+  "[" ^ (contents |? uri) ^ "](" ^ uri ^ ")"
 
 let starts_with prefix s =
   let p = String.length prefix in
