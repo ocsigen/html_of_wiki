@@ -217,22 +217,19 @@ module rec PhrasingParser :
   let br_elem _ = "  \n"
   let img_elem _ _ _ = forbidden
 
-  (* normalement, c'est un span avec la classe teletype, mais c'est inutilisé,
-     donc autant juste mettre en gras *)
+  (* Normally, this is a span with the class teletype, but it is unused, so it
+     is better to just make it bold. *)
   let tt_elem _ l = "{b " ^ escape_mld (String.concat "" l) ^ "}"
   let monospace_elem _ l = "[" ^ String.concat "" l ^ "]"
 
-  (* J'aurais pu choisir le latex mais j'ai préféré le html *)
+  (* I could have chosen LaTeX to do it, but I preferred HTML. *)
   let underlined_elem _ l = "{%html: <u>" ^ String.concat "" l ^ "</u> %}"
-
-  (* je sais pas encore gérer ça *)
   let linethrough_elem _ l = "~~" ^ String.concat "" l ^ "~~"
   let subscripted_elem _ l = "{%html: <sub>" ^ String.concat "" l ^ "</sub> %}"
 
   let superscripted_elem _ l =
     "{%html: <sup>" ^ String.concat "" l ^ "</sup> %}"
 
-  (* faudrait vérifier si ça marche ça : *)
   let nbsp = "&nbsp;"
   let endash = "&ndash;"
   let emdash = "&mdash;"
@@ -242,7 +239,7 @@ module rec PhrasingParser :
   let string_of_href href = href
 
   let p_elem _ l =
-    (* on ne gère pas les attributs, il y en a parfois*)
+    (* We do not handle attributes, though they are sometimes present. *)
     let content = String.concat "" l in
     breakline_adder content ^ "\n"
 
@@ -298,18 +295,13 @@ and MldBuilder :
 
   let tt_elem _ l = "{b " ^ escape_mld (String.concat "" l) ^ "}"
   let monospace_elem _ l = "[" ^ String.concat "" l ^ "]"
-
-  (* J'aurais pu choisir le latex mais j'ai préféré le html *)
   let underlined_elem _ l = "{%html: <u>" ^ String.concat "" l ^ "</u> %}"
-
-  (* je sais pas encore gérer ça *)
   let linethrough_elem _ l = "~~" ^ String.concat "" l ^ "~~"
   let subscripted_elem _ l = "{%html: <sub>" ^ String.concat "" l ^ "</sub> %}"
 
   let superscripted_elem _ l =
     "{%html: <sup>" ^ String.concat "" l ^ "</sup> %}"
 
-  (* faudrait vérifier si ça marche ça : *)
   let nbsp = "&nbsp;"
   let endash = "&ndash;"
   let emdash = "&mdash;"
@@ -319,7 +311,6 @@ and MldBuilder :
   let string_of_href href = href
 
   let p_elem _ l =
-    (* on ne gère pas les attributs, il y en a parfois*)
     let content = String.concat "" l in
     breakline_adder content ^ "\n"
 
@@ -352,7 +343,6 @@ and MldBuilder :
          l)
     ^ "\n"
 
-  (* jsp *)
   let hr_elem _ = "---\n"
 
   let table_elem _ l =
@@ -372,8 +362,6 @@ and MldBuilder :
   let phrasing s = s
   let flow s = s
   let list s = s
-
-  (* jsp *)
   let error s = "~~" ^ s ^ "~~"
 
   type plugin_content =
@@ -411,22 +399,22 @@ end = struct
           let processed_content =
             Wikicreole.from_string () (module MldBuilder) content
           in
-          (* normalement, il y a un formatage particulier des header, là on
-             pourra pas l'avoir *)
+          (* Normally, there is specific formatting for headers, which we will
+             not have here. *)
           `Phrasing_without_interactive (String.concat "" processed_content) )
     | Pre ->
       ( Some plugin_res
       , fun _ _ _ ->
-          (* ce genre de balises servent dans l'api pour afficher le code le
-             soucis étant que le formattage est détaillé en wikicreole avec
-             plein de balises qui sont des extensions. Sauf qu'on gère mal les
-             extensions, il vaut donc mieux ne pas utiliser*)
+          (* These types of tags are used in the API to display code. The issue
+             is that the formatting is detailed in WikiCreole with many tags
+             that are extensions. However, we handle extensions poorly, so it is
+             better not to use them. *)
           `Phrasing_without_interactive "{b Not supported}" )
     | Div ->
       ( Some plugin_res
       , fun _ _ content ->
-          (* on peut pas gérer les attributs mais juste afficher "not supported"
-             ferait perdre trop de contenu *)
+          (* We cannot handle attributes, but simply displaying "not supported"
+             would result in losing too much content. *)
           let content =
             match content with
             | Some c -> c
@@ -437,8 +425,6 @@ end = struct
           in
           `Flow5 (String.concat "" processed_content) )
     | Paragraph ->
-      (* je retrouve aucune occurence de celui là dans tutos/ et eliom/
-         bizarrement *)
       (None, fun _ _ _ -> `Phrasing_without_interactive "{b Not supported}")
     | Concepts ->
       ( Some plugin_res
@@ -451,8 +437,8 @@ end = struct
           let processed_content =
             Wikicreole.from_string () (module MldBuilder) content
           in
-          (* normalement, c'est dans une boite à part, là on peut pas le gérer
-             de manière particulière *)
+          (* Normally, this is in a orange box, but we cannot handle it in a
+             particular way here. *)
           `Flow5 ("\n{5 Concepts}\n" ^ String.concat "" processed_content ^ "\n")
       )
     | Concept ->
@@ -490,9 +476,8 @@ end = struct
     | Span ->
       ( Some plugin_res
       , fun _ _ content ->
-          (* ne sert à rien car on ne peut pas mettre d'attributs *)
-          (* on met tout de même le contenu pour pas qu'il y ait des trous à des
-             moments *)
+          (* It is useless because we cannot add attributes. *)
+          (* We still include the content so that there are no gaps at times. *)
           let content =
             match content with
             | Some c -> c
@@ -505,8 +490,8 @@ end = struct
     | Outline ->
       ( Some plugin_res
       , fun _ _ _ ->
-          (* est peut utiliser et on peut pas gérer les attributs, donc je le
-             met en not supported *)
+          (* It may be used, and we cannot handle attributes, so I label it as
+             "not supported." *)
           `Phrasing_without_interactive "{b Not supported}" )
     (* retrieve from another file until AApiCode, I modified it a little bit *)
     | AManual ->
@@ -668,7 +653,7 @@ end = struct
     | Code ->
       ( None
       , fun _ _ content ->
-          (* les attributs sont essentiels ici, mais on ne peut pas en mettre *)
+          (* Attributes are essential here, but we cannot add them. *)
           `Phrasing_without_interactive
             (match content with
             | Some content -> breakline_adder ("{[" ^ content ^ "]}")
