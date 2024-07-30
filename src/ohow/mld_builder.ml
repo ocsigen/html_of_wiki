@@ -677,7 +677,7 @@ end = struct
           (* les attributs sont essentiels ici, mais on ne peut pas en mettre *)
           `Phrasing_without_interactive
             (match content with
-            | Some content -> "{[" ^ content ^ "]}"
+            | Some content -> breakline_adder ("{[" ^ content ^ "]}")
             | None -> "") )
     | CodeInline ->
       ( None
