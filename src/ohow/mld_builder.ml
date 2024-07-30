@@ -217,11 +217,9 @@ module rec PhrasingParser :
   let br_elem _ = "  \n"
   let img_elem _ _ _ = forbidden
 
-  let tt_elem _ l =
-    "{%html: <span class=\"teletype\">"
-    ^ escape_mld (String.concat "" l)
-    ^ "</span> %}"
-
+  (* normalement, c'est un span avec la classe teletype, mais c'est inutilisé,
+     donc autant juste mettre en gras *)
+  let tt_elem _ l = "{b " ^ escape_mld (String.concat "" l) ^ "}"
   let monospace_elem _ l = "[" ^ String.concat "" l ^ "]"
 
   (* J'aurais pu choisir le latex mais j'ai préféré le html *)
@@ -298,11 +296,7 @@ and MldBuilder :
     let my_attrs = get_attributs attrs in
     "{%html: <img alt=\"" ^ alt ^ "\" src=\"" ^ href ^ "\" " ^ my_attrs ^ "> %}"
 
-  let tt_elem _ l =
-    "{%html: <span class=\"teletype\">"
-    ^ escape_mld (String.concat "" l)
-    ^ "</span> %}"
-
+  let tt_elem _ l = "{b " ^ escape_mld (String.concat "" l) ^ "}"
   let monospace_elem _ l = "[" ^ String.concat "" l ^ "]"
 
   (* J'aurais pu choisir le latex mais j'ai préféré le html *)
