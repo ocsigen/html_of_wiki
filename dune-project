@@ -29,7 +29,7 @@
  (name html_of_wiki)
  (synopsis "A wikicreole to HTML compiler")
  (description
-  "html_of_wiki is a static website generator used by the Ocsigen project to manage its online documentation.")
+  "a static website generator for software projects, using wikicreole syntax.")
  (depends
   ("cmdliner" (>= 1.1.1))
   "js_of_ocaml-ppx_deriving_json"
