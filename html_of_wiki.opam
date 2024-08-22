@@ -2,7 +2,7 @@
 opam-version: "2.0"
 synopsis: "A wikicreole to HTML compiler"
 description:
-  "html_of_wiki is a static website generator used by the Ocsigen project to manage its online documentation."
+  "a static website generator for software projects, using wikicreole syntax."
 maintainer: [
   "The ocsigen team <dev@ocsigen.org>" "Leo Valais <leo.valais97@gmail.com>"
 ]
