@@ -18,16 +18,18 @@ let parse_lid id =
   | id :: rpath when not (is_capitalized id) ->
     check_capitalized_path rpath;
     (List.rev rpath, id)
-  | _ -> ([], "")
-(* raise (Error (Printf.sprintf "invalid ocaml id %S" (String.concat "" id))) *)
+  | _ ->
+    (* ([], "") *)
+    raise (Error (Printf.sprintf "invalid ocaml id %S" (String.concat "" id)))
 
 let parse_uid id =
   match List.rev (String.split_on_char '.' (String.concat "" id)) with
   | id :: rpath when is_capitalized id ->
     check_capitalized_path rpath;
     (List.rev rpath, id)
-  | _ -> ([], "")
-(* raise (Error (Printf.sprintf "invalid ocaml id %S" (String.concat "" id))) *)
+  | _ ->
+    (* ([], "") *)
+    raise (Error (Printf.sprintf "invalid ocaml id %S" (String.concat "" id)))
 
 let parse_method id =
   match String.split_on_char '#' id with
