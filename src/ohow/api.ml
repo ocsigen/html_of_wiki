@@ -19,7 +19,6 @@ let parse_lid id =
     check_capitalized_path rpath;
     (List.rev rpath, id)
   | _ ->
-    (* ([], "") *)
     raise (Error (Printf.sprintf "invalid ocaml id %S" (String.concat "" id)))
 
 let parse_uid id =
@@ -28,7 +27,6 @@ let parse_uid id =
     check_capitalized_path rpath;
     (List.rev rpath, id)
   | _ ->
-    (* ([], "") *)
     raise (Error (Printf.sprintf "invalid ocaml id %S" (String.concat "" id)))
 
 let parse_method id =
