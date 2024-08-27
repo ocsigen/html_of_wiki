@@ -740,4 +740,5 @@ let write_markdown oc s =
   output_string oc
     (String.concat ""
        (Wikicreole.from_string ~sectioning:true () (module MarkdownBuilder) s));
-  flush oc
+  flush oc;
+  close_out oc (* Ensure oc is closed after markdown conversion *)

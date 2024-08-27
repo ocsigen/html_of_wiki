@@ -105,14 +105,9 @@ let process_file opts output_channel file =
       match opts.Global.out_language with
       | "md" ->
         let content = read_file file in
-        write_markdown oc content;
-        close_out oc (* Ensure oc is closed after markdown conversion *)
-      | "html" ->
-        ohow ~indent:opts.Global.pretty file oc;
-        close_out oc (* Ensure oc is closed after HTML conversion *)
-      | _ ->
-        ohow ~indent:opts.Global.pretty file oc;
-        close_out oc)
+        write_markdown oc content
+      | "html" -> ohow ~indent:opts.Global.pretty file oc
+      | _ -> ohow ~indent:opts.Global.pretty file oc)
 (* Ensure oc is closed in the default case *)
 (* Global.with_current_file file (fun () ->
  *     get_output_channel output_channel file
