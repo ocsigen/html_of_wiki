@@ -108,10 +108,6 @@ let process_file opts output_channel file =
         write_markdown oc content
       | "html" -> ohow ~indent:opts.Global.pretty file oc
       | _ -> ohow ~indent:opts.Global.pretty file oc)
-(* Ensure oc is closed in the default case *)
-(* Global.with_current_file file (fun () ->
- *     get_output_channel output_channel file
- *     |> ohow ~indent:opts.Global.pretty file) *)
 
 let init_extensions () =
   Wiki_ext.init ();
