@@ -12,18 +12,20 @@ homepage: "https://github.com/ocsigen/html_of_wiki"
 doc: "https://ocsigen.org/html_of_wiki/2.0/manual/intro"
 bug-reports: "https://github.com/ocsigen/html_of_wiki/issues"
 depends: [
-  "dune" {>= "2.0"}
+  "dune" {>= "3.17"}
+  "ocaml" {< "5.0"}
   "cmdliner" {>= "1.1.1"}
-  "js_of_ocaml-ppx_deriving_json"
+  "tyxml" {>= "4.6.0"}
+  "base64"
   "js_of_ocaml-ppx"
+  "js_of_ocaml-ppx_deriving_json"
   "ocamlfind"
   "re"
-  "base64"
   "reason"
-  "tyxml" {>= "4.6.0"}
+  "odoc" {with-doc}
 ]
 build: [
-  ["dune" "subst"] {pinned}
+  ["dune" "subst"] {dev}
   [
     "dune"
     "build"
