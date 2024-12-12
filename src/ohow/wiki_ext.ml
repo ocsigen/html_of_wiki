@@ -152,9 +152,9 @@ let do_when_project _ _ args c =
   in
   (Global.options ()).project
   >>= (fun current ->
-        if predicate project current
-        then Some (`Flow5 (c <$> Wiki_syntax.compile |? []))
-        else None)
+  if predicate project current
+  then Some (`Flow5 (c <$> Wiki_syntax.compile |? []))
+  else None)
   |? `Flow5 []
 
 let do_when_local _ _ _ c =
