@@ -46,7 +46,8 @@ module type Preprocessor = sig
     -> string
 end
 
-(** Module type for representing wikicreole parser whose return type id [ret]. *)
+(** Module type for representing wikicreole parser whose return type id [ret].
+*)
 module type Parser = sig
   include Preprocessor
 
