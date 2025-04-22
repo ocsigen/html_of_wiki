@@ -31,6 +31,7 @@
  (description
   "a static website generator for software projects, using wikicreole syntax.")
  (depends
+  (ocaml (< 5.0))
   ("cmdliner" (>= 1.1.1))
   "js_of_ocaml-ppx_deriving_json"
   "js_of_ocaml-ppx"

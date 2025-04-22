@@ -13,6 +13,7 @@ doc: "https://ocsigen.org/html_of_wiki/2.0/manual/intro"
 bug-reports: "https://github.com/ocsigen/html_of_wiki/issues"
 depends: [
   "dune" {>= "2.0"}
+  "ocaml" {< "5.0"}
   "cmdliner" {>= "1.1.1"}
   "js_of_ocaml-ppx_deriving_json"
   "js_of_ocaml-ppx"
