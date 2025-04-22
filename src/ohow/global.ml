@@ -31,8 +31,8 @@ let ref_menu_file : menu_file option ref = ref None
 
 let with_menu_file mf k =
   ignore
-    ( (!ref_menu_file >>= function
-       | Manual s | Api s -> Some s)
+    ( ( !ref_menu_file >>= function
+        | Manual s | Api s -> Some s )
     >>= fun s -> failwith @@ "menu_file " ^ s ^ "already set. Abort." );
   ref_menu_file := Some mf;
   let r = k () in

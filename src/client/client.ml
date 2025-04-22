@@ -123,8 +123,9 @@ let convert pre =
 
 let remove_error_message n =
   let p = Js.Unsafe.coerce n in
-  if Js.string p##.firstChild == Js.string "[object Text]"
-     && p##.firstChild##.data == Js.string reason_error
+  if
+    Js.string p##.firstChild == Js.string "[object Text]"
+    && p##.firstChild##.data == Js.string reason_error
   then Js.Opt.iter n##.firstChild (fun c -> ignore (n##removeChild c))
 
 let add_error_message n =

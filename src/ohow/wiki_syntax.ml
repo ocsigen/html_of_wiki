@@ -256,9 +256,7 @@ open Wiki_syntax_types.ExtParser
 let cast_wp (type a b c) wp =
   let module P =
     (val wp
-        : ExtParser
-        with type res = a
-         and type res_without_interactive = b
+        : ExtParser with type res = a and type res_without_interactive = b
          and type link_content = c)
   in
   (module P : Parser with type res = a)
@@ -267,9 +265,7 @@ let cast_wp (type a b c) wp =
 let cast_niwp (type a b c) wp =
   let module P =
     (val wp
-        : ExtParser
-        with type res = a
-         and type res_without_interactive = b
+        : ExtParser with type res = a and type res_without_interactive = b
          and type link_content = c)
   in
   (module struct
@@ -284,9 +280,7 @@ let cast_niwp (type a b c) wp =
 let get_plugin_resolver (type a b c) wp =
   let module P =
     (val wp
-        : ExtParser
-        with type res = a
-         and type res_without_interactive = b
+        : ExtParser with type res = a and type res_without_interactive = b
          and type link_content = c)
   in
   P.plugin_resolver
@@ -294,9 +288,7 @@ let get_plugin_resolver (type a b c) wp =
 let preparse_string (type a b c) wp =
   let module P =
     (val wp
-        : ExtParser
-        with type res = a
-         and type res_without_interactive = b
+        : ExtParser with type res = a and type res_without_interactive = b
          and type link_content = c)
   in
   P.preparse_string
@@ -304,9 +296,7 @@ let preparse_string (type a b c) wp =
 let desugar_string (type a b c) wp =
   let module P =
     (val wp
-        : ExtParser
-        with type res = a
-         and type res_without_interactive = b
+        : ExtParser with type res = a and type res_without_interactive = b
          and type link_content = c)
   in
   P.desugar_string
@@ -1173,7 +1163,10 @@ module FlowBuilder = struct
 
   let img_elem attribs href alt =
     let a = opt_of_list (parse_common_attribs attribs) in
-    let src = uri_of_href href (* CCC https ? *) in
+    let src =
+      uri_of_href href
+      (* CCC https ? *)
+    in
     [ (Html.img ~src ~alt ?a () : [> `Img ] Html.elt) ]
 
   let tt_elem attribs content =
@@ -1729,9 +1722,7 @@ let register_simple_extension (type a b c)
     ~(wp : (a, b, c) ext_wikicreole_parser) ~name ?preparser ?ni_plugin plugin =
   let module Parser =
     (val wp
-        : ExtParser
-        with type res = a
-         and type res_without_interactive = b
+        : ExtParser with type res = a and type res_without_interactive = b
          and type link_content = c)
   in
   let open Parser in
@@ -1899,9 +1890,7 @@ let register_wiki_extension (type a b c a' b' c') ~wp ~name ~wp_rec ?preparser
     (plugin : (_, _, _) wiki_plugin) =
   let module Parser =
     (val wp
-        : ExtParser
-        with type res = a
-         and type res_without_interactive = b
+        : ExtParser with type res = a and type res_without_interactive = b
          and type link_content = c)
   in
   let module Plugin = struct
@@ -1935,9 +1924,7 @@ let register_link_extension (type a b c a' b' c') ~wp ~name ~wp_rec ?preparser
     ?(context = fun bi _ -> bi) (plugin : (_, _, _) link_plugin) =
   let module Parser =
     (val wp
-        : ExtParser
-        with type res = a
-         and type res_without_interactive = b
+        : ExtParser with type res = a and type res_without_interactive = b
          and type link_content = c)
   in
   let module Plugin = struct
@@ -1956,9 +1943,7 @@ let register_raw_wiki_extension (type a b c a' b' c') ~wp ~name ~wp_rec
     ?preparser ?ni_plugin plugin =
   let module Parser =
     (val wp
-        : ExtParser
-        with type res = a
-         and type res_without_interactive = b
+        : ExtParser with type res = a and type res_without_interactive = b
          and type link_content = c)
   in
   let open Parser in

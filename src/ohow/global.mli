@@ -2,7 +2,8 @@
     Unsets the [current_file] after [k] finishes and returns its value. *)
 val with_current_file : string -> (unit -> 'a) -> 'a
 
-(** [using_current_file k] calls [k @@ current_file ()] and returns its value. *)
+(** [using_current_file k] calls [k @@ current_file ()] and returns its value.
+*)
 val using_current_file : (string -> 'a) -> 'a
 
 (** Returns the current file path. *)
