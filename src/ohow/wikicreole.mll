@@ -151,6 +151,7 @@ module Make(B : Builder) = struct
 
   type ctx =
       { param : B.param;
+        sectioning: bool;
 	mutable italic : bool;
 	mutable bold : bool;
 	mutable monospace : bool;
@@ -168,7 +169,6 @@ module Make(B : Builder) = struct
 	mutable descr : (bool * B.phrasing list * attribs) list;
 	mutable flow : (int * B.flow list) list;
 	mutable stack : stack;
-	mutable sectioning: bool;
       }
 
   let count c s =
