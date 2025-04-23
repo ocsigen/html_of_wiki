@@ -19,29 +19,27 @@ let doctree _ args _ =
       Global.(
         match mf with
         | Manual _ ->
-          Document.Project
-            { page = Manual ""; project = ""; version = Version.Dev }
+            Document.Project
+              { page = Manual ""; project = ""; version = Version.Dev }
         | Api _ ->
-          Document.Project
-            { page = Api { subproject = None; file = "" }
-            ; project = ""
-            ; version = Version.Dev
-            })
+            Document.Project
+              {
+                page = Api { subproject = None; file = "" };
+                project = "";
+                version = Version.Dev;
+              })
     in
     Wiki_widgets_interface.
-      { bi_page
-      ; bi_sectioning = true
-      ; bi_add_link = ignore
-      ; bi_content = []
-      ; bi_title = ""
+      {
+        bi_page;
+        bi_sectioning = true;
+        bi_add_link = ignore;
+        bi_content = [];
+        bi_title = "";
       }
   in
   let compile_with_menu_file mf =
-    let f =
-      Global.(
-        match mf with
-        | Manual f | Api f -> f)
-    in
+    let f = Global.(match mf with Manual f | Api f -> f) in
     let bi = bi_of_menu_file mf in
     Global.(with_menu_file mf (fun () -> compile bi f))
   in
@@ -80,13 +78,14 @@ let docversion _bi args _contents =
              (txt v))
   in
   `Flow5
-    [ txt "Version "
-    ; select
+    [
+      txt "Version ";
+      select
         ~a:
           (a_class [ "how-versions" ]
           :: a_onchange "location = this.value;"
           :: attrs)
-        links
+        links;
     ]
 
 let init () =

@@ -27,15 +27,13 @@ let rewind dir file =
   let rec rew = function
     | p when path_eql p dir -> "."
     | "." | "/" ->
-      failwith @@ "rewind: " ^ file ^ " cannot be rewinded to dir " ^ dir
+        failwith @@ "rewind: " ^ file ^ " cannot be rewinded to dir " ^ dir
     | p -> Filename.concat ".." @@ rew @@ Filename.dirname p
   in
   file |> realpath |> Filename.dirname |> rew
 
 let is_inside_dir dir file =
-  match rewind dir file with
-  | _ -> true
-  | exception Failure _ -> false
+  match rewind dir file with _ -> true | exception Failure _ -> false
 
 let rec remove_prefixl l l' =
   match (l, l') with
@@ -47,10 +45,7 @@ let path_rm_prefix prefix p =
   (* works the other way round ;) *)
   remove_prefixl (list_of_path prefix) (list_of_path p) |> path_of_list
 
-let is_visible = function
-  | "" -> false
-  | f -> f.[0] <> '.'
-
+let is_visible = function "" -> false | f -> f.[0] <> '.'
 let is_visible_dir d = Sys.is_directory d && is_visible d
 
 let concat_uri_suffix suffix = function

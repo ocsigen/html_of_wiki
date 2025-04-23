@@ -34,14 +34,14 @@ let do_outline wp bi args c =
        match c with
        | None -> []
        | Some c ->
-         (Wiki_syntax.xml_of_wiki wp bi c :> Html_types.flow5 Html.elt list)
+           (Wiki_syntax.xml_of_wiki wp bi c :> Html_types.flow5 Html.elt list)
      in
      let ignore =
        match List.Assoc.get_opt args "ignore" with
        | None -> [ "nav"; "aside" ]
        | Some x ->
-         String.split_on_char ' ' x
-         |> List.map (fun x -> String.trim x |> String.lowercase_ascii)
+           String.split_on_char ' ' x
+           |> List.map (fun x -> String.trim x |> String.lowercase_ascii)
      in
      let div =
        (elem = `Container && not bi.Wiki_widgets_interface.bi_sectioning)
@@ -80,37 +80,33 @@ let f_link _bi args c =
     match c with
     | Some c -> c
     | None -> (
-      match page with
-      | Some page -> [ Html.txt page ]
-      | None -> failwith "extension:link: cannot infer text for link")
+        match page with
+        | Some page -> [ Html.txt page ]
+        | None -> failwith "extension:link: cannot infer text for link")
   in
   (* class and id attributes will be taken by Wiki_syntax.a_elem *)
   ( Wiki_syntax_types.Absolute
       (match href with
       | Some href ->
-        (match (wiki, page, fragment) with
-        | None, None, None -> ()
-        | _ ->
-          failwith
-            "extension:link: wiki, page and fragment arguments cannot be used \
-             together with href");
-        href
+          (match (wiki, page, fragment) with
+          | None, None, None -> ()
+          | _ ->
+              failwith
+                "extension:link: wiki, page and fragment arguments cannot be \
+                 used together with href");
+          href
       | None ->
-        let fragment =
-          match fragment with
-          | None -> ""
-          | Some f -> "#" ^ f
-        in
-        let url =
-          match (wiki, page) with
-          | None, None -> "/"
-          | Some wiki, Some page -> Printf.sprintf "/%s/%s" wiki page
-          | Some wiki, None -> Printf.sprintf "/%s/" wiki
-          | None, Some page -> Printf.sprintf "/%s" page
-        in
-        url ^ fragment)
-  , args
-  , content )
+          let fragment = match fragment with None -> "" | Some f -> "#" ^ f in
+          let url =
+            match (wiki, page) with
+            | None, None -> "/"
+            | Some wiki, Some page -> Printf.sprintf "/%s/%s" wiki page
+            | Some wiki, None -> Printf.sprintf "/%s/" wiki
+            | None, Some page -> Printf.sprintf "/%s" page
+          in
+          url ^ fragment),
+    args,
+    content )
 
 let do_drawer wp bi args c =
   let open Html in
@@ -119,7 +115,7 @@ let do_drawer wp bi args c =
      let content =
        match c with
        | Some c ->
-         (Wiki_syntax.xml_of_wiki wp bi c :> Html_types.flow5 Html.elt list)
+           (Wiki_syntax.xml_of_wiki wp bi c :> Html_types.flow5 Html.elt list)
        | None -> []
      in
      let button =
@@ -145,15 +141,15 @@ let do_when_project _ _ args c =
     | [ Some p; None ] -> (p, ( = ))
     | [ None; Some p ] -> (p, ( <> ))
     | [ None; None ] ->
-      fail "required arguments missing: \"when\" or \"unless\""
+        fail "required arguments missing: \"when\" or \"unless\""
     | [ Some _; Some _ ] ->
-      fail "mutually incompatible arguments provided: \"when\", \"unless\""
+        fail "mutually incompatible arguments provided: \"when\", \"unless\""
     | _ -> fail "unexpected argument list provided"
   in
   (Global.options ()).project
   >>= (fun current ->
-  if predicate project current
-  then Some (`Flow5 (c <$> Wiki_syntax.compile |? []))
+  if predicate project current then
+    Some (`Flow5 (c <$> Wiki_syntax.compile |? []))
   else None)
   |? `Flow5 []
 
@@ -165,8 +161,7 @@ let do_when_local _ _ _ c =
 let do_unless_local _ _ _ c =
   let open Operators in
   `Flow5
-    (if not (Global.options ()).local
-     then c <$> Wiki_syntax.compile |? []
+    (if not (Global.options ()).local then c <$> Wiki_syntax.compile |? []
      else [])
 
 let init () =

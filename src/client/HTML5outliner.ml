@@ -10,14 +10,7 @@ let heading_content = [ "h1"; "h2"; "h3"; "h4"; "h5"; "h6"; "hgroup" ]
 
 (* The h1 element is said to have the highest rank, the h6 element has the
    lowest rank, and two elements with the same name have equal rank. *)
-type rank =
-  | H6
-  | H5
-  | H4
-  | H3
-  | H2
-  | H1
-  | Top
+type rank = H6 | H5 | H4 | H3 | H2 | H1 | Top
 
 type outline = section list
 and section = Section of Dom.node Js.t list * string option * outline
@@ -28,22 +21,22 @@ type heading =
   | Unnamed of string
   | Named of (rank * Dom.node Js.t list * string option)
 
-type state =
-  { heading : heading
-  ; outline : outline
-  ; context : ((rank * Dom.node Js.t list * string option) * outline) list
-  ; ignore : Dom.node Js.t -> bool
-  }
+type state = {
+  heading : heading;
+  outline : outline;
+  context : ((rank * Dom.node Js.t list * string option) * outline) list;
+  ignore : Dom.node Js.t -> bool;
+}
 
 exception FoundNode of Dom.node Js.t
 
 let find_first_heading node =
   let rec find node =
     let tag = String.lowercase_ascii (Js.to_string node##.nodeName) in
-    if List.mem tag [ "h1"; "h2"; "h3"; "h4"; "h5"; "h6" ]
-    then raise (FoundNode node)
-    else if not (List.mem tag sectionning_tag)
-    then List.iter find (Dom.list_of_nodeList node##.childNodes)
+    if List.mem tag [ "h1"; "h2"; "h3"; "h4"; "h5"; "h6" ] then
+      raise (FoundNode node)
+    else if not (List.mem tag sectionning_tag) then
+      List.iter find (Dom.list_of_nodeList node##.childNodes)
   in
   try
     find node;
@@ -59,10 +52,9 @@ let find_previous_heading node =
   in
   let rec find node =
     let tag = String.lowercase_ascii (Js.to_string node##.nodeName) in
-    if List.mem tag [ "h1"; "h2"; "h3"; "h4"; "h5"; "h6" ]
-    then raise (FoundNode node)
-    else if not (List.mem tag sectionning_tag)
-    then (
+    if List.mem tag [ "h1"; "h2"; "h3"; "h4"; "h5"; "h6" ] then
+      raise (FoundNode node)
+    else if not (List.mem tag sectionning_tag) then (
       List.iter find (List.rev (Dom.list_of_nodeList node##.childNodes));
       find (previous node))
   in
@@ -104,38 +96,40 @@ let get_fragment node =
         (fun s -> Some (Js.to_string s)))
 
 let unnamed tag =
-  [ (Dom_html.document##createTextNode (Js.string ("Unnamed " ^ tag))
-      :> Dom.node Js.t)
+  [
+    (Dom_html.document##createTextNode (Js.string ("Unnamed " ^ tag))
+      :> Dom.node Js.t);
   ]
 
 let step_up st =
   match st.context with
   | [] -> assert false
   | (upper_heading, upper_outline) :: context ->
-    let heading, fragment =
-      match st.heading with
-      | Named (_, nodes, fragment) -> (nodes, fragment)
-      | Unnamed tag -> (unnamed tag, None)
-    in
-    { st with
-      heading = Named upper_heading
-    ; outline =
-        Section (heading, fragment, List.rev st.outline) :: upper_outline
-    ; context
-    }
+      let heading, fragment =
+        match st.heading with
+        | Named (_, nodes, fragment) -> (nodes, fragment)
+        | Unnamed tag -> (unnamed tag, None)
+      in
+      {
+        st with
+        heading = Named upper_heading;
+        outline =
+          Section (heading, fragment, List.rev st.outline) :: upper_outline;
+        context;
+      }
 
 let rec insert_heading st ((rank, _, _) as node) =
   match st.heading with
   | Unnamed _ -> assert false
   | Named ((candidate_rank, _, _) as candidate) ->
-    if candidate_rank > rank
-    then
-      { st with
-        heading = Named node
-      ; outline = []
-      ; context = (candidate, st.outline) :: st.context
-      }
-    else insert_heading (step_up st) node
+      if candidate_rank > rank then
+        {
+          st with
+          heading = Named node;
+          outline = [];
+          context = (candidate, st.outline) :: st.context;
+        }
+      else insert_heading (step_up st) node
 
 let rec rebuild st =
   match (st.context, st.heading) with
@@ -143,18 +137,17 @@ let rec rebuild st =
   | _, Named _ | _, Unnamed _ -> rebuild (step_up st)
 
 let init_st ?(ignore = fun _ -> false) tag =
-  { heading = Unnamed tag
-  ; outline = []
-  ; context = [ ((Top, [], None), []) ]
-  ; ignore
+  {
+    heading = Unnamed tag;
+    outline = [];
+    context = [ ((Top, [], None), []) ];
+    ignore;
   }
 
 let rec walk st node =
   let tag = String.lowercase_ascii (Js.to_string node##.nodeName) in
-  if st.ignore node
-  then st
-  else if List.mem tag heading_content
-  then
+  if st.ignore node then st
+  else if List.mem tag heading_content then
     let node = find_first_heading node in
     let childrens =
       List.map
@@ -165,21 +158,18 @@ let rec walk st node =
     match st.heading with
     | Unnamed _ when st.outline = [] -> { st with heading = Named candidate }
     | Unnamed tag when st.context = [ ((Top, [], None), []) ] ->
-      { st with
-        heading = Named candidate
-      ; outline = []
-      ; context = ((Top, unnamed tag, fragment), st.outline) :: st.context
-      }
+        {
+          st with
+          heading = Named candidate;
+          outline = [];
+          context = ((Top, unnamed tag, fragment), st.outline) :: st.context;
+        }
     | Unnamed _ -> assert false
     | Named _ -> insert_heading st candidate
-  else if List.mem tag sectionning_root
-  then st (* ignore these nodes... *)
-  else if List.mem tag sectionning_content
-  then
+  else if List.mem tag sectionning_root then st (* ignore these nodes... *)
+  else if List.mem tag sectionning_content then
     let st =
-      match st.context with
-      | [] | [ ((Top, _, _), _) ] -> st
-      | _ -> step_up st
+      match st.context with [] | [ ((Top, _, _), _) ] -> st | _ -> step_up st
     in
     let nodes = Dom.list_of_nodeList node##.childNodes in
     let outline =
@@ -209,14 +199,9 @@ let find_fragment fragment outline =
     | Section (_, _, outline) -> find_l outline
   and find_l = function
     | [] -> None
-    | x :: xs -> (
-      match find x with
-      | None -> find_l xs
-      | Some _ as x -> x)
+    | x :: xs -> ( match find x with None -> find_l xs | Some _ as x -> x)
   in
-  match find_l outline with
-  | None -> []
-  | Some x -> x
+  match find_l outline with None -> [] | Some x -> x
 
 let rec build_ol ?(depth = 0) outline =
   (* depth = 0 means as deep as infinity (for a value of infinity equal to
@@ -232,10 +217,10 @@ and build_li ~depth (Section (heading, fragment, outline)) =
   (match fragment with
   | None -> List.iter (Dom.appendChild li) heading
   | Some fragment ->
-    let a = Dom_html.createA Dom_html.document in
-    a##setAttribute (Js.string "href") (Js.string @@ "#" ^ fragment);
-    List.iter (Dom.appendChild a) heading;
-    Dom.appendChild li a);
-  if outline <> [] && depth <> 0
-  then Dom.appendChild li (build_ol ~depth outline);
+      let a = Dom_html.createA Dom_html.document in
+      a##setAttribute (Js.string "href") (Js.string @@ "#" ^ fragment);
+      List.iter (Dom.appendChild a) heading;
+      Dom.appendChild li a);
+  if outline <> [] && depth <> 0 then
+    Dom.appendChild li (build_ol ~depth outline);
   li

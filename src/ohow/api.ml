@@ -9,33 +9,32 @@ let is_capitalized s =
 let check_capitalized_path path =
   List.iter
     (fun name ->
-      if not (is_capitalized name)
-      then raise (Error (Printf.sprintf "%S is not a valid module name" name)))
+      if not (is_capitalized name) then
+        raise (Error (Printf.sprintf "%S is not a valid module name" name)))
     path
 
 let parse_lid id =
   match List.rev (String.split_on_char '.' (String.concat "" id)) with
   | id :: rpath when not (is_capitalized id) ->
-    check_capitalized_path rpath;
-    (List.rev rpath, id)
+      check_capitalized_path rpath;
+      (List.rev rpath, id)
   | _ ->
-    raise (Error (Printf.sprintf "invalid ocaml id %S" (String.concat "" id)))
+      raise (Error (Printf.sprintf "invalid ocaml id %S" (String.concat "" id)))
 
 let parse_uid id =
   match List.rev (String.split_on_char '.' (String.concat "" id)) with
   | id :: rpath when is_capitalized id ->
-    check_capitalized_path rpath;
-    (List.rev rpath, id)
+      check_capitalized_path rpath;
+      (List.rev rpath, id)
   | _ ->
-    raise (Error (Printf.sprintf "invalid ocaml id %S" (String.concat "" id)))
+      raise (Error (Printf.sprintf "invalid ocaml id %S" (String.concat "" id)))
 
 let parse_method id =
   match String.split_on_char '#' id with
   | [ id; mid ] when (not (is_capitalized id)) && not (is_capitalized mid) ->
-    (id, mid)
+      (id, mid)
   | _ -> raise (Error (Printf.sprintf "invalid method name %S" id))
 
-(** OCaml identifier *)
 type t =
   string list
   * [ `Mod of string
@@ -57,8 +56,8 @@ type t =
     | `IndexClasses
     | `IndexClassTypes
     | `IndexModules
-    | `IndexModuleTypes
-    ]
+    | `IndexModuleTypes ]
+(** OCaml identifier *)
 
 let index : t = ([], `Index)
 let seps = Re.rep1 (Re.alt [ Re.blank; Re.char '\n' ]) |> Re.compile
@@ -67,65 +66,66 @@ let parse_contents contents =
   match contents with
   | None | Some "" -> raise (Error "contents must be an Ocaml id")
   | Some def -> (
-    let def = Re.split seps def in
-    match def with
-    | [ "intro" ] -> ([], `Index)
-    | [ "index" ] -> ([], `Index)
-    | "index" :: "types" :: _ -> ([], `IndexTypes)
-    | "index" :: "exceptions" :: _ -> ([], `IndexExceptions)
-    | "index" :: "values" :: _ -> ([], `IndexValues)
-    | "index" :: "attributes" :: _ -> ([], `IndexAttributes)
-    | "index" :: "methods" :: _ -> ([], `IndexMethods)
-    | "index" :: "classes" :: _ -> ([], `IndexClasses)
-    | "index" :: "class" :: "types" :: _ -> ([], `IndexClassTypes)
-    | "index" :: "modules" :: _ -> ([], `IndexModules)
-    | "index" :: "module" :: "types" :: _ -> ([], `IndexModuleTypes)
-    | "val" :: lid | "value" :: lid ->
-      let path, id = parse_lid lid in
-      (path, `Value id)
-    | "type" :: lid ->
-      let path, id = parse_lid lid in
-      (path, `Type id)
-    | "class" :: "type" :: lid ->
-      let path, id = parse_lid lid in
-      (path, `ClassType id)
-    | "class" :: lid ->
-      let path, id = parse_lid lid in
-      (path, `Class id)
-    | "module" :: "type" :: uid | "mod" :: "type" :: uid ->
-      let path, id = parse_uid uid in
-      (path, `ModType id)
-    | "module" :: uid | "mod" :: uid ->
-      let path, id = parse_uid uid in
-      (path, `Mod id)
-    | "exception" :: uid | "exc" :: uid ->
-      let path, id = parse_uid uid in
-      (path, `Exc id)
-    | "attribute" :: lid | "attr" :: lid ->
-      let path, id = parse_lid lid in
-      let id, did = parse_method id in
-      (path, `Attr (id, did))
-    | "method" :: lid ->
-      let path, id = parse_lid lid in
-      let id, mid = parse_method id in
-      (path, `Method (id, mid))
-    | "section" :: lid ->
-      let path, id = parse_lid lid in
-      (path, `Section id)
-    | x :: _ -> raise (Error ("invalid contents: " ^ x))
-    | [] -> raise (Error "empty contents"))
+      let def = Re.split seps def in
+      match def with
+      | [ "intro" ] -> ([], `Index)
+      | [ "index" ] -> ([], `Index)
+      | "index" :: "types" :: _ -> ([], `IndexTypes)
+      | "index" :: "exceptions" :: _ -> ([], `IndexExceptions)
+      | "index" :: "values" :: _ -> ([], `IndexValues)
+      | "index" :: "attributes" :: _ -> ([], `IndexAttributes)
+      | "index" :: "methods" :: _ -> ([], `IndexMethods)
+      | "index" :: "classes" :: _ -> ([], `IndexClasses)
+      | "index" :: "class" :: "types" :: _ -> ([], `IndexClassTypes)
+      | "index" :: "modules" :: _ -> ([], `IndexModules)
+      | "index" :: "module" :: "types" :: _ -> ([], `IndexModuleTypes)
+      | "val" :: lid | "value" :: lid ->
+          let path, id = parse_lid lid in
+          (path, `Value id)
+      | "type" :: lid ->
+          let path, id = parse_lid lid in
+          (path, `Type id)
+      | "class" :: "type" :: lid ->
+          let path, id = parse_lid lid in
+          (path, `ClassType id)
+      | "class" :: lid ->
+          let path, id = parse_lid lid in
+          (path, `Class id)
+      | "module" :: "type" :: uid | "mod" :: "type" :: uid ->
+          let path, id = parse_uid uid in
+          (path, `ModType id)
+      | "module" :: uid | "mod" :: uid ->
+          let path, id = parse_uid uid in
+          (path, `Mod id)
+      | "exception" :: uid | "exc" :: uid ->
+          let path, id = parse_uid uid in
+          (path, `Exc id)
+      | "attribute" :: lid | "attr" :: lid ->
+          let path, id = parse_lid lid in
+          let id, did = parse_method id in
+          (path, `Attr (id, did))
+      | "method" :: lid ->
+          let path, id = parse_lid lid in
+          let id, mid = parse_method id in
+          (path, `Method (id, mid))
+      | "section" :: lid ->
+          let path, id = parse_lid lid in
+          (path, `Section id)
+      | x :: _ -> raise (Error ("invalid contents: " ^ x))
+      | [] -> raise (Error "empty contents"))
 
 let string_of_id ?(spacer = ".") : t -> string = function
   | path, (`Method (cl, name) | `Attr (cl, name)) ->
-    name ^ " [" ^ String.concat spacer (path @ [ cl ]) ^ "]"
-  | ( path
-    , ( `Mod name
+      name ^ " [" ^ String.concat spacer (path @ [ cl ]) ^ "]"
+  | ( path,
+      ( `Mod name
       | `ModType name
       | `Class name
       | `ClassType name
       | `Value name
       | `Type name
-      | `Exc name ) ) -> String.concat spacer (path @ [ name ])
+      | `Exc name ) ) ->
+      String.concat spacer (path @ [ name ])
   | _, `Index -> "Api introduction"
   | _, `IndexTypes
   | _, `IndexExceptions
@@ -136,15 +136,12 @@ let string_of_id ?(spacer = ".") : t -> string = function
   | _, `IndexClassTypes
   | _, `IndexModules
   | _, `IndexModuleTypes
-  | _, `Section _ -> ""
+  | _, `Section _ ->
+      ""
 
 module Ocamldoc = struct
   let path_of_id ?prefix id =
-    let add_prefix s =
-      match prefix with
-      | None -> s
-      | Some p -> p ^ s
-    in
+    let add_prefix s = match prefix with None -> s | Some p -> p ^ s in
     match id with
     | _path, `Index -> add_prefix "index"
     | _path, `IndexTypes -> add_prefix "index_types"
@@ -157,17 +154,17 @@ module Ocamldoc = struct
     | _path, `IndexModules -> add_prefix "index_modules"
     | _path, `IndexModuleTypes -> add_prefix "index_module_types"
     | path, `ModType name | path, `Mod name ->
-      String.concat "." (path @ [ name ])
+        String.concat "." (path @ [ name ])
     | path, `ClassType name | path, `Class name -> (
-      match prefix with
-      | None -> String.concat "." (path @ [ name ]) ^ "-c"
-      | Some p -> p ^ String.concat "." (path @ [ name ]))
+        match prefix with
+        | None -> String.concat "." (path @ [ name ]) ^ "-c"
+        | Some p -> p ^ String.concat "." (path @ [ name ]))
     | path, `Attr (cl, _) | path, `Method (cl, _) -> (
-      match prefix with
-      | None -> String.concat "." (path @ [ cl ]) ^ "-c"
-      | Some p -> p ^ String.concat "." (path @ [ cl ]))
+        match prefix with
+        | None -> String.concat "." (path @ [ cl ]) ^ "-c"
+        | Some p -> p ^ String.concat "." (path @ [ cl ]))
     | path, `Value _ | path, `Type _ | path, `Exc _ | path, `Section _ ->
-      add_prefix (String.concat "." path)
+        add_prefix (String.concat "." path)
 
   let fragment_of_id : t -> string option = function
     | _, `Value name -> Some ("VAL" ^ name)
@@ -188,8 +185,7 @@ module Odoc = struct
     | `Argument
     | `Class
     | `ClassType
-    | `File
-    ]
+    | `File ]
 
   let string_of_path_kind : path_kind -> string = function
     | `Page -> "page"
@@ -236,8 +232,7 @@ module Odoc = struct
     | `Method
     | `Val
     | `Constructor
-    | `Field
-    ]
+    | `Field ]
 
   let string_of_kind : anchor_kind -> string = function
     | #path_kind as x -> string_of_path_kind x
@@ -273,5 +268,6 @@ module Odoc = struct
     | _, `IndexClasses
     | _, `IndexClassTypes
     | _, `IndexModules
-    | _, `IndexModuleTypes -> None
+    | _, `IndexModuleTypes ->
+        None
 end

@@ -20,45 +20,41 @@ let build_page file content =
     let rec f = function
       | [] -> None
       | x :: t -> (
-        match Tyxml_xml.content x with
-        | Tyxml_xml.Node ("h1", _, title) ->
-          List.map flatten title |> List.flatten
-          |> List.map (Format.asprintf "%a" (Tyxml_xml.pp ()))
-          |> String.concat ""
-          |> fun t -> Some t
-          (* the first one, depth first *)
-        | Tyxml_xml.Node (_, _, children) -> (
-          match f children with
-          | Some _title as r -> r (* return the first one *)
-          | None -> f t (* not found among children, try with the siblings *))
-        | _ -> None)
+          match Tyxml_xml.content x with
+          | Tyxml_xml.Node ("h1", _, title) ->
+              List.map flatten title |> List.flatten
+              |> List.map (Format.asprintf "%a" (Tyxml_xml.pp ()))
+              |> String.concat ""
+              |> fun t -> Some t
+              (* the first one, depth first *)
+          | Tyxml_xml.Node (_, _, children) -> (
+              match f children with
+              | Some _title as r -> r (* return the first one *)
+              | None ->
+                  f t (* not found among children, try with the siblings *))
+          | _ -> None)
       (* not found at all *)
     in
     f @@ List.map Tyxml_html.toelt blocks
   in
-  let ti =
-    match extract_h1 content with
-    | Some s -> s
-    | None -> ""
-  in
+  let ti = match extract_h1 content with Some s -> s | None -> "" in
   let a_cl =
     file
-    ::
-    (match (Global.options ()).project with
-    | Some p -> [ p ]
-    | None -> [])
+    :: (match (Global.options ()).project with Some p -> [ p ] | None -> [])
   in
   Tyxml.Html.(
     html
       (head
          (title (txt ti))
-         ([ meta ~a:[ a_charset "utf8" ] ()
-          ; meta
+         ([
+            meta ~a:[ a_charset "utf8" ] ();
+            meta
               ~a:
-                [ a_content "width=device-width, initial-scale=1"
-                ; a_name "viewport"
+                [
+                  a_content "width=device-width, initial-scale=1";
+                  a_name "viewport";
                 ]
-              ()
+              ();
           ]
          @ Site_ocsimore.(List.map make_css @@ List.rev !css_links)
          @ Site_ocsimore.(List.map make_script @@ List.rev !head_scripts)))
@@ -77,11 +73,10 @@ let ohow ~indent file oc =
   ( ( file |> read_file |> fun wiki ->
       match (Global.options ()).template with
       | Some template ->
-        read_file template |> Wiki_syntax.compile_with_content wiki
+          read_file template |> Wiki_syntax.compile_with_content wiki
       | None -> Wiki_syntax.compile wiki )
   |> fun c ->
-    if (Global.options ()).headless
-    then List.iter (pprint ~indent oc) c
+    if (Global.options ()).headless then List.iter (pprint ~indent oc) c
     else
       pprint ~indent oc
         (build_page (Filename.basename (infer_wiki_name file)) c) );
@@ -106,26 +101,27 @@ let init_extensions () =
   Site_ocsimore.init ()
 
 let main
-    { Global.print
-    ; pretty
-    ; headless
-    ; outfile
-    ; suffix
-    ; project
-    ; root
-    ; manual
-    ; api
-    ; default_subproject
-    ; images
-    ; assets
-    ; template
-    ; csw
-    ; docversions
-    ; local
-    ; files
+    {
+      Global.print;
+      pretty;
+      headless;
+      outfile;
+      suffix;
+      project;
+      root;
+      manual;
+      api;
+      default_subproject;
+      images;
+      assets;
+      template;
+      csw;
+      docversions;
+      local;
+      files;
     } =
-  if not (List.for_all Sys.file_exists files)
-  then failwith "Some input files doesn't exist...";
+  if not (List.for_all Sys.file_exists files) then
+    failwith "Some input files doesn't exist...";
   init_extensions ();
   let root = Paths.realpath root in
   let relative_to_root p =
@@ -136,23 +132,24 @@ let main
   let images = images <$> relative_to_root in
   let assets = assets <$> relative_to_root in
   let opts =
-    { Global.print
-    ; pretty
-    ; headless
-    ; outfile
-    ; suffix
-    ; project
-    ; root
-    ; manual
-    ; api
-    ; default_subproject
-    ; images
-    ; assets
-    ; template
-    ; csw
-    ; docversions
-    ; local
-    ; files
+    {
+      Global.print;
+      pretty;
+      headless;
+      outfile;
+      suffix;
+      project;
+      root;
+      manual;
+      api;
+      default_subproject;
+      images;
+      assets;
+      template;
+      csw;
+      docversions;
+      local;
+      files;
     }
   in
   (match Sys.getenv_opt "HOW_IN_PROJECT" with

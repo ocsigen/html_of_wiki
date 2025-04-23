@@ -7,20 +7,18 @@ let attrs args =
   match lang with
   | None -> ([], [])
   | Some lang ->
-    let pre_classes, code_classes =
-      if List.Assoc.get_opt args "translated" = None && lang = "ocaml"
-      then ([], [ "translatable" ])
-      else ([ "manually-translated" ], [])
-    in
-    ( attrs @ [ Html.a_class pre_classes ]
-    , [ Html.a_class @@ (("language-" ^ lang) :: code_classes) ] )
+      let pre_classes, code_classes =
+        if List.Assoc.get_opt args "translated" = None && lang = "ocaml" then
+          ([], [ "translatable" ])
+        else ([ "manually-translated" ], [])
+      in
+      ( attrs @ [ Html.a_class pre_classes ],
+        [ Html.a_class @@ (("language-" ^ lang) :: code_classes) ] )
 
 let code _bi args contents =
   `Flow5
     (let contents =
-       match contents with
-       | None -> ""
-       | Some x -> String.trim x
+       match contents with None -> "" | Some x -> String.trim x
      in
      let p_a, c_a = attrs args in
      [ Html.(pre ~a:p_a [ code ~a:c_a [ txt contents ] ]) ])
@@ -28,9 +26,7 @@ let code _bi args contents =
 let code_inline _bi args contents =
   `Phrasing_without_interactive
     (let contents =
-       match contents with
-       | None -> ""
-       | Some x -> String.trim x
+       match contents with None -> "" | Some x -> String.trim x
      in
      let _, c_a = attrs args in
      [ Html.(code ~a:c_a [ txt contents ]) ])

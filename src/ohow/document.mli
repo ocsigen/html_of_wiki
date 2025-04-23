@@ -1,10 +1,6 @@
 type t =
   | Site of string
-  | Project of
-      { page : project_page
-      ; version : Version.t
-      ; project : string
-      }
+  | Project of { page : project_page; version : Version.t; project : string }
   | Deadlink of exn
 
 and project_page =
@@ -12,9 +8,6 @@ and project_page =
   | Template
   | Page of string
   | Manual of string
-  | Api of
-      { subproject : string option
-      ; file : string
-      }
+  | Api of { subproject : string option; file : string }
 
 val to_uri : ?fragment:string -> t -> string

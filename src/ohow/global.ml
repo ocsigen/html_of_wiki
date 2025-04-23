@@ -23,17 +23,14 @@ let using_current_file k =
 
 let current_file () = using_current_file (fun x -> x)
 
-type menu_file =
-  | Manual of string
-  | Api of string
+type menu_file = Manual of string | Api of string
 
 let ref_menu_file : menu_file option ref = ref None
 
 let with_menu_file mf k =
   ignore
-    ( ( !ref_menu_file >>= function
-        | Manual s | Api s -> Some s )
-    >>= fun s -> failwith @@ "menu_file " ^ s ^ "already set. Abort." );
+    ( (!ref_menu_file >>= function Manual s | Api s -> Some s) >>= fun s ->
+      failwith @@ "menu_file " ^ s ^ "already set. Abort." );
   ref_menu_file := Some mf;
   let r = k () in
   ref_menu_file := None;
@@ -43,34 +40,29 @@ let using_menu_file k = !ref_menu_file <$> k
 let menu_file () = !ref_menu_file
 
 let manual_menu_file () =
-  !ref_menu_file >>= function
-  | Manual s -> Some s
-  | _ -> None
+  !ref_menu_file >>= function Manual s -> Some s | _ -> None
 
-let api_menu_file () =
-  !ref_menu_file >>= function
-  | Api s -> Some s
-  | _ -> None
+let api_menu_file () = !ref_menu_file >>= function Api s -> Some s | _ -> None
 
-type cli_options =
-  { files : string list
-  ; print : bool
-  ; pretty : bool
-  ; headless : bool
-  ; local : bool
-  ; outfile : string option
-  ; suffix : string
-  ; project : string option
-  ; root : string
-  ; manual : string option
-  ; api : string option
-  ; default_subproject : string option
-  ; images : string option
-  ; assets : string option
-  ; template : string option
-  ; csw : string list
-  ; docversions : string list
-  }
+type cli_options = {
+  files : string list;
+  print : bool;
+  pretty : bool;
+  headless : bool;
+  local : bool;
+  outfile : string option;
+  suffix : string;
+  project : string option;
+  root : string;
+  manual : string option;
+  api : string option;
+  default_subproject : string option;
+  images : string option;
+  assets : string option;
+  template : string option;
+  csw : string list;
+  docversions : string list;
+}
 
 let ref_options : cli_options option ref = ref None
 
@@ -95,9 +87,7 @@ let the_manual () =
   | None -> failwith "no manual given"
 
 let the_api () =
-  match (options ()).api with
-  | Some s -> s
-  | None -> failwith "no api given"
+  match (options ()).api with Some s -> s | None -> failwith "no api given"
 
 let the_images () =
   match (options ()).images with

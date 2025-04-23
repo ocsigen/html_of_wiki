@@ -22,8 +22,8 @@
     @author Vincent Balat
     @author Boris Yakobowski *)
 
-(** Xml-like attributes for the extension (eg val='foo') *)
 type attribs = (string * string) list
+(** Xml-like attributes for the extension (eg val='foo') *)
 
 module type RawBuilder = sig
   type href
@@ -87,9 +87,9 @@ module type RawBuilder = sig
   val hr_elem : attribs -> flow_without_interactive
 
   val table_elem :
-       attribs
-    -> ((bool * attribs * phrasing list) list * attribs) list
-    -> flow_without_interactive
+    attribs ->
+    ((bool * attribs * phrasing list) list * attribs) list ->
+    flow_without_interactive
 
   val phrasing : phrasing_without_interactive -> phrasing
   val flow : flow_without_interactive -> flow
@@ -97,8 +97,8 @@ module type RawBuilder = sig
   val error : string -> phrasing_without_interactive
 end
 
-(** *)
 type (-'param, +'res) plugin = 'param -> attribs -> string option -> 'res
+(** *)
 
 type plugin_resolver = Resolver of (string -> plugin_resolver option)
 
@@ -109,8 +109,7 @@ module type Builder = sig
     [ `Flow5_link of href * attribs * flow_without_interactive
     | `Phrasing_link of href * attribs * phrasing_without_interactive
     | `Flow5 of flow
-    | `Phrasing_without_interactive of phrasing_without_interactive
-    ]
+    | `Phrasing_without_interactive of phrasing_without_interactive ]
 
   val plugin : string -> plugin_resolver option * (param, plugin_content) plugin
   val plugin_action : string -> int -> int -> (param, unit) plugin

@@ -22,13 +22,12 @@ open Operators
 (*****************************************************************************)
 (** Extension script *)
 
-type script_kind =
-  | Src of string
-  | Js of string
+type script_kind = Src of string | Js of string
 
 let make_script = function
   | Src src ->
-    Html.(script ~a:[ a_script_type `Javascript; a_src src ] (cdata_script ""))
+      Html.(
+        script ~a:[ a_script_type `Javascript; a_src src ] (cdata_script ""))
   | Js js -> Html.(script ~a:[ a_script_type `Javascript ] (cdata_script js))
 
 let process_script args c =
@@ -48,9 +47,7 @@ let do_head_script _ args c =
 (*****************************************************************************)
 (** Extension css *)
 
-type css_kind =
-  | Href of string
-  | Css of string
+type css_kind = Href of string | Css of string
 
 let make_css = function
   | Href href -> Html.(link ~rel:[ `Stylesheet ] ~href ())
@@ -84,9 +81,10 @@ let do_wip _bi _args xml =
        | None -> []
      in
      Html.
-       [ aside
+       [
+         aside
            ~a:[ a_class [ "wip" ] ]
-           (header [ h5 [ txt "Work in progress" ] ] :: xml)
+           (header [ h5 [ txt "Work in progress" ] ] :: xml);
        ])
 
 let do_wip_inline _bi args xml =
@@ -111,9 +109,10 @@ let do_concepts _bi args xml =
      in
      let attrs = Wiki_syntax.parse_common_attribs args in
      Html.
-       [ aside
+       [
+         aside
            ~a:(a_class [ "concepts" ] :: attrs)
-           (header [ h5 [ txt "Concepts" ] ] :: xml)
+           (header [ h5 [ txt "Concepts" ] ] :: xml);
        ])
 
 (* Concept *)
@@ -131,15 +130,18 @@ let do_concept bi args xml =
      let t = get_title bi args in
      let attrs = Wiki_syntax.parse_common_attribs args in
      Html.
-       [ aside
+       [
+         aside
            ~a:(a_class [ "concept" ] :: attrs)
            (header
-              [ h5
-                  [ span ~a:[ a_class [ "concept_prefix" ] ] [ txt "Concept: " ]
-                  ; txt t
-                  ]
+              [
+                h5
+                  [
+                    span ~a:[ a_class [ "concept_prefix" ] ] [ txt "Concept: " ];
+                    txt t;
+                  ];
               ]
-           :: xml)
+           :: xml);
        ])
 
 (*****************************************************************************)
@@ -147,11 +149,7 @@ let do_concept bi args xml =
 
 let do_paragraph _bi args xml =
   `Flow5
-    (let xml =
-       match xml with
-       | Some c -> (c :> _ Html.elt list)
-       | None -> []
-     in
+    (let xml = match xml with Some c -> (c :> _ Html.elt list) | None -> [] in
      let attrs = Wiki_syntax.parse_common_attribs args in
      Html.[ div ~a:(a_class [ "paragraph" ] :: attrs) xml ])
 
@@ -162,49 +160,57 @@ let do_client_server_switch _ args _ =
   match (Global.options ()).api with
   | None -> `Flow5 []
   | Some api ->
-    let client = "client" in
-    let server = "server" in
-    let { Global.csw; root; _ } = Global.options () in
-    let file = Global.current_file () in
-    let attrs = Wiki_syntax.parse_common_attribs args in
-    let is_api = Paths.(is_inside_dir (root +/+ api) file) in
-    let is_client = Paths.(is_inside_dir (root +/+ api +/+ client) file) in
-    let is_server = Paths.(is_inside_dir (root +/+ api +/+ server) file) in
-    let wiki = Filename.basename file in
-    let make_switch = function
-      | None -> []
-      | Some other ->
-        let html = Filename.chop_extension wiki ^ Global.suffix () in
-        let href = Paths.(rewind (root +/+ api) file +/+ other +/+ html) in
-        let checked = if other = server then [ Html.a_checked () ] else [] in
-        let onchange = "location = '" ^ href ^ "';" in
-        Html.
-          [ label
-              ~a:(a_class [ "csw-switch" ] :: attrs)
-              [ input
-                  ~a:([ a_input_type `Checkbox; a_onchange onchange ] @ checked)
-                  ()
-              ; span
-                  ~a:[ a_class [ "csw-slider"; "csw-slider-style-round" ] ]
-                  []
-              ; span ~a:[ a_class [ "csw-slider-no" ] ] [ txt "Server version" ]
-              ; span
-                  ~a:[ a_class [ "csw-slider-yes" ] ]
-                  [ txt "Client version" ]
+      let client = "client" in
+      let server = "server" in
+      let { Global.csw; root; _ } = Global.options () in
+      let file = Global.current_file () in
+      let attrs = Wiki_syntax.parse_common_attribs args in
+      let is_api = Paths.(is_inside_dir (root +/+ api) file) in
+      let is_client = Paths.(is_inside_dir (root +/+ api +/+ client) file) in
+      let is_server = Paths.(is_inside_dir (root +/+ api +/+ server) file) in
+      let wiki = Filename.basename file in
+      let make_switch = function
+        | None -> []
+        | Some other ->
+            let html = Filename.chop_extension wiki ^ Global.suffix () in
+            let href = Paths.(rewind (root +/+ api) file +/+ other +/+ html) in
+            let checked =
+              if other = server then [ Html.a_checked () ] else []
+            in
+            let onchange = "location = '" ^ href ^ "';" in
+            Html.
+              [
+                label
+                  ~a:(a_class [ "csw-switch" ] :: attrs)
+                  [
+                    input
+                      ~a:
+                        ([ a_input_type `Checkbox; a_onchange onchange ]
+                        @ checked)
+                      ();
+                    span
+                      ~a:[ a_class [ "csw-slider"; "csw-slider-style-round" ] ]
+                      [];
+                    span
+                      ~a:[ a_class [ "csw-slider-no" ] ]
+                      [ txt "Server version" ];
+                    span
+                      ~a:[ a_class [ "csw-slider-yes" ] ]
+                      [ txt "Client version" ];
+                  ];
               ]
-          ]
-    in
-    let make = function
-      | [] -> []
-      | wikis when is_api && List.exists (fun s -> s = wiki) wikis -> (
-        match (is_client, is_server) with
-        | true, false -> make_switch @@ Some server
-        | false, true -> make_switch @@ Some client
-        | false, false -> make_switch None
-        | _, _ -> assert false)
-      | _ -> []
-    in
-    `Flow5 (make csw)
+      in
+      let make = function
+        | [] -> []
+        | wikis when is_api && List.exists (fun s -> s = wiki) wikis -> (
+            match (is_client, is_server) with
+            | true, false -> make_switch @@ Some server
+            | false, true -> make_switch @@ Some client
+            | false, false -> make_switch None
+            | _, _ -> assert false)
+        | _ -> []
+      in
+      `Flow5 (make csw)
 
 (*****************************************************************************)
 (** Extension google search *)
@@ -221,28 +227,32 @@ let do_google_search _ args _ =
     | None -> failwith "googlesearch: must provide an \"domain\""
   in
   Html.
-    [ form
+    [
+      form
         ~a:[ a_id "googlesearch"; a_action "https://google.com/search" ]
-        [ input
+        [
+          input
             ~a:
-              [ a_name "q"
-              ; a_id "gsearch-box"
-              ; a_placeholder "Search using Google"
+              [
+                a_name "q";
+                a_id "gsearch-box";
+                a_placeholder "Search using Google";
               ]
-            ()
-        ; label
+            ();
+          label
             ~a:[ a_label_for "gsearch-box" ]
-            [ img ~src:image ~alt:"" ~a:[ a_id "gsearch-icon" ] () ]
-        ; input
+            [ img ~src:image ~alt:"" ~a:[ a_id "gsearch-icon" ] () ];
+          input
             ~a:
-              [ a_input_type `Submit
-              ; a_id "gsearch-submit"
-              ; a_onclick
+              [
+                a_input_type `Submit;
+                a_id "gsearch-submit";
+                a_onclick
                 @@ "document.getElementById('gsearch-box').value += ' site:"
-                ^ domain ^ "';"
+                ^ domain ^ "';";
               ]
-            ()
-        ]
+            ();
+        ];
     ]
   |> fun x -> `Flow5 x
 

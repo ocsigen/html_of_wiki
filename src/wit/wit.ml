@@ -29,8 +29,8 @@ let main template =
   match replace_content_tag tmpl wiki with
   | Some replacement -> print_string replacement
   | None ->
-    Printf.fprintf stderr "no <<content>> tag found in template\n";
-    exit 1
+      Printf.fprintf stderr "no <<content>> tag found in template\n";
+      exit 1
 
 let tmpl_cmd =
   let doc = "The template to put the wiki into." in
@@ -43,16 +43,17 @@ let info_cmd =
       "Inlines a wikicreole file into another one with a <<content>> tag."
     in
     let man =
-      [ `S Manpage.s_description
-      ; `P
+      [
+        `S Manpage.s_description;
+        `P
           "$(tname) reads wikicreole content from stdin and inserts it inside \
            the given template file $(b,TMPL) in place of the first <<content>> \
-           tag found and outputs the result on stdout."
-      ; `P "The $(b,TMPL) file is never modified."
-      ; `S Manpage.s_bugs
-      ; `P
+           tag found and outputs the result on stdout.";
+        `P "The $(b,TMPL) file is never modified.";
+        `S Manpage.s_bugs;
+        `P
           "Escaping <<content>> tags has no effect, the tag is still \
-           recognized."
+           recognized.";
       ]
     in
     Cmd.info "wit" ~version:"v0.0.0" ~doc ~man)

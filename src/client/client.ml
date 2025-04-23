@@ -15,50 +15,46 @@ let () =
          let elem, restrict2 =
            match elem with
            | `Id id ->
-             ( (Dom_html.document##getElementById (Js.string id)
-                 :> Dom.node Js.t Js.opt)
-             , None )
+               ( (Dom_html.document##getElementById (Js.string id)
+                   :> Dom.node Js.t Js.opt),
+                 None )
            | `Container ->
-             let fragment =
-               if div
-               then
-                 try
-                   Js.Opt.case
-                     (HTML5outliner.find_previous_heading nav)
-                     (fun () -> None)
-                     (fun x -> HTML5outliner.get_fragment x)
-                 with Not_found -> None
-               else None
-             in
-             (HTML5outliner.find_container nav, fragment)
+               let fragment =
+                 if div then
+                   try
+                     Js.Opt.case
+                       (HTML5outliner.find_previous_heading nav)
+                       (fun () -> None)
+                       (fun x -> HTML5outliner.get_fragment x)
+                   with Not_found -> None
+                 else None
+               in
+               (HTML5outliner.find_container nav, fragment)
          in
          let restrict =
-           match restrict with
-           | None -> restrict2
-           | _ -> restrict
+           match restrict with None -> restrict2 | _ -> restrict
          in
          match Js.Opt.to_option elem with
          | None -> ()
          | Some elem ->
-           let outline =
-             HTML5outliner.outline ~ignore
-               (Dom.list_of_nodeList elem##.childNodes)
-           in
-           let outline =
-             match restrict with
-             | Some fragment -> HTML5outliner.find_fragment fragment outline
-             | None -> (
-               match outline with
-               | [ HTML5outliner.Section (_, _, outline) ] -> outline
-               | _ -> outline)
-           in
-           Dom.appendChild nav (HTML5outliner.build_ol ?depth outline)
+             let outline =
+               HTML5outliner.outline ~ignore
+                 (Dom.list_of_nodeList elem##.childNodes)
+             in
+             let outline =
+               match restrict with
+               | Some fragment -> HTML5outliner.find_fragment fragment outline
+               | None -> (
+                   match outline with
+                   | [ HTML5outliner.Section (_, _, outline) ] -> outline
+                   | _ -> outline)
+             in
+             Dom.appendChild nav (HTML5outliner.build_ol ?depth outline)
     end)
 
 let to_list l =
   let rec f acc i =
-    if i < l##.length
-    then
+    if i < l##.length then
       match Js.Opt.to_option (l##item i) with
       | None -> f acc (i + 1)
       | Some x -> f (x :: acc) (i + 1)
@@ -103,15 +99,15 @@ let translate existing =
   match Js.Opt.to_option existing##.textContent with
   | None -> ()
   | Some ocaml -> (
-    try
-      (* to_bytestring is required because there are 0xa0 bytes *)
-      let reason = ocaml |> Js.to_bytestring |> to_reason |> Js.string in
-      let code' = create_code ~language:"reason" reason in
-      insert_after ~existing code';
-      highlight_element code';
-      (* remove translatable, so that we only do this once *)
-      existing##.className := Js.string "language-ocaml"
-    with _e -> existing##.className := Js.string "language-ocaml error")
+      try
+        (* to_bytestring is required because there are 0xa0 bytes *)
+        let reason = ocaml |> Js.to_bytestring |> to_reason |> Js.string in
+        let code' = create_code ~language:"reason" reason in
+        insert_after ~existing code';
+        highlight_element code';
+        (* remove translatable, so that we only do this once *)
+        existing##.className := Js.string "language-ocaml"
+      with _e -> existing##.className := Js.string "language-ocaml error")
 
 let convert pre =
   let code = Dom_html.(createCode document) in
@@ -138,8 +134,7 @@ let toggle_reason () =
   to_list (Dom_html.document##getElementsByTagName n)
   |> List.iter (fun body ->
          let class_list = body##.classList in
-         if Js.to_bool (class_list##contains (Js.string "reason"))
-         then (
+         if Js.to_bool (class_list##contains (Js.string "reason")) then (
            let t = Js.string "language-ocaml error" in
            to_list (Dom_html.document##getElementsByClassName t)
            |> List.iter remove_error_message;
@@ -162,26 +157,26 @@ let () =
          (match Dom_html.(getElementById_coerce "search" CoerceTo.form) with
          | None -> ()
          | Some form ->
-           form##.onsubmit :=
-             Dom_html.handler @@ fun _ ->
-             let engine = "https://google.com/search?q=" in
-             let filter = " site:ocsigen.org" in
-             let q =
-               (match Dom_html.(getElementById_coerce "q" CoerceTo.input) with
-               | None -> filter
-               | Some q -> Js.to_string q##.value ^ filter)
-               |> Js.string |> Js.encodeURIComponent |> Js.to_string
-             in
-             Dom_html.window##.location##.href := Js.string (engine ^ q);
-             Js.bool false);
+             form##.onsubmit :=
+               Dom_html.handler @@ fun _ ->
+               let engine = "https://google.com/search?q=" in
+               let filter = " site:ocsigen.org" in
+               let q =
+                 (match Dom_html.(getElementById_coerce "q" CoerceTo.input) with
+                 | None -> filter
+                 | Some q -> Js.to_string q##.value ^ filter)
+                 |> Js.string |> Js.encodeURIComponent |> Js.to_string
+               in
+               Dom_html.window##.location##.href := Js.string (engine ^ q);
+               Js.bool false);
          (* language switch *)
          (match Dom_html.getElementById_opt "reason" with
          | None -> ()
          | Some btn ->
-           btn##.onclick :=
-             Dom_html.handler @@ fun _ ->
-             toggle_reason ();
-             Js.bool true);
+             btn##.onclick :=
+               Dom_html.handler @@ fun _ ->
+               toggle_reason ();
+               Js.bool true);
          (* API conversion *)
          let f = Js.string "odocwiki_code" in
          to_list (Dom_html.document##getElementsByClassName f)
