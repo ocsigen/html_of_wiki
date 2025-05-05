@@ -5,6 +5,7 @@
 
 open Import
 open Operators
+open Markdown_builder
 
 let build_page file content =
   let rec flatten elt =
@@ -71,7 +72,10 @@ let pprint ~indent oc html =
   Format.pp_print_flush fmt ()
 
 let infer_wiki_name = Filename.remove_extension
-let infer_output_file file = infer_wiki_name file ^ ".html"
+
+let infer_output_file file suffix =
+  let base = infer_wiki_name file in
+  base ^ suffix
 
 let ohow ~indent file oc =
   ( ( file |> read_file |> fun wiki ->
@@ -87,15 +91,23 @@ let ohow ~indent file oc =
         (build_page (Filename.basename (infer_wiki_name file)) c) );
   close_out oc
 
-let get_output_channel output_channel file =
+let get_output_channel output_channel file suffix =
   match output_channel with
   | Some out -> out
-  | None -> open_out @@ infer_output_file file
+  | None -> open_out @@ infer_output_file file suffix
 
 let process_file opts output_channel file =
   Global.with_current_file file (fun () ->
-      get_output_channel output_channel file
-      |> ohow ~indent:opts.Global.pretty file)
+      let oc =
+        get_output_channel output_channel file
+          (if opts.Global.out_language = "md" then ".md" else ".html")
+      in
+      match opts.Global.out_language with
+      | "md" ->
+        let content = read_file file in
+        write_markdown oc content
+      | "html" -> ohow ~indent:opts.Global.pretty file oc
+      | _ -> ohow ~indent:opts.Global.pretty file oc)
 
 let init_extensions () =
   Wiki_ext.init ();
@@ -122,6 +134,7 @@ let main
     ; csw
     ; docversions
     ; local
+    ; out_language
     ; files
     } =
   if not (List.for_all Sys.file_exists files)
@@ -152,6 +165,7 @@ let main
     ; csw
     ; docversions
     ; local
+    ; out_language
     ; files
     }
   in
@@ -159,11 +173,11 @@ let main
   | Some _ -> Global.root_to_site := Paths.(up +/+ up)
   | None -> ());
   Global.with_options opts (fun () ->
-      ((match (outfile, print) with
-       | Some file, _ -> Some (open_out file)
-       | None, true -> Some stdout
-       | _ -> None)
-      |> process_file opts |> List.iter)
-      @@ files)
+      (match (outfile, print) with
+      | Some file, _ -> Some (open_out file)
+      | None, true -> Some stdout
+      | _ -> None)
+      |> fun output_channel ->
+      List.iter (fun file -> process_file opts output_channel file) files)
 
 let () = Cli.run main
