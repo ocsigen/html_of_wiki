@@ -69,6 +69,7 @@ type cli_options =
   ; assets : string option
   ; template : string option
   ; csw : string list
+  ; out_language : string
   ; docversions : string list
   }
 
@@ -84,7 +85,8 @@ let with_options opts k =
 let using_options k =
   match !ref_options with
   | Some options -> k options
-  | None -> failwith "Global.options isn't properly intialized."
+  | None ->
+    failwith (current_file () ^ "Global.options isn't properly intialized.")
 
 let options () = using_options (fun x -> x)
 let suffix () = (options ()).suffix
@@ -92,22 +94,22 @@ let suffix () = (options ()).suffix
 let the_manual () =
   match (options ()).manual with
   | Some s -> s
-  | None -> failwith "no manual given"
+  | None -> failwith ("no manual given" ^ current_file ())
 
 let the_api () =
   match (options ()).api with
   | Some s -> s
-  | None -> failwith "no api given"
+  | None -> failwith ("no api given" ^ current_file ())
 
 let the_images () =
   match (options ()).images with
   | Some s -> s
-  | None -> failwith "no images given"
+  | None -> failwith ("no images given" ^ current_file ())
 
 let the_assets () =
   match (options ()).assets with
   | Some s -> s
-  | None -> failwith "no assets given"
+  | None -> failwith ("no assets given" ^ current_file ())
 
 (* Preserve absolute path *)
 let root () = (options ()).root
