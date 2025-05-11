@@ -11,12 +11,15 @@
 
 (generate_opam_files true)
 
+(name html_of_wiki)
+
 (package
  (name html_of_wiki)
+ (version 0.1~beta)
  (synopsis "A wikicreole to HTML compiler")
  (description "a static website generator for software projects, using wikicreole syntax.")
  (depends
-  (ocaml (< 5.0))
+  (ocaml (< 5.1))
   ("cmdliner" (>= 1.1.1))
   "js_of_ocaml-ppx_deriving_json"
   "js_of_ocaml-ppx"

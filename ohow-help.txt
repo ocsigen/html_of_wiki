@@ -134,7 +134,7 @@ COMMON OPTIONS
            Show version information.
 
 EXIT STATUS
-       ohow exits with the following status:
+       ohow exits with:
 
        0   on success.
 
