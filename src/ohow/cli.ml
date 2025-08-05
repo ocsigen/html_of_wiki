@@ -1,5 +1,13 @@
 open Import
 
+let out_language_cmd =
+  let doc =
+    "The output language for the export. Can be 'md' for Markdown or 'html' \
+     for HTML."
+  in
+  Cmdliner.Arg.(
+    value & opt string "html" & info [ "out-language" ] ~docv:"LANGUAGE" ~doc)
+
 let file_cmd =
   let doc = "A wikicreole file to convert to HTML." in
   Cmdliner.Arg.(non_empty & pos_all file [] & info [] ~docv:"FILE" ~doc)
@@ -158,7 +166,8 @@ let info_cmd =
     Cmd.info "ohow" ~version:"v2.0" ~doc ~man)
 
 let register_options k print headless outfile project root manual api
-    default_subproject images assets template csw docversions local files =
+    default_subproject images assets template csw docversions local out_language
+    files =
   let open Operators in
   let suffix = if local then ".html" else "" in
   let pretty = local in
@@ -188,6 +197,7 @@ let register_options k print headless outfile project root manual api
     ; csw
     ; docversions
     ; local
+    ; out_language
     ; files
     }
   in
@@ -199,7 +209,8 @@ let run main =
       const (register_options main)
       $ print_cmd $ headless_cmd $ outfile_cmd $ project_cmd $ root_cmd
       $ manual_cmd $ api_cmd $ default_subproject_cmd $ img_cmd $ assets_cmd
-      $ template_cmd $ csw_cmd $ docversions_cmd $ local_cmd $ file_cmd)
+      $ template_cmd $ csw_cmd $ docversions_cmd $ local_cmd $ out_language_cmd
+      $ file_cmd)
   in
   let command = Cmdliner.Cmd.v info_cmd ohow_cmd in
   exit Cmdliner.Cmd.(eval command)
