@@ -79,12 +79,14 @@ let insert_after ~existing nw =
 let to_reason s =
   let clean = Regexp.(global_replace (regexp "\xa0") s " ") in
   (try
-     Lexing.from_string clean |> Reason_toolchain.ML.interface_with_comments
-     |> Reason_toolchain.RE.print_interface_with_comments Format.str_formatter
+     Lexing.from_string clean
+     |> Reason.Reason_toolchain.ML.interface_with_comments
+     |> Reason.Reason_toolchain.RE.print_interface_with_comments
+          Format.str_formatter
    with _ ->
      Lexing.from_string clean
-     |> Reason_toolchain.ML.implementation_with_comments
-     |> Reason_toolchain.RE.print_implementation_with_comments
+     |> Reason.Reason_toolchain.ML.implementation_with_comments
+     |> Reason.Reason_toolchain.RE.print_implementation_with_comments
           Format.str_formatter);
   Format.flush_str_formatter ()
 
