@@ -1,4 +1,4 @@
-(lang dune 3.18)
+(lang dune 3.19)
 
 (using menhir 3.0)
 (implicit_transitive_deps false)
@@ -26,5 +26,5 @@
   "ocamlfind"
   "re"
   "base64"
-  "reason"
-  ("tyxml"(>= 4.6.0))))
+  ("reason" (>= 3.17))
+  ("tyxml" (>= 4.6))))
