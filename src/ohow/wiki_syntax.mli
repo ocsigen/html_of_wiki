@@ -238,10 +238,8 @@ val register_link_simple_flow_extension :
 
 type wiki_flow_pplugin =
   { fpp :
-      'flow.
-      ( 'flow
-        Html_types.between_flow5_and_flow5_without_interactive_header_footer
-      , 'flow
+      ( Html_types.flow5
+      , Html_types.flow5_without_interactive_header_footer
       , Html_types.phrasing_without_interactive )
       wiki_plugin
   }
@@ -255,11 +253,8 @@ val register_wiki_flow_extension :
 
 type interactive_wiki_flow_pplugin =
   { ifpp :
-      'flow 'flow_without_interactive.
-      ( ( 'flow
-        , 'flow_without_interactive )
-        Html_types.between_flow5_and_flow5_without_header_footer
-      , 'flow
+      ( Html_types.flow5
+      , Html_types.flow5_without_header_footer
       , Html_types.phrasing_without_interactive )
       wiki_plugin
   }

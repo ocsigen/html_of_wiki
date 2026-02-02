@@ -19,7 +19,7 @@
  (synopsis "A wikicreole to HTML compiler")
  (description "a static website generator for software projects, using wikicreole syntax.")
  (depends
-  (ocaml (< 5.1))
+  (ocaml (>= 4.08))
   ("cmdliner" (>= 1.1.1))
   "js_of_ocaml-ppx_deriving_json"
   "js_of_ocaml-ppx"

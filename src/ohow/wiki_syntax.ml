@@ -1961,15 +1961,14 @@ let register_raw_wiki_extension (type a b c a' b' c') ~wp ~name ~wp_rec
 
 type wiki_flow_pplugin =
   { fpp :
-      'flow.
-      ( 'flow
-        Html_types.between_flow5_and_flow5_without_interactive_header_footer
-      , 'flow
+      ( Html_types.flow5
+      , Html_types.flow5_without_interactive_header_footer
       , Html_types.phrasing_without_interactive )
       wiki_plugin
   }
 
-let register_wiki_flow_extension ~name ?(reduced = true) ?preparser plugin =
+let register_wiki_flow_extension ~name ?(reduced = true) ?preparser
+    (plugin : wiki_flow_pplugin) =
   let register wp =
     register_wiki_extension ~name ~wp ~wp_rec:wp ?preparser
       ~ni_plugin:
@@ -2002,25 +2001,31 @@ let register_wiki_flow_extension ~name ?(reduced = true) ?preparser plugin =
 
 type interactive_wiki_flow_pplugin =
   { ifpp :
-      'flow 'flow_without_interactive.
-      ( ( 'flow
-        , 'flow_without_interactive )
-        Html_types.between_flow5_and_flow5_without_header_footer
-      , 'flow
+      ( Html_types.flow5
+      , Html_types.flow5_without_header_footer
       , Html_types.phrasing_without_interactive )
       wiki_plugin
   }
 
 let register_interactive_wiki_flow_extension ~name ?(reduced = true) ?preparser
-    plugin =
+    (plugin : interactive_wiki_flow_pplugin) =
   let register wp =
     register_wiki_extension ~name ~wp ~wp_rec:wp ?preparser
-      (plugin.ifpp :> (FlowTypes.res, FlowTypes.res, _) wiki_plugin)
+      (plugin.ifpp
+        : ( Html_types.flow5
+          , Html_types.flow5_without_header_footer
+          , _ )
+          wiki_plugin
+        :> (FlowTypes.res, FlowTypes.res, _) wiki_plugin)
   in
   register wikicreole_parser;
   register_wiki_extension ~name ~wp:wikicreole_parser_without_header_footer
     ~wp_rec:wikicreole_parser_without_header_footer ?preparser
     (plugin.ifpp
+      : ( Html_types.flow5
+        , Html_types.flow5_without_header_footer
+        , _ )
+        wiki_plugin
       :> ( FlowWithoutHeaderFooterTypes.res
          , FlowWithoutHeaderFooterTypes.res
          , _ )
