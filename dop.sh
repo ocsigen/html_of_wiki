@@ -13,7 +13,7 @@ EXIT_ENV=3
 EXIT_CONFIG=4
 
 usage() {
-    echo "Usage: dop [-c CONFIG] [-v] [-h] [-r DIR] [-t <json|plain>] [-l] ROOT" >&2
+    echo "Usage: dop [-c CONFIG] [-v] [-h] [-r DIR] [-t <json|plain>] [-g <md|html>] [-l] ROOT" >&2
     [ -z $1 ] && exit $EXIT_USAGE || exit $1
 }
 
@@ -48,13 +48,33 @@ find_ohow() {
 }
 
 process_options() {
-    [ $format = plain -o $format = json ] || usage
-    if [ $format = json ]; then
-        check_jq
-        json=true
-    else
-        json=false
-    fi
+    case $config_format in
+        json)
+            check_jq
+            json=true
+            ;;
+        plain)
+            json=false
+            ;;
+        *)
+            echo "Unsupported configuration format specified with -t option: $config_format" >&2
+            usage $EXIT_USAGE
+            ;;
+    esac
+
+    case $output_language in
+        md|markdown)
+            output_language=md
+            ;;
+        html)
+            output_language=html
+            ;;
+        *)
+            echo "Unsupported output language specified with -g option: $output_language" >&2
+            usage $EXIT_USAGE
+            ;;
+    esac
+
     [ -d $wikidir ] || {
         echo "Wiki directory $wikidir does not exist. Aborting." >&2
         exit $EXIT_CONFIG
@@ -66,7 +86,6 @@ process_options() {
         }
     fi
 }
-
 
 first_that_exists() {
     local tst=$1
@@ -107,13 +126,13 @@ infer_config() {
     project=$(basename `pwd`)
     default_subp=
 
-    man=$(first_that_exists -d manual manual_wiki manual_wikis man)
+    manual=$(first_that_exists -d manual manual_wiki manual_wikis man)
     api=$(first_that_exists -d api api_wiki api_wikis apis)
-    assets=$(first_that_exists -d assets files $man/assets $man/files)
-    images=$(first_that_exists -d images files illustrations $man/assets $man/files $man/illustrations)
+    assets=$(first_that_exists -d assets files $manual/assets $manual/files)
+    images=$(first_that_exists -d images files illustrations $manual/assets $manual/files $manual/illustrations)
     [ -z "$images" -a -n "$assets" ] && images=$assets
     [ -z "$assets" -a -n "$images" ] && assets=$images
-    contains_wikis $man || man=$(first_that_exists -d $man/src $man/wiki $man/wikis $man)
+    contains_wikis $manual || man=$(first_that_exists -d $manual/src $manual/wiki $manual/wikis $manual)
 
     client=$(first_that_exists -d $api/client)
     server=$(first_that_exists -d $api/server)
@@ -216,7 +235,7 @@ show_config() {
     if $json; then
         jq . <<EOF
 {"project": "$project",
-"manual": "$man", "api": "$api",
+"manual": "$manual", "api": "$api",
 "assets": "$assets", "images": "$images",
 "default_subproject": $dsp,
 "client": "$client", "server": "$server",
@@ -226,7 +245,7 @@ show_config() {
 EOF
     else
         echo "project            $project"
-        echo "manual             $man"
+        echo "manual             $manual"
         echo "api                $api"
         echo "assets             $assets"
         echo "images             $images"
@@ -250,7 +269,7 @@ call_ohow() {
     local opts="--root $root"
     $is_local && opts="$opts --local"
     [ -n "$project" ] && opts="$opts --project $project"
-    [ -n "$man" ] && opts="$opts --manual $man"
+    [ -n "$manual" ] && opts="$opts --manual $manual"
     [ -n "$api" ] && opts="$opts --api $api"
     [ -n "$assets" ] && opts="$opts --assets $assets"
     [ -n "$images" ] && opts="$opts --images $images"
@@ -258,9 +277,10 @@ call_ohow() {
     [ -n "$docversions" ] && opts="$opts --docversions $docversions"
     [ -n "$templates" ] && opts="$opts --template $templates"
 
-    if $csw
-    then $ohow $opts --csw <(csw) $1
-    else $ohow $opts $1
+    if $csw; then
+        $ohow $opts --csw <(csw) $1 --out-language $output_language
+    else
+        $ohow $opts $1 --out-language $output_language
     fi
 }
 
@@ -317,7 +337,8 @@ find_ohow
 verbose=false
 root="_dop"
 config=
-format=plain
+config_format=plain
+output_language=html
 force=false
 is_local=false
 keep_wikis=false
@@ -325,11 +346,12 @@ show_inferred=false
 show_used=false
 no_run=false
 docversions=
-while getopts hr:c:t:vflkiusnd: opt; do
+while getopts hr:c:t:g:vflkiusnd: opt; do
     case "$opt" in
         r) root="$OPTARG";;
         c) config="$OPTARG";;
-        t) format="$OPTARG";;
+        t) config_format="$OPTARG";;
+        g) output_language="$OPTARG";;
         f) force=true;;
         v) verbose=true;;
         l) is_local=true;;
