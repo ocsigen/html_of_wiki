@@ -109,6 +109,10 @@ OPTIONS
            Writes the HTML into the given file. Always overwrites. Overrides
            --print.
 
+       --out-language=LANGUAGE (absent=html)
+           The output language for the export. Can be 'md' for Markdown or
+           'html' for HTML.
+
        -p, --print
            Print the HTML to stdout.
 
@@ -118,7 +122,8 @@ OPTIONS
        -r, --hl, --headless
            Produces raw HTML without head tag and not inside a body tag.
 
-       --root=DIR (absent=/home/hugo/html_of_wiki/_build/default)
+       --root=DIR
+       (absent=/home/bibou/Documents/stage/html_of_wiki/_build/default)
            Use the given root directory.
 
        -t FILE, --template=FILE

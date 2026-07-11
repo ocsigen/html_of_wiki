@@ -1193,3 +1193,4 @@ let from_string (type param) (type flow) ?(sectioning = false) param builder s =
   Wikicreole.from_lexbuf_no_preempt sectioning param (Lexing.from_string s)
 
 }
+
