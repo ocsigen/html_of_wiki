@@ -1,6 +1,6 @@
 # html_of_wiki
 
-> <!--wodoc:div class="chapterintro"--> <!--wodoc:span class="monospace"-->html\_of\_wiki<!--wodoc:end--> is a versatile, minimalist yet powerful **static website generator**. It is designed with simplicity in mind: no special directories, almost no configuration and everything working out of the box. No web server required, just the compilation of your content to HTML and you're free to choose which static files server service fits you: GitHub Pages, GitLab Pages, etc.
+> html\_of\_wiki is a versatile, minimalist yet powerful **static website generator**. It is designed with simplicity in mind: no special directories, almost no configuration and everything working out of the box. No web server required, just the compilation of your content to HTML and you're free to choose which static files server service fits you: GitHub Pages, GitLab Pages, etc.
 
 ## Manual
 - [html\_of\_wiki](index.md)

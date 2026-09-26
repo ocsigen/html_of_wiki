@@ -1,20 +1,19 @@
 # html_of_wiki
 
-> <!--wodoc:div class="chapterintro"--> <!--wodoc:span class="monospace"-->html\_of\_wiki<!--wodoc:end--> is a versatile, minimalist yet powerful **static website generator**. It is designed with simplicity in mind: no special directories, almost no configuration and everything working out of the box. No web server required, just the compilation of your content to HTML and you're free to choose which static files server service fits you: GitHub Pages, GitLab Pages, etc.
+> html\_of\_wiki is a versatile, minimalist yet powerful **static website generator**. It is designed with simplicity in mind: no special directories, almost no configuration and everything working out of the box. No web server required, just the compilation of your content to HTML and you're free to choose which static files server service fits you: GitHub Pages, GitLab Pages, etc.
 
 
 ---
 
 # html\_of\_wiki
 
-<!--wodoc:div class="chapterintro"--> <!--wodoc:span class="monospace"-->html\_of\_wiki<!--wodoc:end--> is a versatile, minimalist yet powerful **static website generator**. It is designed with simplicity in mind: no special directories, almost no configuration and everything working out of the box. No web server required, just the compilation of your content to HTML and you're free to choose which static files server service fits you: GitHub Pages, GitLab Pages, etc.
+ html\_of\_wiki is a versatile, minimalist yet powerful **static website generator**. It is designed with simplicity in mind: no special directories, almost no configuration and everything working out of the box. No web server required, just the compilation of your content to HTML and you're free to choose which static files server service fits you: GitHub Pages, GitLab Pages, etc.
 
 It allows writing website content in a feature-rich and extensible language: the **wikicréole**. This language, thanks to its clever design, allows to write rich content as much expressively as with plain HTML.
 
-<!--wodoc:span class="monospace"-->html\_of\_wiki<!--wodoc:end--> is part of the Ocsigen project and is used to generate its documentation---including this page\! It has no problem dealing with large websites, it can handle several versions of several projects.
+html\_of\_wiki is part of the Ocsigen project and is used to generate its documentation---including this page\! It has no problem dealing with large websites, it can handle several versions of several projects.
 
-<!--wodoc:span class="monospace"-->html\_of\_wiki<!--wodoc:end--> is also composable, it can be integrated into a CI/CD process so you can automate the deployment of your website. Rebuild and deploy on each commit\! <!--wodoc:end-->
-
+html\_of\_wiki is also composable, it can be integrated into a CI/CD process so you can automate the deployment of your website. Rebuild and deploy on each commit\!
 
 ## Installation
 
@@ -42,12 +41,9 @@ The following sections describe:
 
 ## The wikicréole
 
-
 ## The standard
 
 The following picture summarises the wikicréole 1\.0 format.
-
-<!--wodoc:a_img src="wiki.jpg"--><!--wodoc:end-->
 
 **Notes**:
 
@@ -56,18 +52,15 @@ The following picture summarises the wikicréole 1\.0 format.
 
 ## Syntax additions
 
-
 ### Supported links syntaxes
 
 The following table lists additional link syntaxes supported by the tool. \|\=Syntax \|\=Description \| \|`[[wiki("name"):page]]`\|Link to the `page` of the project `name`\| \|`[[wiki:page]]` \|Link to the `page` of the current project \| \|`[[site:page]]` \|Website root-relative link \| \|`[[href:path]]` \|Raw `href` value \|
 
 The following table lists available links abbreviations. \|\=Abbreviation \|\=Equivalent syntax \|\=Description \| \|`[[]]` \|`[[href:.]]` \|Current page \| \|`[[#anchor]]`\|`[[href:#anchor]]`\|Current page with anchor \| \|`[[/path]]` \|`[[site:path]]` \|Website root-relative link\| \|`[[path]]` \|`[[href:path]]` \|Relative link \|
 
-
 ### Decorations
 
 The following table lists the additional available decorations. \|\=Syntax\|\=Description\|\=Example\| \|`--` \|*en-dash* \|\--\| \|`---` \|*em-dash* \|\---\| \|`##text##` \|Mono-spaced font\|`text`\| \|`^^super^^`\|Superscript \|text^^super^^\| \|`,,sub,,` \|Subscript \|text,,sub,,\| \|`__text__` \|Underline \|\_\_text\_\_\| \|`/-text-/` \|Strike-through \|/-text-/\|
-
 
 ### Definition lists
 
@@ -81,11 +74,9 @@ The following code produces a definition list.
 ```
 ;title1 :definition1 ;title2 :definition2
 
-
 ### Inline HTML classes
 
 It is possible to inline some HTML classes to the following element using the syntax `~@~@class="title"~@~@`.
-
 
 ### Extensions
 
@@ -95,11 +86,9 @@ Extensions syntax: `<<extension attr1="val1" attr2="val2" ... argN="valN"|conten
 
 Here are some common, widely used by Ocsigen's documentation extensions: ; `<<a_manual>>` : Link to a page of the manual of a project. ; `<<span>>` : Inserts an HTML `<span/>` element allowing a fine control over the DOM of the page. ; `<<doctree>>` : Displays a menu like the one on the left of this text.
 
-
 ## How to use `ohow` (one\_html\_of\_wiki)
 
 **one\_html\_of\_wiki** is a CLI tool for generating a *single* HTML document from a *single* wikicréole file.
-
 
 ## Basic usage
 
@@ -114,7 +103,6 @@ $ ohow --local file.wiki # generate local-navigation compatible links (REMOVE TH
 ```
 
 ## Advanced usage
-
 
 ### Templates
 
@@ -233,10 +221,9 @@ The *root* directory is the directory containing all wiki content for a specific
 - `--api 2.0/api/` \--- or equivalently, `--api api`
 - `--assets assets`
 - (`--images assets` \--- Only if you used `a_img` and that the images are in the `assets/` directory.)
-For inter-project links, `ohow` **supposes that every projects are inside the same directory**. For example, `<<a_manual project="eliom" chapter="intro">>` will produce the following link: `{%html:<!--wodoc:span class="rewind"-->%}rewinding to the root directory{%html:<!--wodoc:end-->%}/../../{%html:<!--wodoc:span class="manproject"-->%}eliom{%html:<!--wodoc:end-->%}/{%html:<!--wodoc:span class="mandir"-->%}path to the manual directory given with [--manual]{%html:<!--wodoc:end-->%}/{%html:<!--wodoc:span class="manchap"-->%}intro{%html:<!--wodoc:end-->%}`. The first `../` rewinds from the root directory into the project directory (containing all versions). The second `../` rewinds inside the directory containing all the projects. It could, in practice, look like `../../../../eliom/latest/man/intro`.
+For inter-project links, `ohow` **supposes that every projects are inside the same directory**. For example, `<<a_manual project="eliom" chapter="intro">>` will produce the following link: `{%html:%}rewinding to the root directory{%html:%}/../../{%html:%}eliom{%html:%}/{%html:%}path to the manual directory given with [--manual]{%html:%}/{%html:%}intro{%html:%}`. The first `../` rewinds from the root directory into the project directory (containing all versions). The second `../` rewinds inside the directory containing all the projects. It could, in practice, look like `../../../../eliom/latest/man/intro`.
 
 html\_of\_wiki imposes these constraints for links because these are the constraints GitHub Pages imposes. To conclude, setting up these extensions is not as complicated as it sounds (it's roughly passing some paths to `ohow` through command line arguments) and the benefits are huge: this way you abstract away any hierarchy between wiki pages and projects and let the compiler work out the links by itself. Thus, any structural change of your projects **will not** force you to rewrite your documentation\!
-
 
 ### The `<<doctree>>` extension
 
@@ -262,7 +249,6 @@ The menu on the left of this text is generated using that extension. Here is an 
 ```
 Again, that extension requires some extra parameters---`--root`, `--manual` and `--api`\---which are described above. The generated element is a `<nav/>` with `class="how-doctree"`.
 
-
 ### The `<<docversion>>` extension
 
 `<<docversion>>` is an extension which inserts a dropdown list that lets the visitor select the version of the documentation to see. An example of such a widget on the left of this text.
@@ -271,13 +257,11 @@ To use it, place the versions to display in a file, say `versions.txt`, one per 
 
 The extension places a text---`"Version"`\---and a `<select/>` element with `class="how-versions"`. Required options are `--root` and `--docversion`.
 
-
 ### The `<<client-server-switch>>` extension
 
 **\_\_WARNING\_\_: This extension is specific to the Ocsigen project.**
 
 To include a client/server switch, include `<<client-server-switch>>` without attributes somewhere in the template. The data of this extension is automatically collected by either [dop](./#dop) or [quickdop](./#quickdop). At a lower level, this extension requires a parameter---`--csw`\---which expects a file. Inside must figure the name a all wiki files (with extension `.wiki`), one per line, that should have a client/server switch. [dop](./#dop) uses the Unix builtin `comm -12` to extract the files the sub-projects `client` and `server` have in \_\_comm\_\_on.
-
 
 ## Legacy support
 
@@ -294,11 +278,9 @@ To make things even easier, we provide out of the box two higher level documenta
 - *quick-doc\_of\_project* (`quickdop`) \--- for generating the documentation of a project with many versions
 These tools are described in detail in the following sections.
 
-
 ## `dop`
 
 It is a wrapper on `ohow` designed to generate the document of a single version of a project with a one-line command.
-
 
 ### Configuration file
 
@@ -340,16 +322,13 @@ The following table describes the entries recognized by `dop`:
 
 The `templates` key is an array because it would be possible (thanks to `wit`) to have several templates but this feature is not currently implemented in `dop`. PR welcomed\! ;-)
 
-
 ### Command-line interface
 
 The command `dop` accepts the following short options:
 
 \|\=Name \|\=Option \|\=Value \|\=Default value\|\=Description\| \|Config \|`-c`\|File \|\---\|Configuration file\| \|Config type\|`-t`\|`json` or `plain`\|`plain`\|Configuration file type (format)\| \|Clean \|`-k`\|Flag \|\---\|Do not clean wikis after compilation\| \|Inferred \|`-i`\|Flag \|\---\|Print inferred configuration\| \|Used \|`-u`\|Flag \|\---\|Print used (final) configuration\| \|No run \|`-n`\|Flag \|\---\|Dry run (no compilation)\| \|Root dir \|`-r`\|Name \|`_dop`\|Root directory (output directory)\| \|Force \|`-f`\|Flag \|\---\|Removes root dir if exists\| \|Local \|`-l`\|Flag \|\---\|Generate local links (`--local`)\| \|Docversion \|`-d`\|File \|\---\|`docversion` files (see `--docversion` option)\| \|Verbose \|`-v`\|Flag \|\---\|Verbose\| \|Help \|`-h`\|Flag \|\---\|Show help and exit\|
 
-
 ### Examples
-
 
 #### Minimal example
 
@@ -386,11 +365,9 @@ $ tree
 
 You can look at the files called `.howdocgen` inside the `wikidoc` branch of each documented Ocsigen project for a real demonstration.
 
-
 ## `quickdop`
 
 To make things easier for projects with multiple versions of the documentation, html\_of\_wiki provides `quickdop`. It takes care of generating the docs for version found (directory name matching `[0-9]+|dev`) and provides automatically a value for the `--docversion` option.
-
 
 ### Usage
 
@@ -399,38 +376,33 @@ quickdop [-f] PROJECT OUTDIR [DOP_OPTIONS]
 ```
 ;`PROJECT` :The directory containing the versions. ;`OUTDIR` :The build directory. Automatically created and replaced when the `-f` option is provided. ;`DOP_OPTIONS` :The options usually passed to `dop`. Obviously, the options `-r`, `-d` and the target are provided by `quickdop` and must not be explicitly given.
 
-
 ## Built-in wikicréole extensions
 
-<!--wodoc:span class="monospace"-->html\_of\_wiki<!--wodoc:end--> is shipped with a number of built-in, general purpose, wikicréole extensions. The documentation of the extensions `doctree`, `docversion`, `client-server-switch`, `a_manual`, `a_api`, `a_api_type`, `a_api_code`, `a_img` and `a_file` can be found in earlier sections of this document.
+html\_of\_wiki is shipped with a number of built-in, general purpose, wikicréole extensions. The documentation of the extensions `doctree`, `docversion`, `client-server-switch`, `a_manual`, `a_api`, `a_api_type`, `a_api_code`, `a_img` and `a_file` can be found in earlier sections of this document.
 
 Each extension documented below accept the attributes `class` and `id` for explicitly giving an HTML class and an HTML id to the generated code.
-
 
 ## Nameless extension
 
 Acts as a comment, i.e., inserts no HTML. For example: `<<|I'm a comment: I will not appear inside the generated HTML>>`.
 
-
 ## `code` and `code-inline`
 
-;**Attributes** :`language="X"`, `translated="translated"` (optional, for `X` \= `"ocaml"` only) ;**Description** :Inserts a code block. ;**HTML element** :`<pre class="manually-translated"><code class="language-X"></code></pre>` or `<pre><code class="language-ocaml translatable"></code></pre>` ;**Example** :<!--wodoc:pre-->
+;**Attributes** :`language="X"`, `translated="translated"` (optional, for `X` \= `"ocaml"` only) ;**Description** :Inserts a code block. ;**HTML element** :`<pre class="manually-translated"><code class="language-X"></code></pre>` or `<pre><code class="language-ocaml translatable"></code></pre>` ;**Example** :
 
 ```ocaml
 int_of_string "12" + 3
 ```
-<!--wodoc:end--> produces 
+ produces
 
 ```ocaml
 int_of_string "12" + 3
 ```
 The `code-inline` extension is similar but inserts a code snippet inside the current paragraph and not in a block of its own.
 
-
 ## `div`, `span`, `nav`, `pre`
 
 Inserts the corresponding HTML elements.
-
 
 ## `googlesearch`
 
@@ -450,33 +422,27 @@ Inserts the corresponding HTML elements.
                     a_onclick @@ "document.getElementById('gsearch-box').value += ' site:" ^ DOMAIN ^ "';"]
             ()]]
 ```
-;**Example** :<!--wodoc:pre--><!--wodoc:end-->
-
+;**Example** :
 
 ## `wip` and `wip-inline`
 
-Inserts the content of extension in a `<div/>` element with the class `wip`. You may want to add in your CSS the following rule: <!--wodoc:pre-->.wip `display: none;`<!--wodoc:end--> `wip-inline` is the inline counterpart of `wip`.
-
+Inserts the content of extension in a `<div/>` element with the class `wip`. You may want to add in your CSS the following rule: .wip `display: none;` `wip-inline` is the inline counterpart of `wip`.
 
 ## `when-local` and `unless-local`
 
 `when-local` inserts its content when `ohow` (or any higher level documentation generator) is called with the `--local` (or `-l`) option. `unless-local` inserts its content when not. This extension is useful for addressing complex resource linking issues.
 
-
 ## `when-project`
 
 ;**Attributes** :`when="P"` or (**exclusive**) `unless="P"` ;**Description** :Inserts the content when (or unless) the project the wiki file belongs to is `P` (see the configuration key `project`).
-
 
 ## `script`
 
 ;**Attributes** :`src="JS_SRC"` ;**Description** :Inserts a `<script>` tag importing the given `JS_SRC` JavaScript source file *inside the `<body>` of the document*.
 
-
 ## `head-script`
 
 ;**Attributes** :`src="JS_SRC"` ;**Description** :Inserts a `<script>` tag importing the given `JS_SRC` JavaScript source file *inside the `<head>` of the document*.
-
 
 ## `head-css`
 
